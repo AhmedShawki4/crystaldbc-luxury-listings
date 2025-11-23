@@ -50,11 +50,11 @@ const HomePage = () => {
       >
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-bold text-white mb-6 animate-fade-in">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-bold text-white mb-6 animate-fade-in" style={{ textShadow: '2px 4px 12px rgba(0, 0, 0, 0.8), 0 0 40px rgba(212, 175, 55, 0.3)' }}>
             Find Your Dream Property <br />
-            <span className="text-primary">with CrystalDBC</span>
+            <span className="text-primary" style={{ textShadow: '2px 4px 12px rgba(0, 0, 0, 0.8), 0 0 60px rgba(212, 175, 55, 0.5)' }}>with CrystalDBC</span>
           </h1>
-          <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-2xl mx-auto animate-slide-up">
+          <p className="text-xl md:text-2xl text-white mb-12 max-w-2xl mx-auto animate-slide-up" style={{ textShadow: '1px 2px 8px rgba(0, 0, 0, 0.8)' }}>
             Discover exceptional homes in the most desirable locations
           </p>
 
