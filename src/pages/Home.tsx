@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PropertyCard from "@/components/PropertyCard";
 import properties from "@/data/properties.json";
+import heroBackground from "@/assets/hero-background.jpg";
 
 const HomePage = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
@@ -43,19 +44,10 @@ const HomePage = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Video Background */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        >
-          <source src="https://cdn.coverr.co/videos/coverr-aerial-view-of-beautiful-resort-1891/1080p.mp4" type="video/mp4" />
-          {/* Fallback for browsers that don't support video */}
-          Your browser does not support the video tag.
-        </video>
+      <section
+        className="relative h-screen flex items-center justify-center bg-cover bg-center"
+        style={{ backgroundImage: `url(${heroBackground})` }}
+      >
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-bold text-white mb-6 animate-fade-in">
