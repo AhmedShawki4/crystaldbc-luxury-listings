@@ -1,13 +1,21 @@
 import { useParams, Link } from "react-router-dom";
-import { MapPin, Bed, Bath, Square, ArrowLeft, Check } from "lucide-react";
+import { MapPin, Bed, Bath, Square, ArrowLeft, Check, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { properties } from "@/data/properties";
 import { useState, useEffect } from "react";
+import RegisterInterestDialog from "@/components/RegisterInterestDialog";
+import PropertyCard from "@/components/PropertyCard";
 
 const PropertyDetail = () => {
   const { id } = useParams();
   const property = properties.find((p) => p.id === Number(id));
   const [selectedImage, setSelectedImage] = useState(0);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Get 3 other properties (exclude current property)
+  const otherProperties = properties
+    .filter((p) => p.id !== property?.id)
+    .slice(0, 3);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -150,26 +158,92 @@ const PropertyDetail = () => {
           {/* Contact Card */}
           <div className="lg:col-span-1">
             <div className="bg-card border border-border rounded-lg p-6 sticky top-24">
-              <h3 className="text-2xl font-display font-bold text-primary mb-4">
-                Schedule a Viewing
+              <h3 className="text-2xl font-display font-bold text-primary mb-2">
+                Interested in {property.title}?
               </h3>
-              <p className="text-muted-foreground mb-6">
-                Interested in this property? Contact us to schedule a private viewing.
+              <p className="text-muted-foreground mb-6 leading-relaxed">
+                Get exclusive access, floor plans, and personalized consultation with our experts.
               </p>
+              
               <div className="space-y-4">
-                <Button asChild className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
-                  <Link to="/contact">Contact Agent</Link>
+                <Button 
+                  asChild 
+                  variant="outline" 
+                  className="w-full border-2 hover:bg-accent/10"
+                >
+                  <a href="tel:+971123456789" className="flex items-center justify-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    Call +971 12 345 6789
+                  </a>
                 </Button>
-                <Button asChild variant="outline" className="w-full">
-                  <Link to="/contact">Request Info</Link>
+                
+                <Button 
+                  onClick={() => setIsDialogOpen(true)}
+                  className="w-full bg-accent hover:bg-accent/90 text-accent-foreground flex items-center justify-center gap-2"
+                >
+                  <Mail className="h-4 w-4" />
+                  I am Interested
                 </Button>
+                
+                <RegisterInterestDialog 
+                  open={isDialogOpen} 
+                  onOpenChange={setIsDialogOpen} 
+                />
               </div>
-              <div className="mt-6 pt-6 border-t border-border">
-                <p className="text-sm text-muted-foreground mb-2">Property ID</p>
-                <p className="text-foreground font-semibold">CDBC-{property.id.toString().padStart(4, '0')}</p>
+            </div>
+            
+            {/* Project Statistics Card */}
+            <div className="bg-card border border-border rounded-lg p-6 mt-6">
+              <h3 className="text-xl font-display font-bold text-primary mb-6">
+                Project Statistics
+              </h3>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center pb-3 border-b border-border">
+                  <span className="text-sm text-muted-foreground">Project ID</span>
+                  <span className="text-foreground font-semibold">CDBC-{property.id.toString().padStart(4, '0')}</span>
+                </div>
+                <div className="flex justify-between items-center pb-3 border-b border-border">
+                  <span className="text-sm text-muted-foreground">Status</span>
+                  <span className="text-foreground font-semibold">{property.status}</span>
+                </div>
+                <div className="flex justify-between items-center pb-3 border-b border-border">
+                  <span className="text-sm text-muted-foreground">Progress</span>
+                  <span className="text-foreground font-semibold">—</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Service Charge</span>
+                  <span className="text-foreground font-semibold">—</span>
+                </div>
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Similar Properties */}
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        <div className="mb-8">
+          <h2 className="text-3xl font-display font-bold text-primary mb-2">
+            Similar Properties
+          </h2>
+          <p className="text-muted-foreground">
+            Discover more exceptional properties that might interest you
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {otherProperties.map((prop) => (
+            <PropertyCard
+              key={prop.id}
+              id={prop.id}
+              image={prop.images[0]}
+              title={prop.title}
+              location={prop.location}
+              price={prop.price}
+              beds={prop.beds}
+              baths={prop.baths}
+              sqft={prop.sqft}
+            />
+          ))}
         </div>
       </section>
     </div>

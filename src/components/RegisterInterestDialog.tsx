@@ -12,8 +12,13 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
-const RegisterInterestDialog = () => {
-  const [isOpen, setIsOpen] = useState(false);
+interface RegisterInterestDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+const RegisterInterestDialog = ({ open: externalOpen, onOpenChange }: RegisterInterestDialogProps = {}) => {
+  const [internalOpen, setInternalOpen] = useState(false);
   const location = useLocation();
   const [formData, setFormData] = useState({
     fullName: "",
@@ -23,14 +28,22 @@ const RegisterInterestDialog = () => {
   });
   const { toast } = useToast();
 
+  // Determine if we're using external or internal control
+  const isExternallyControlled = externalOpen !== undefined;
+  const isOpen = isExternallyControlled ? externalOpen : internalOpen;
+  const setIsOpen = isExternallyControlled ? (onOpenChange || (() => {})) : setInternalOpen;
+
   useEffect(() => {
+    // Only show dialog automatically if not externally controlled
+    if (isExternallyControlled) return;
+    
     // Show dialog after 3 seconds on every page navigation
     const timer = setTimeout(() => {
-      setIsOpen(true);
+      setInternalOpen(true);
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [location.pathname]); // Trigger when route changes
+  }, [location.pathname, isExternallyControlled]); // Trigger when route changes
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
