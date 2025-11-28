@@ -28,8 +28,8 @@ const Navigation = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Use dark background with backdrop blur when scrolled or not on homepage
-  const useDarkNav = scrolled || !isHomePage;
+  // Use dark background with backdrop blur when scrolled, not on homepage, or mobile menu is open
+  const useDarkNav = scrolled || !isHomePage || isOpen;
 
   return (
     <nav className={cn(
