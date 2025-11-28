@@ -96,7 +96,7 @@ const RegisterInterestDialog = ({ open: externalOpen, onOpenChange }: RegisterIn
                 Register Your Interest
               </DialogTitle>
               <p className="text-xs sm:text-sm text-white/70">
-                Be first to access Dubai's best properties
+                Be first to access Egypt's best properties
               </p>
             </div>
           </div>
@@ -105,7 +105,7 @@ const RegisterInterestDialog = ({ open: externalOpen, onOpenChange }: RegisterIn
         {/* Form */}
         <form onSubmit={handleSubmit} className="px-4 py-4 space-y-3 sm:px-6 sm:py-5 sm:space-y-4">
           <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
-            Join thousands of investors who trust our agency to navigate Dubai real estate. 
+            Join thousands of investors who trust our agency to navigate Egypt real estate. 
             Get tailored recommendations and market insights.
           </p>
 

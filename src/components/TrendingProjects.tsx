@@ -56,7 +56,7 @@ const trendingProjects: TrendingProject[] = [
     image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1400",
     status: "Presale",
     description:
-      "The Serene at Sobha Central is a masterfully envisioned residential project that redefines Dubai's skyline with its iconic, futuristic design. Towering high with sleek lines and glass facades, the architecture is a true statement of modern sophistication and grandeur. Strategically nestled in a green landscape and urban framework, the towers appear as crystalline structures reflecting light and life, offering residents a harmonious blend of nature and metropolitan living.",
+      "The Serene at Sobha Central is a masterfully envisioned residential project that redefines Egypt's skyline with its iconic, futuristic design. Towering high with sleek lines and glass facades, the architecture is a true statement of modern sophistication and grandeur. Strategically nestled in a green landscape and urban framework, the towers appear as crystalline structures reflecting light and life, offering residents a harmonious blend of nature and metropolitan living.",
     amenities: [
       { name: "Swimming Pool" },
       { name: "Jogging Track" },
@@ -81,11 +81,11 @@ const trendingProjects: TrendingProject[] = [
   {
     id: 3,
     name: "Damac Bay 2",
-    location: "Dubai Harbour",
+    location: "Egypt Harbour",
     image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=1400",
     status: "Presale",
     description:
-      "DAMAC Bay 2 is a stunning waterfront development offering luxurious living with breathtaking views of the Arabian Gulf. This architectural marvel features modern design with flowing curves and premium finishes. Located in the prestigious Dubai Harbour, residents enjoy direct access to pristine beaches, yacht clubs, and world-class dining experiences.",
+      "DAMAC Bay 2 is a stunning waterfront development offering luxurious living with breathtaking views of the Arabian Gulf. This architectural marvel features modern design with flowing curves and premium finishes. Located in the prestigious Egypt Harbour, residents enjoy direct access to pristine beaches, yacht clubs, and world-class dining experiences.",
     amenities: [
       { name: "Private Beach Access" },
       { name: "Infinity Pool" },

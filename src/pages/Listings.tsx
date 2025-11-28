@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PropertyCard from "@/components/PropertyCard";
 import { properties } from "@/data/properties";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,6 +10,10 @@ const Listings = () => {
   const [sortBy, setSortBy] = useState("featured");
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const [typeFilter, setTypeFilter] = useState("all");
   const [priceFilter, setPriceFilter] = useState("all");
   const [bedsFilter, setBedsFilter] = useState("all");
@@ -69,10 +73,10 @@ const Listings = () => {
       <section className="bg-muted/30 py-16 border-b border-border">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl md:text-5xl font-display font-bold text-primary mb-4 fade-in">
-            Dubai Properties
+            Egypt Properties
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl fade-in">
-            Discover 100+ premium properties across Dubai's most sought-after locations
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto fade-in">
+            Discover 100+ premium properties across Egypt's most sought-after locations
           </p>
         </div>
       </section>

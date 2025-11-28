@@ -207,7 +207,7 @@ const RealEstateChatBot = () => {
     ) {
       return {
         id: Date.now(),
-        text: "I'd be happy to provide investment guidance! � The Egypt and Dubai property markets offer excellent opportunities. Our investment specialists can provide personalized advice based on your goals. Would you like to schedule a consultation? You can also browse our premium listings to see current opportunities.",
+        text: "I'd be happy to provide investment guidance! 💼 The Egypt property market offers excellent opportunities. Our investment specialists can provide personalized advice based on your goals. Would you like to schedule a consultation? You can also browse our premium listings to see current opportunities.",
         sender: "bot",
         timestamp: new Date(),
       };
