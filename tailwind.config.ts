@@ -14,15 +14,14 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        heading: ['Montserrat', 'system-ui', 'sans-serif'],
+        display: ['Playfair Display', 'serif'],
+        body: ['Inter', 'sans-serif'],
       },
       colors: {
-        gold: {
-          DEFAULT: 'hsl(var(--gold))',
-          light: 'hsl(var(--gold-light))',
-          dark: 'hsl(var(--gold-dark))',
-        },
+        'luxury-gold': 'hsl(var(--luxury-gold))',
+        'luxury-gold-light': 'hsl(var(--luxury-gold-light))',
+        'luxury-dark': 'hsl(var(--luxury-dark))',
+        'luxury-cream': 'hsl(var(--luxury-cream))',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -93,13 +92,6 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fadeIn 0.6s ease-out",
-        "slide-up": "slideUp 0.6s ease-out",
-      },
-      boxShadow: {
-        'soft': '0 2px 15px rgba(0, 0, 0, 0.08)',
-        'medium': '0 4px 25px rgba(0, 0, 0, 0.12)',
-        'strong': '0 10px 40px rgba(0, 0, 0, 0.15)',
       },
     },
   },
