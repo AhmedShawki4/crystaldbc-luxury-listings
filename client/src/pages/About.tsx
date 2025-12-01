@@ -1,8 +1,11 @@
 import { Award, Users, Target, Heart } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { useCmsSection } from "@/hooks/useCmsSection";
 import type { AboutContent } from "@/types";
 import { getMediaUrl } from "@/lib/media";
+import PageHero from "@/components/PageHero";
+import { Button } from "@/components/ui/button";
 
 const fallbackAbout: AboutContent = {
   heroImage: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&q=80&w=2000",
@@ -47,33 +50,33 @@ const About = () => {
   const stats = content.stats?.length ? content.stats : fallbackAbout.stats;
 
   return (
-    <div className="min-h-screen pt-20">
-      {/* Hero Section */}
-      <section className="relative h-[400px] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <img
-            src={heroImage}
-            alt={content.heroTitle || "About CrystalDBC"}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-luxury-dark/70" />
-        </div>
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl md:text-6xl font-display font-bold text-white mb-4 fade-in">
-            {content.heroTitle || "About CrystalDBC"}
-          </h1>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto fade-in">
-            {content.heroSubtitle || "Excellence in luxury real estate"}
-          </p>
-        </div>
-      </section>
+    <div className="min-h-screen">
+      <PageHero
+        eyebrow="Our Legacy"
+        title={content.heroTitle || "About CrystalDBC"}
+        description={content.heroSubtitle || "Excellence in luxury real estate"}
+        icon={Award}
+        backgroundImage={heroImage}
+        stats={stats.map((stat) => ({ label: stat.label, value: stat.value }))}
+        actions={(
+          <>
+            <Button asChild className="bg-luxury-gold text-luxury-dark hover:bg-luxury-gold/80 shadow-lg shadow-luxury-gold/20">
+              <Link to="/listings">Discover Listings</Link>
+            </Button>
+            <Button asChild variant="outline" className="border-accent bg-accent/10 text-accent hover:bg-accent/20 hover:text-accent-foreground">
+              <Link to="/contact">Speak with Experts</Link>
+            </Button>
+          </>
+        )}
+      />
 
       {/* Our Story */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-4xl font-display font-bold text-primary mb-6">Our Story</h2>
-            <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
+          <div className="mx-auto max-w-4xl rounded-3xl border border-border/60 bg-card/60 p-10 shadow-2xl shadow-black/5">
+            <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground/70">Our Story</p>
+            <h2 className="mt-4 text-4xl font-display font-bold text-primary">Rooted in Excellence</h2>
+            <div className="mt-6 space-y-4 text-lg text-muted-foreground leading-relaxed">
               {storyParagraphs.map((paragraph, index) => (
                 <p key={`${paragraph}-${index}`}>{paragraph}</p>
               ))}
@@ -85,40 +88,27 @@ const About = () => {
       {/* Our Values */}
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-display font-bold text-primary text-center mb-16">
+          <h2 className="text-center text-4xl font-display font-bold text-primary mb-16">
             Our Values
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
             {values.map((value) => {
               const Icon = iconMap[value.iconKey?.toLowerCase() as keyof typeof iconMap] ?? Award;
               return (
-                <div className="text-center group" key={`${value.title}-${value.description}`}>
-                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                    <Icon className="h-10 w-10 text-accent" />
+                <div
+                  className="group rounded-3xl border border-border/60 bg-card/60 p-8 text-left shadow-lg shadow-black/5 transition duration-300 hover:-translate-y-1 hover:border-accent/40"
+                  key={`${value.title}-${value.description}`}
+                >
+                  <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/10 text-accent group-hover:bg-accent/20">
+                    <Icon className="h-7 w-7" />
                   </div>
-                  <h3 className="text-xl font-display font-semibold text-primary mb-3">
+                  <h3 className="text-2xl font-display font-semibold text-primary mb-3">
                     {value.title}
                   </h3>
-                  <p className="text-muted-foreground">
-                    {value.description}
-                  </p>
+                  <p className="text-muted-foreground">{value.description}</p>
                 </div>
               );
             })}
-          </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="py-20 bg-luxury-dark text-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {stats.map((stat) => (
-              <div key={stat.label}>
-                <p className="text-5xl font-display font-bold text-accent mb-2">{stat.value}</p>
-                <p className="text-white/80">{stat.label}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>

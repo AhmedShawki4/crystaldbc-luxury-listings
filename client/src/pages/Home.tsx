@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Award, Users, Home as HomeIcon, Mail, Phone, MapPin } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { ArrowRight, Award, Users, Home as HomeIcon, Mail, Phone, MapPin, Building2, ShieldCheck, Sparkles } from "lucide-react";
 import Hero from "@/components/Hero";
 import PropertyCard from "@/components/PropertyCard";
 import TrendingProjects from "@/components/TrendingProjects";

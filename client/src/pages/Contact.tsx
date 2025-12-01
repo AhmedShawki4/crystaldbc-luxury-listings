@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import apiClient from "@/lib/apiClient";
 import { useCmsSection } from "@/hooks/useCmsSection";
 import type { ContactContent } from "@/types";
+import PageHero from "@/components/PageHero";
 
 const Contact = () => {
   useEffect(() => {
@@ -70,25 +71,45 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen pt-20">
-      {/* Hero Section */}
-      <section className="bg-muted/30 py-16 border-b border-border">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-display font-bold text-primary mb-4 fade-in">
-            {contactContent?.title ?? "Get in Touch"}
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto fade-in">
-            {contactContent?.subtitle ?? "Ready to find your dream property? We're here to help you every step of the way"}
-          </p>
-        </div>
-      </section>
+    <div className="min-h-screen">
+      <PageHero
+        eyebrow="Concierge"
+        title={contactContent?.title ?? "Get in Touch"}
+        description={
+          contactContent?.subtitle ??
+          "Ready to find your dream property? We're here to guide you every step of the way."
+        }
+        icon={Phone}
+        stats={[
+          { label: "Phone", value: contactContent?.phone ?? "+1 (888) 555-1234" },
+          { label: "Email", value: contactContent?.email ?? "info@crystaldbc.com" },
+          { label: "Office", value: "Cairo & Dubai", helper: "Worldwide network" },
+        ]}
+        actions={(
+          <>
+            <Button
+              asChild
+              className="bg-luxury-gold text-luxury-dark hover:bg-luxury-gold/80 shadow-lg shadow-luxury-gold/20"
+            >
+              <a href={`tel:${contactContent?.phone ?? "+18885551234"}`}>Call our advisors</a>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="border-accent bg-accent/10 text-accent hover:bg-accent/20 hover:text-accent-foreground"
+            >
+              <a href={`mailto:${contactContent?.email ?? "info@crystaldbc.com"}`}>Send an email</a>
+            </Button>
+          </>
+        )}
+      />
 
       {/* Contact Content */}
       <section className="py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Information */}
-            <div>
+            <div className="rounded-3xl border border-border/60 bg-card/60 p-10 shadow-2xl shadow-black/5">
               <h2 className="text-3xl font-display font-bold text-primary mb-6">
                 Contact Information
               </h2>
@@ -98,7 +119,7 @@ const Contact = () => {
 
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center flex-shrink-0">
                     <Phone className="h-6 w-6 text-accent" />
                   </div>
                   <div>
@@ -113,7 +134,7 @@ const Contact = () => {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center flex-shrink-0">
                     <Mail className="h-6 w-6 text-accent" />
                   </div>
                   <div>
@@ -128,7 +149,7 @@ const Contact = () => {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center flex-shrink-0">
                     <MapPin className="h-6 w-6 text-accent" />
                   </div>
                   <div>
@@ -140,7 +161,7 @@ const Contact = () => {
                 </div>
               </div>
 
-              <div className="mt-12 p-6 bg-muted/30 rounded-lg">
+              <div className="mt-12 rounded-3xl border border-border/60 bg-muted/30 p-6">
                 <h3 className="text-xl font-display font-semibold text-primary mb-3">
                   Office Hours
                 </h3>
@@ -154,7 +175,7 @@ const Contact = () => {
 
             {/* Contact Form */}
             <div>
-              <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg p-8">
+              <form onSubmit={handleSubmit} className="rounded-3xl border border-border/60 bg-card/80 p-8 shadow-2xl shadow-black/10">
                 <h2 className="text-3xl font-display font-bold text-primary mb-6">
                   Send us a Message
                 </h2>

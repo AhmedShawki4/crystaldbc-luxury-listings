@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useCmsSection } from "@/hooks/useCmsSection";
 import type { HeroContent } from "@/types";
+import { getMediaUrl } from "@/lib/media";
 
 const fallbackHero: HeroContent = {
   heading: "Discover Your Dream",
@@ -16,13 +17,14 @@ const fallbackHero: HeroContent = {
 const Hero = () => {
   const { data } = useCmsSection<HeroContent>("hero", fallbackHero);
   const content = data ?? fallbackHero;
+  const heroImage = content.backgroundImage ? getMediaUrl(content.backgroundImage) : fallbackHero.backgroundImage;
 
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img
-          src={content.backgroundImage}
+          src={heroImage}
           alt="Luxury Property"
           className="w-full h-full object-cover"
         />

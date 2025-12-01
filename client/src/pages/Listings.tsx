@@ -2,9 +2,10 @@ import { useMemo, useState, useEffect } from "react";
 import PropertyCard from "@/components/PropertyCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Search, MapPin, Home, DollarSign, Bed, SlidersHorizontal } from "lucide-react";
+import { Search, MapPin, Home, DollarSign, Bed, SlidersHorizontal, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import useProperties, { type PropertyFilters } from "@/hooks/useProperties";
+import PageHero from "@/components/PageHero";
 
 const Listings = () => {
   const [sortBy, setSortBy] = useState("featured");
@@ -56,22 +57,35 @@ const Listings = () => {
     [properties]
   );
 
+  const cityCount = Math.max(locations.length - 1, 0);
+  const typeCount = Math.max(types.length - 1, 0);
+
   return (
-    <div className="min-h-screen pt-20">
-      {/* Header */}
-      <section className="bg-muted/30 py-16 border-b border-border">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl md:text-5xl font-display font-bold text-primary mb-4 fade-in">
-            Egypt Properties
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto fade-in">
-            Discover 100+ premium properties across Egypt's most sought-after locations
-          </p>
-        </div>
-      </section>
+    <div className="min-h-screen">
+      <PageHero
+        eyebrow="Luxury Listings"
+        title="Egypt Properties"
+        description="Discover premium residences across New Cairo, North Coast, and the Red Sea — curated for discerning investors."
+        icon={Building2}
+        stats={[
+          { label: "Active Listings", value: isLoading ? "..." : `${properties.length}` },
+          { label: "Cities", value: `${cityCount}`, helper: "Across Egypt" },
+          { label: "Property Types", value: `${typeCount}`, helper: "Villas, penthouses, more" },
+        ]}
+        actions={(
+          <>
+            <Button asChild className="bg-luxury-gold text-luxury-dark hover:bg-luxury-gold/80 shadow-lg shadow-luxury-gold/20">
+              <a href="#filters">Refine Search</a>
+            </Button>
+            <Button asChild variant="outline" className="border-accent bg-accent/10 text-accent hover:bg-accent/20 hover:text-accent-foreground">
+              <a href="/contact">Talk to an Advisor</a>
+            </Button>
+          </>
+        )}
+      />
 
       {/* Search and Filters */}
-      <section className="py-8 bg-background border-b border-border">
+      <section id="filters" className="py-8 bg-background border-b border-border">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Search Bar */}
           <div className="relative mb-6">

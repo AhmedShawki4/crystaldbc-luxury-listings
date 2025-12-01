@@ -59,7 +59,6 @@ const Wishlist = () => {
                     </h3>
                     <p className="text-muted-foreground">{item.property.location}</p>
                   </div>
-                  <p className="text-sm text-muted-foreground flex-1">{item.note || "No notes added."}</p>
                   <div className="flex items-center justify-between gap-3">
                     <Link to={`/property/${item.property._id}`} className="text-primary font-semibold">
                       View Details
