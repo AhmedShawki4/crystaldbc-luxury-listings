@@ -7,63 +7,19 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import useTrendingProjects from "@/hooks/useTrendingProjects";
-import type { TrendingProject } from "@/types";
 import { getMediaUrl } from "@/lib/media";
-import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import apiClient from "@/lib/apiClient";
-import useAuth from "@/hooks/useAuth";
+import useWishlistActions from "@/hooks/useWishlistActions";
 
 const TrendingProjects = () => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
-  const [wishlistTarget, setWishlistTarget] = useState<string | null>(null);
   const { data: projects = [], isLoading } = useTrendingProjects();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-
-  const wishlistMutation = useMutation({
-    mutationFn: (propertyId: string) => apiClient.post("/wishlist", { property: propertyId }),
-    onSuccess: () => {
-      toast({ title: "Added to wishlist", description: "Find it anytime under your account." });
-      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
-    },
-    onError: () => {
-      toast({ title: "Wishlist update failed", description: "Please try again.", variant: "destructive" });
-    },
-    onSettled: () => setWishlistTarget(null),
-  });
-
-  const handleAddToWishlist = (project: TrendingProject) => {
-    const propertyId = project.property?._id;
-    if (!propertyId) {
-      toast({
-        title: "Link a property",
-        description: "Edit this project to attach a property before saving to wishlist.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!isAuthenticated) {
-      toast({
-        title: "Sign in required",
-        description: "Log in to save projects to your wishlist.",
-      });
-      navigate("/auth/login");
-      return;
-    }
-
-    setWishlistTarget(propertyId);
-    wishlistMutation.mutate(propertyId);
-  };
+  const { addToWishlist, activeId, isAdding } = useWishlistActions();
 
   useEffect(() => {
     if (!api) {
@@ -213,13 +169,13 @@ const TrendingProjects = () => {
                           size="lg"
                           variant="ghost"
                           className="border border-white/20 bg-white/5 text-white hover:bg-white/15 flex-1 sm:flex-none"
-                          onClick={() => handleAddToWishlist(project)}
+                          onClick={() => addToWishlist(project.property?._id)}
                           disabled={
                             !project.property?._id ||
-                            (wishlistMutation.isPending && wishlistTarget === project.property?._id)
+                            (isAdding && activeId === project.property?._id)
                           }
                         >
-                          {wishlistMutation.isPending && wishlistTarget === project.property?._id
+                          {isAdding && activeId === project.property?._id
                             ? "Saving..."
                             : project.property?._id
                               ? "Save to Wishlist"

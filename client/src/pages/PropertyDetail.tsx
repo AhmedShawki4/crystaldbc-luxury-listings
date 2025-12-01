@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { MapPin, Bed, Bath, Square, ArrowLeft, Check, Phone, Mail } from "lucide-react";
+import { MapPin, Bed, Bath, Square, ArrowLeft, Check, Phone, Mail, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { properties } from "@/data/properties";
 import type { Property as StaticProperty } from "@/data/properties";
@@ -10,6 +10,7 @@ import apiClient from "@/lib/apiClient";
 import type { Property as ApiProperty } from "@/types";
 import useProperties from "@/hooks/useProperties";
 import { getMediaUrl } from "@/lib/media";
+import useWishlistActions from "@/hooks/useWishlistActions";
 
 type DetailedProperty = {
   id: string;
@@ -85,6 +86,7 @@ const PropertyDetail = () => {
     exclude: property?.id,
     limit: 3,
   });
+  const { addToWishlist, activeId, isAdding } = useWishlistActions();
   const fallbackSimilar = useMemo(
     () =>
       properties
@@ -147,6 +149,9 @@ const PropertyDetail = () => {
 
     fetchProperty();
   }, [propertyId]);
+
+  const persistedPropertyId = property && /^[a-f\d]{24}$/i.test(property.id) ? property.id : undefined;
+  const isWishlistSaving = Boolean(persistedPropertyId && activeId === persistedPropertyId && isAdding);
 
   if (isLoading) {
     return (
@@ -318,6 +323,17 @@ const PropertyDetail = () => {
                 >
                   <Mail className="h-4 w-4" />
                   I am Interested
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full border border-dashed border-border flex items-center justify-center gap-2"
+                  onClick={() => addToWishlist(persistedPropertyId)}
+                  disabled={!persistedPropertyId || isWishlistSaving}
+                >
+                  <Heart className="h-4 w-4" />
+                  {persistedPropertyId ? (isWishlistSaving ? "Saving..." : "Save to Wishlist") : "Link property to enable"}
                 </Button>
                 
                 <RegisterInterestDialog

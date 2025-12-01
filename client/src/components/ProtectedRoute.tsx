@@ -2,6 +2,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import type { ReactNode } from "react";
 import type { Role } from "@/types";
+import AccessRestricted from "@/components/AccessRestricted";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -25,14 +26,7 @@ const ProtectedRoute = ({ children, roles }: ProtectedRouteProps) => {
   }
 
   if (roles && user && !roles.includes(user.role)) {
-    return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 text-center">
-        <h2 className="text-2xl font-display font-semibold">Access Restricted</h2>
-        <p className="text-muted-foreground max-w-lg">
-          You do not have permission to view this page. Please contact an administrator if you believe this is an error.
-        </p>
-      </div>
-    );
+    return <AccessRestricted />;
   }
 
   return <>{children}</>;

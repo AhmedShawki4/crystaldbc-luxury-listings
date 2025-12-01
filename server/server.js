@@ -42,6 +42,7 @@ app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/wishlist", require("./routes/wishlistRoutes"));
 app.use("/api/uploads", require("./routes/uploadRoutes"));
 app.use("/api/analytics", require("./routes/analyticsRoutes"));
+app.use("/api/activity-logs", require("./routes/activityRoutes"));
 
 app.use(errorHandler);
 

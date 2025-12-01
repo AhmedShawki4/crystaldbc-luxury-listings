@@ -13,6 +13,6 @@ const router = express.Router();
 router.post("/", createLead);
 router.get("/", authenticate, authorize(ROLES.ADMIN, ROLES.EMPLOYEE), getLeads);
 router.put("/:id", authenticate, authorize(ROLES.ADMIN, ROLES.EMPLOYEE), updateLead);
-router.delete("/:id", authenticate, authorize(ROLES.ADMIN, ROLES.EMPLOYEE), deleteLead);
+router.delete("/:id", authenticate, authorize(ROLES.ADMIN), deleteLead);
 
 module.exports = router;

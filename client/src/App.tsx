@@ -22,6 +22,8 @@ import AdminCMS from "./pages/admin/AdminCMS";
 import AdminLeads from "./pages/admin/AdminLeads";
 import AdminMessages from "./pages/admin/AdminMessages";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminReports from "./pages/admin/AdminReports";
+import AdminActivityLogs from "./pages/admin/AdminActivityLogs";
 
 const queryClient = new QueryClient();
 
@@ -64,10 +66,40 @@ const App = () => (
           >
             <Route index element={<AdminOverview />} />
             <Route path="properties" element={<AdminProperties />} />
-            <Route path="projects" element={<AdminProjects />} />
-            <Route path="cms" element={<AdminCMS />} />
+            <Route
+              path="projects"
+              element={
+                <ProtectedRoute roles={["admin"]}>
+                  <AdminProjects />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="cms"
+              element={
+                <ProtectedRoute roles={["admin"]}>
+                  <AdminCMS />
+                </ProtectedRoute>
+              }
+            />
             <Route path="leads" element={<AdminLeads />} />
             <Route path="messages" element={<AdminMessages />} />
+            <Route
+              path="reports"
+              element={
+                <ProtectedRoute roles={["admin", "employee"]}>
+                  <AdminReports />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="activity"
+              element={
+                <ProtectedRoute roles={["admin"]}>
+                  <AdminActivityLogs />
+                </ProtectedRoute>
+              }
+            />
             <Route path="users" element={<ProtectedRoute roles={["admin"]}><AdminUsers /></ProtectedRoute>} />
           </Route>
 

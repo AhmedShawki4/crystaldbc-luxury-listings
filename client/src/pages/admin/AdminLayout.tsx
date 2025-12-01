@@ -1,15 +1,18 @@
 import { Link, NavLink, Outlet } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import type { Role } from "@/types";
 
-const navItems = [
-  { to: "/admin", label: "Overview", exact: true },
-  { to: "/admin/properties", label: "Properties" },
-  { to: "/admin/projects", label: "Trending Projects" },
-  { to: "/admin/cms", label: "CMS" },
-  { to: "/admin/leads", label: "Leads" },
-  { to: "/admin/messages", label: "Messages" },
-  { to: "/admin/users", label: "Users" },
+const NAV_ITEMS: Array<{ to: string; label: string; exact?: boolean; roles?: Role[] }> = [
+  { to: "/admin", label: "Overview", exact: true, roles: ["admin", "employee"] },
+  { to: "/admin/properties", label: "Properties", roles: ["admin", "employee"] },
+  { to: "/admin/projects", label: "Trending Projects", roles: ["admin", "employee"] },
+  { to: "/admin/cms", label: "CMS", roles: ["admin", "employee"] },
+  { to: "/admin/leads", label: "Leads", roles: ["admin", "employee"] },
+  { to: "/admin/messages", label: "Messages", roles: ["admin", "employee"] },
+  { to: "/admin/reports", label: "Reports", roles: ["admin", "employee"] },
+  { to: "/admin/activity", label: "Activity Logs", roles: ["admin"] },
+  { to: "/admin/users", label: "Users", roles: ["admin"] },
 ];
 
 const AdminLayout = () => {
@@ -31,7 +34,7 @@ const AdminLayout = () => {
           </Button>
         </div>
         <nav className="flex-1 px-4 py-6 space-y-1">
-          {navItems.map((item) => (
+          {NAV_ITEMS.filter((item) => !item.roles || (user?.role && item.roles.includes(user.role))).map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

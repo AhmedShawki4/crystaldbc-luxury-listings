@@ -13,6 +13,6 @@ const router = express.Router();
 router.post("/", createMessage);
 router.get("/", authenticate, authorize(ROLES.ADMIN, ROLES.EMPLOYEE), getMessages);
 router.patch("/:id", authenticate, authorize(ROLES.ADMIN, ROLES.EMPLOYEE), updateMessageStatus);
-router.delete("/:id", authenticate, authorize(ROLES.ADMIN, ROLES.EMPLOYEE), deleteMessage);
+router.delete("/:id", authenticate, authorize(ROLES.ADMIN), deleteMessage);
 
 module.exports = router;

@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
-import { MapPin, Bed, Bath, Square } from "lucide-react";
+import { MapPin, Bed, Bath, Square, Heart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { getMediaUrl } from "@/lib/media";
+import { Button } from "@/components/ui/button";
+import useWishlistActions from "@/hooks/useWishlistActions";
 
 interface PropertyCardProps {
   id: number | string;
@@ -24,6 +26,17 @@ const PropertyCard = ({
   baths,
   sqft,
 }: PropertyCardProps) => {
+  const { addToWishlist, activeId, isAdding } = useWishlistActions();
+  const rawId = id?.toString();
+  const propertyId = rawId && /^[a-f\d]{24}$/i.test(rawId) ? rawId : undefined;
+
+  const handleWishlist = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    addToWishlist(propertyId);
+  };
+
+  const isSaving = propertyId && activeId === propertyId && isAdding;
+
   return (
     <Link to={`/property/${id}`} className="block group">
       <Card className="overflow-hidden border-border hover-lift bg-card">
@@ -36,6 +49,22 @@ const PropertyCard = ({
           <div className="absolute top-4 right-4 bg-accent text-accent-foreground px-4 py-2 rounded-full text-sm font-semibold">
             {price}
           </div>
+          <Button
+            type="button"
+            size="icon"
+            variant="secondary"
+            className="absolute top-4 left-4 rounded-full bg-white/90 text-primary hover:bg-white"
+            onClick={handleWishlist}
+            disabled={!propertyId || isSaving}
+            aria-label="Save to wishlist"
+          >
+            <Heart className={`h-4 w-4 ${isSaving ? "animate-pulse" : ""}`} />
+          </Button>
+          {rawId && !propertyId && (
+            <span className="absolute bottom-4 left-4 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
+              Link property to save
+            </span>
+          )}
         </div>
         <CardContent className="p-6">
           <h3 className="text-xl font-display font-semibold text-primary mb-2 group-hover:text-accent transition-colors">

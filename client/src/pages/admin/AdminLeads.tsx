@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import useAuth from "@/hooks/useAuth";
 
 const fetchLeads = async () => {
   const { data } = await apiClient.get<{ leads: Lead[] }>("/leads");
@@ -15,6 +16,8 @@ const AdminLeads = () => {
   const { data } = useQuery({ queryKey: ["leads"], queryFn: fetchLeads });
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const canDelete = user?.role === "admin";
 
   const updateMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) => apiClient.put(`/leads/${id}`, { status }),
@@ -49,10 +52,15 @@ const AdminLeads = () => {
                 <div>
                   <h3 className="font-semibold">{lead.fullName}</h3>
                   <p className="text-sm text-muted-foreground">{lead.email}</p>
+                  {lead.phoneNumber && (
+                    <p className="text-sm text-muted-foreground">{lead.phoneNumber}</p>
+                  )}
                 </div>
-                <Button variant="destructive" size="sm" onClick={() => deleteMutation.mutate(lead._id)}>
-                  Delete
-                </Button>
+                {canDelete && (
+                  <Button variant="destructive" size="sm" onClick={() => deleteMutation.mutate(lead._id)}>
+                    Delete
+                  </Button>
+                )}
               </div>
               <p className="text-sm text-muted-foreground">
                 Interest: {lead.interestedIn || "N/A"} — Source: {lead.source}

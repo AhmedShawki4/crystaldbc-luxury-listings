@@ -127,3 +127,18 @@ export interface AnalyticsSummary {
   };
   recentLeads: Lead[];
 }
+
+export interface ActivityLog {
+  _id: string;
+  user?: {
+    _id: string;
+    name: string;
+    email: string;
+    role: Role;
+  };
+  action: string;
+  entityType?: string;
+  entityId?: string;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+}

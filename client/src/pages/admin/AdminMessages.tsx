@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import useAuth from "@/hooks/useAuth";
 
 const fetchMessages = async () => {
   const { data } = await apiClient.get<{ messages: ContactMessage[] }>("/messages");
@@ -15,6 +16,8 @@ const AdminMessages = () => {
   const { data } = useQuery({ queryKey: ["messages"], queryFn: fetchMessages });
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const canDelete = user?.role === "admin";
 
   const updateMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) => apiClient.patch(`/messages/${id}`, { status }),
@@ -50,9 +53,11 @@ const AdminMessages = () => {
                   <h3 className="font-semibold">{message.name}</h3>
                   <p className="text-sm text-muted-foreground">{message.email}</p>
                 </div>
-                <Button variant="destructive" size="sm" onClick={() => deleteMutation.mutate(message._id)}>
-                  Delete
-                </Button>
+                {canDelete && (
+                  <Button variant="destructive" size="sm" onClick={() => deleteMutation.mutate(message._id)}>
+                    Delete
+                  </Button>
+                )}
               </div>
               <p className="text-sm text-muted-foreground">{message.phone}</p>
               <p className="text-sm">{message.message}</p>
