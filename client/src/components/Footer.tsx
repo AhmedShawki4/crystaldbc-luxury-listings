@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useCmsSection } from "@/hooks/useCmsSection";
 import type { FooterContent } from "@/types";
+import { Phone, Mail, MapPin, ArrowUpRight } from "lucide-react";
 
 const fallbackFooter: FooterContent = {
   description:
@@ -21,8 +22,9 @@ const Footer = () => {
   const content = data ?? fallbackFooter;
 
   return (
-    <footer className="bg-luxury-dark text-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <footer className="relative overflow-hidden bg-luxury-dark text-white">
+      <div className="absolute inset-0 bg-gradient-to-br from-luxury-dark via-[#0b1c2c] to-black opacity-90" />
+      <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div>
             <Link to="/" className="flex items-center gap-2 mb-4">
@@ -35,17 +37,22 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-display font-semibold mb-4">Contact Us</h3>
             <ul className="space-y-3 text-sm">
-              <li>
-                <a href={`tel:${content.contact.phone}`} className="text-white/70 hover:text-accent transition-colors">
+              <li className="flex items-center gap-2 text-white/80">
+                <Phone className="h-4 w-4 text-accent" />
+                <a href={`tel:${content.contact.phone}`} className="hover:text-accent transition-colors">
                   {content.contact.phone}
                 </a>
               </li>
-              <li>
-                <a href={`mailto:${content.contact.email}`} className="text-white/70 hover:text-accent transition-colors">
+              <li className="flex items-center gap-2 text-white/80">
+                <Mail className="h-4 w-4 text-accent" />
+                <a href={`mailto:${content.contact.email}`} className="hover:text-accent transition-colors">
                   {content.contact.email}
                 </a>
               </li>
-              <li className="text-white/70">{content.contact.location}</li>
+              <li className="flex items-center gap-2 text-white/80">
+                <MapPin className="h-4 w-4 text-accent" />
+                {content.contact.location}
+              </li>
             </ul>
           </div>
 
@@ -54,7 +61,8 @@ const Footer = () => {
             <ul className="space-y-2 text-sm">
               {content.quickLinks.map((link) => (
                 <li key={link.href}>
-                  <Link to={link.href} className="text-white/70 hover:text-accent transition-colors">
+                  <Link to={link.href} className="group flex items-center gap-2 text-white/70 hover:text-accent transition-colors">
+                    <ArrowUpRight className="h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
                     {link.label}
                   </Link>
                 </li>
@@ -64,9 +72,11 @@ const Footer = () => {
 
           <div>
             <h3 className="text-lg font-display font-semibold mb-4">Property Types</h3>
-            <ul className="space-y-2 text-sm text-white/70">
+            <ul className="flex flex-wrap gap-2 text-sm text-white/80">
               {content.propertyTypes.map((type) => (
-                <li key={type}>{type}</li>
+                <li key={type} className="rounded-full border border-white/20 px-3 py-1">
+                  {type}
+                </li>
               ))}
             </ul>
           </div>

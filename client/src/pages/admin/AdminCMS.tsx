@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { getMediaUrl } from "@/lib/media";
 import uploadImage from "@/lib/uploadImage";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import { PenSquare } from "lucide-react";
 
 const fetchSections = async () => {
   const { data } = await apiClient.get<{ sections: CMSSection[] }>("/cms");
@@ -705,10 +707,11 @@ const AdminCMS = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-display font-bold">Content Management</h1>
-        <p className="text-muted-foreground">Edit homepage content blocks with friendly forms and instant previews.</p>
-      </div>
+      <AdminPageHeader
+        icon={PenSquare}
+        title="Content Management"
+        description="Edit homepage content blocks with friendly forms and instant previews."
+      />
 
       <div className="space-y-6">
         {data.map((section) => {

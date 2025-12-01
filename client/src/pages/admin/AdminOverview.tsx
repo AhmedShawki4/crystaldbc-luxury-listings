@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
 import type { AnalyticsSummary } from "@/types";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import { Building2, Mail, HeartHandshake, Users2, ClipboardList, Gauge } from "lucide-react";
 
 const fetchSummary = async () => {
   const { data } = await apiClient.get<AnalyticsSummary>("/analytics/summary");
@@ -20,20 +22,41 @@ const AdminOverview = () => {
 
   const { stats, recentLeads } = data;
 
+  const STAT_CONFIG: Record<keyof AnalyticsSummary["stats"], { label: string; icon: typeof Building2; accent: string }> = {
+    properties: { label: "Properties", icon: Building2, accent: "text-emerald-400 bg-emerald-400/10" },
+    leads: { label: "Leads", icon: Users2, accent: "text-sky-400 bg-sky-400/10" },
+    messages: { label: "Messages", icon: Mail, accent: "text-amber-400 bg-amber-400/10" },
+    users: { label: "Users", icon: HeartHandshake, accent: "text-pink-400 bg-pink-400/10" },
+    wishlistItems: { label: "Wishlist Items", icon: ClipboardList, accent: "text-purple-400 bg-purple-400/10" },
+  };
+
   return (
     <div className="space-y-10">
-      <div>
-        <h1 className="text-3xl font-display font-bold mb-2">Overview</h1>
-        <p className="text-muted-foreground">Key metrics across CrystalDBC.</p>
-      </div>
+      <AdminPageHeader
+        icon={Gauge}
+        title="Executive Overview"
+        description="Key metrics across CrystalDBC in real time."
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {Object.entries(stats).map(([key, value]) => (
-          <div key={key} className="bg-background border border-border rounded-xl p-6">
-            <p className="text-sm text-muted-foreground capitalize">{key.replace(/([A-Z])/g, " $1")}</p>
-            <p className="text-3xl font-display font-bold mt-3">{value}</p>
-          </div>
-        ))}
+        {Object.entries(stats).map(([key, value]) => {
+          const typedKey = key as keyof AnalyticsSummary["stats"];
+          const config = STAT_CONFIG[typedKey];
+          const Icon = config.icon;
+          return (
+            <div key={key} className="rounded-2xl border border-border/70 bg-background/80 p-6 shadow-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">{config.label}</p>
+                  <p className="text-3xl font-display font-bold mt-3">{value}</p>
+                </div>
+                <span className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl ${config.accent}`}>
+                  <Icon className="h-5 w-5" />
+                </span>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <div className="bg-background border border-border rounded-xl p-6">
@@ -43,14 +66,14 @@ const AdminOverview = () => {
         </div>
         <div className="space-y-3">
           {recentLeads.map((lead) => (
-            <div key={lead._id} className="flex flex-col md:flex-row md:items-center md:justify-between border border-border/60 rounded-lg px-4 py-3">
+            <div key={lead._id} className="flex flex-col gap-3 rounded-2xl border border-border/70 bg-muted/20 p-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="font-semibold">{lead.fullName}</p>
+                <p className="font-semibold text-primary">{lead.fullName}</p>
                 <p className="text-sm text-muted-foreground">{lead.email}</p>
               </div>
-              <div className="text-sm text-muted-foreground mt-2 md:mt-0">
-                <p>Status: {lead.status}</p>
-                <p>Source: {lead.source}</p>
+              <div className="flex flex-wrap gap-3 text-xs font-medium uppercase tracking-wide">
+                <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-500">{lead.status}</span>
+                <span className="rounded-full bg-slate-500/10 px-3 py-1 text-slate-400">{lead.source}</span>
               </div>
             </div>
           ))}

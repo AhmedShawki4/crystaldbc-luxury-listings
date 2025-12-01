@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import uploadImage from "@/lib/uploadImage";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import { Sparkles } from "lucide-react";
 
 const fetchProjects = async () => {
   const { data } = await apiClient.get<{ projects: TrendingProject[] }>("/projects");
@@ -115,10 +117,11 @@ const AdminProjects = () => {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-display font-bold">Trending Projects</h1>
-        <p className="text-muted-foreground">Manage the carousel content displayed on the homepage.</p>
-      </div>
+      <AdminPageHeader
+        icon={Sparkles}
+        title="Trending Projects"
+        description="Curate the homepage spotlight carousel with premium developments."
+      />
 
       <Card>
         <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={(e) => e.preventDefault()}>

@@ -3,7 +3,8 @@ import apiClient from "@/lib/apiClient";
 import type { AnalyticsSummary } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, X } from "lucide-react";
+import { Check, X, BarChart3, Download, Building2, Users2, Mail, ClipboardList, Heart } from "lucide-react";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 
 const fetchSummary = async () => {
   const { data } = await apiClient.get<AnalyticsSummary>("/analytics/summary");
@@ -27,32 +28,62 @@ const AdminReports = () => {
     { label: "View activity logs", admin: true, employee: false },
   ];
 
+  const STAT_CONFIG: Record<keyof AnalyticsSummary["stats"], { label: string; icon: typeof Building2; accent: string }> = {
+    properties: { label: "Properties", icon: Building2, accent: "text-emerald-400 bg-emerald-400/10" },
+    leads: { label: "Leads", icon: Users2, accent: "text-sky-400 bg-sky-400/10" },
+    messages: { label: "Messages", icon: Mail, accent: "text-amber-400 bg-amber-400/10" },
+    users: { label: "Users", icon: Heart, accent: "text-pink-400 bg-pink-400/10" },
+    wishlistItems: { label: "Wishlist", icon: ClipboardList, accent: "text-purple-400 bg-purple-400/10" },
+  };
+
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-display font-bold">Reports</h1>
-        <p className="text-muted-foreground">Export high-level performance snapshots.</p>
-      </div>
+      <AdminPageHeader
+        icon={BarChart3}
+        title="Reports & Intelligence"
+        description="Export high-level performance snapshots and compare roles."
+        actions={
+          <Button variant="outline" className="gap-2">
+            <Download className="h-4 w-4" />
+            Export PDF
+          </Button>
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {Object.entries(stats).map(([key, value]) => (
-          <Card key={key}>
-            <CardContent className="p-6">
-              <p className="text-sm text-muted-foreground capitalize">{key.replace(/([A-Z])/g, " $1")}</p>
-              <p className="text-3xl font-display font-semibold mt-2">{value}</p>
-            </CardContent>
-          </Card>
-        ))}
+        {Object.entries(stats).map(([key, value]) => {
+          const typedKey = key as keyof AnalyticsSummary["stats"];
+          const config = STAT_CONFIG[typedKey];
+          const Icon = config.icon;
+          return (
+            <Card key={key} className="border-border/70">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">{config.label}</p>
+                    <p className="text-3xl font-display font-semibold mt-2">{value}</p>
+                  </div>
+                  <span className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl ${config.accent}`}>
+                    <Icon className="h-5 w-5" />
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       <Card>
         <CardContent className="p-6 space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-display font-semibold">Recent Leads</h2>
               <p className="text-sm text-muted-foreground">Top-of-funnel activity snapshot</p>
             </div>
-            <Button variant="outline">Download CSV</Button>
+            <Button variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              Download CSV
+            </Button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

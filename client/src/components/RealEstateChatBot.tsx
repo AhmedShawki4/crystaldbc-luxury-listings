@@ -49,7 +49,7 @@ const RealEstateChatBot = () => {
         },
       ]);
     }
-  }, [isOpen]);
+  }, [isOpen, messages.length]);
 
   const filterProperties = (query: string): Property[] => {
     const lowerQuery = query.toLowerCase();

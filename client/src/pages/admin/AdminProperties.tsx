@@ -9,6 +9,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import uploadImage from "@/lib/uploadImage";
 import { getMediaUrl } from "@/lib/media";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import { Building2 } from "lucide-react";
 
 const fetchProperties = async () => {
   const { data } = await apiClient.get<{ properties: Property[] }>("/properties");
@@ -166,10 +168,11 @@ const AdminProperties = () => {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-display font-bold">Manage Properties</h1>
-        <p className="text-muted-foreground">Create, update, or remove listings.</p>
-      </div>
+      <AdminPageHeader
+        icon={Building2}
+        title="Manage Properties"
+        description="Create, update, or archive listings across the portfolio."
+      />
 
       <Card>
         <CardContent className="p-6">

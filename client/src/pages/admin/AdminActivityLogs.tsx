@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
 import type { ActivityLog } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import { ClipboardList, ShieldCheck } from "lucide-react";
 
 const fetchLogs = async () => {
   const { data } = await apiClient.get<{ logs: ActivityLog[] }>("/activity-logs");
@@ -23,19 +25,25 @@ const AdminActivityLogs = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-display font-bold">Activity Logs</h1>
-        <p className="text-muted-foreground">Audit trail of key CMS actions.</p>
-      </div>
+      <AdminPageHeader
+        icon={ClipboardList}
+        title="Activity Logs"
+        description="Audit every sensitive action performed across the dashboard."
+      />
 
       <div className="space-y-4">
         {data.map((log) => (
-          <Card key={log._id}>
+          <Card key={log._id} className="border-border/70">
             <CardContent className="p-5 space-y-2">
               <div className="flex items-center justify-between gap-4 flex-wrap">
-                <div>
-                  <p className="font-semibold">{log.user?.name ?? "System"}</p>
-                  <p className="text-sm text-muted-foreground">{log.user?.email ?? "-"}</p>
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-muted/70">
+                    <ShieldCheck className="h-5 w-5 text-luxury-gold" />
+                  </span>
+                  <div>
+                    <p className="font-semibold">{log.user?.name ?? "System"}</p>
+                    <p className="text-sm text-muted-foreground">{log.user?.email ?? "-"}</p>
+                  </div>
                 </div>
                 <p className="text-sm text-muted-foreground">{formatDate(log.createdAt)}</p>
               </div>

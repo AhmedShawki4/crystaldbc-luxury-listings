@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import { Shield, UserRound, Mail } from "lucide-react";
 
 const fetchUsers = async () => {
   const { data } = await apiClient.get<{ users: User[] }>("/users");
@@ -56,10 +58,11 @@ const AdminUsers = () => {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-display font-bold">Users</h1>
-        <p className="text-muted-foreground">Administrators can manage platform access.</p>
-      </div>
+      <AdminPageHeader
+        icon={Shield}
+        title="User Access"
+        description="Administrators can provision or revoke access for teammates."
+      />
 
       <Card>
         <CardContent className="p-6">
@@ -112,11 +115,19 @@ const AdminUsers = () => {
 
       <div className="grid grid-cols-1 gap-4">
         {data?.map((user) => (
-          <Card key={user.id}>
+          <Card key={user.id} className="border-border/70">
             <CardContent className="p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <h3 className="font-semibold">{user.name}</h3>
-                <p className="text-sm text-muted-foreground">{user.email}</p>
+              <div className="flex items-center gap-3">
+                <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-muted/70">
+                  <UserRound className="h-5 w-5 text-primary" />
+                </span>
+                <div>
+                  <h3 className="font-semibold">{user.name}</h3>
+                  <p className="text-sm text-muted-foreground flex items-center gap-1">
+                    <Mail className="h-4 w-4" />
+                    {user.email}
+                  </p>
+                </div>
               </div>
               <div className="flex items-center gap-4">
                 <Select value={user.role} onValueChange={(value: Role) => updateRole.mutate({ id: user.id, role: value })}>
