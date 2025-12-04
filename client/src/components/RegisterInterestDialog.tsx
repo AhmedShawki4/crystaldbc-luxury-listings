@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { Building2, User, Mail, Phone, Send } from "lucide-react";
 import {
@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import apiClient from "@/lib/apiClient";
+import useAuth from "@/hooks/useAuth";
 
 interface RegisterInterestDialogProps {
   open?: boolean;
@@ -42,6 +43,9 @@ const RegisterInterestDialog = ({
   const [countryCode, setCountryCode] = useState("+20");
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  const promptStorageKey = useMemo(() => `crystaldbc:lastInterestPrompt:${user?.id ?? "guest"}`, [user?.id]);
 
   // Determine if we're using external or internal control
   const isExternallyControlled = externalOpen !== undefined;
@@ -50,13 +54,21 @@ const RegisterInterestDialog = ({
 
   useEffect(() => {
     if (isExternallyControlled) return;
+    if (typeof window === "undefined") return;
+
+    const lastPrompt = window.localStorage.getItem(promptStorageKey);
+    const sixHours = 6 * 60 * 60 * 1000;
+    if (lastPrompt && Date.now() - Number(lastPrompt) < sixHours) {
+      return;
+    }
 
     const timer = setTimeout(() => {
       setInternalOpen(true);
+      window.localStorage.setItem(promptStorageKey, Date.now().toString());
     }, 30000);
 
     return () => clearTimeout(timer);
-  }, [location.pathname, isExternallyControlled]);
+  }, [location.pathname, isExternallyControlled, promptStorageKey]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

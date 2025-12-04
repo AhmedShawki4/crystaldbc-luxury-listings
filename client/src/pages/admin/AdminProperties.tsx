@@ -11,6 +11,7 @@ import uploadImage from "@/lib/uploadImage";
 import { getMediaUrl } from "@/lib/media";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { Building2 } from "lucide-react";
+import useAuth from "@/hooks/useAuth";
 
 const fetchProperties = async () => {
   const { data } = await apiClient.get<{ properties: Property[] }>("/properties");
@@ -37,6 +38,8 @@ const initialFormState = {
 
 const AdminProperties = () => {
   const { data, isLoading } = useQuery({ queryKey: ["properties"], queryFn: fetchProperties });
+  const { user } = useAuth();
+  const canDelete = user?.role === "admin";
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [formState, setFormState] = useState(initialFormState);
@@ -322,9 +325,11 @@ const AdminProperties = () => {
                   <Button variant="secondary" onClick={() => handleEdit(property)}>
                     Edit
                   </Button>
-                  <Button variant="destructive" onClick={() => deleteMutation.mutate(property._id)}>
-                    Delete
-                  </Button>
+                  {canDelete ? (
+                    <Button variant="destructive" onClick={() => deleteMutation.mutate(property._id)}>
+                      Delete
+                    </Button>
+                  ) : null}
                 </div>
               </div>
               <p className="text-muted-foreground text-sm">{property.priceLabel}</p>

@@ -1,25 +1,27 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import apiClient from "@/lib/apiClient";
-import type { ActivityLog } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
-import { ClipboardList, ShieldCheck } from "lucide-react";
-
-const fetchLogs = async () => {
-  const { data } = await apiClient.get<{ logs: ActivityLog[] }>("/activity-logs");
-  return data.logs;
-};
+import { ClipboardList, ShieldCheck, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { fetchActivityLogs } from "@/lib/activityLogs";
 
 const formatDate = (value: string) => new Date(value).toLocaleString();
 
 const AdminActivityLogs = () => {
-  const { data, isLoading } = useQuery({ queryKey: ["activity-logs"], queryFn: fetchLogs });
+  const [search, setSearch] = useState("");
+  const { data, isLoading } = useQuery({
+    queryKey: ["activity-logs", { search }],
+    queryFn: () => fetchActivityLogs({ search: search || undefined }),
+  });
+
+  const logs = data?.logs ?? [];
 
   if (isLoading) {
     return <p className="text-muted-foreground">Loading activity logs...</p>;
   }
 
-  if (!data || data.length === 0) {
+  if (!logs.length) {
     return <p className="text-muted-foreground">No activity recorded yet.</p>;
   }
 
@@ -31,8 +33,23 @@ const AdminActivityLogs = () => {
         description="Audit every sensitive action performed across the dashboard."
       />
 
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="relative w-full md:max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search action, entity, or ID"
+            className="pl-9"
+          />
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Showing {logs.length} of {data?.total ?? logs.length} entries
+        </p>
+      </div>
+
       <div className="space-y-4">
-        {data.map((log) => (
+        {logs.map((log) => (
           <Card key={log._id} className="border-border/70">
             <CardContent className="p-5 space-y-2">
               <div className="flex items-center justify-between gap-4 flex-wrap">

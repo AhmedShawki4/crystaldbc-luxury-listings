@@ -5,6 +5,7 @@ const morgan = require("morgan");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorHandler");
+const { generalLimiter } = require("./middleware/rateLimiter");
 
 dotenv.config({ path: path.join(__dirname, ".env") });
 
@@ -22,6 +23,7 @@ app.use(
     credentials: true,
   })
 );
+app.use(generalLimiter);
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));

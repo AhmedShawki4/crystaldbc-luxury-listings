@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import useAuth from "@/hooks/useAuth";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
-import { Users2, Mail, Phone, MapPin, MessageCircle, Trash2 } from "lucide-react";
+import { Users2, Mail, Phone, UserRound, MessageCircle, Trash2 } from "lucide-react";
 
 const fetchLeads = async () => {
   const { data } = await apiClient.get<{ leads: Lead[] }>("/leads");
@@ -74,8 +74,8 @@ const AdminLeads = () => {
                     )}
                     {lead.interestedIn && (
                       <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        <span>{lead.interestedIn}</span>
+                        <UserRound className="h-4 w-4" />
+                        <span className="capitalize">{lead.interestedIn}</span>
                       </div>
                     )}
                   </div>

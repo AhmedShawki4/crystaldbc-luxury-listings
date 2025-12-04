@@ -15,6 +15,6 @@ router.get("/", getProperties);
 router.get("/:id", getProperty);
 router.post("/", authenticate, authorize(ROLES.ADMIN, ROLES.EMPLOYEE), createProperty);
 router.put("/:id", authenticate, authorize(ROLES.ADMIN, ROLES.EMPLOYEE), updateProperty);
-router.delete("/:id", authenticate, authorize(ROLES.ADMIN, ROLES.EMPLOYEE), deleteProperty);
+router.delete("/:id", authenticate, authorize(ROLES.ADMIN), deleteProperty);
 
 module.exports = router;

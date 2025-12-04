@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
-import { Shield, UserRound, Mail } from "lucide-react";
+import { Shield, UserRound, Mail, Activity } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { fetchActivityLogs } from "@/lib/activityLogs";
 
 const fetchUsers = async () => {
   const { data } = await apiClient.get<{ users: User[] }>("/users");
@@ -22,6 +24,14 @@ const AdminUsers = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [formState, setFormState] = useState({ name: "", email: "", password: "", role: "user" as Role });
+  const [logUser, setLogUser] = useState<User | null>(null);
+
+  const selectedUserId = logUser?.id ?? null;
+  const { data: selectedLogs, isLoading: loadingLogs } = useQuery({
+    queryKey: ["activity-logs", { userId: selectedUserId }],
+    queryFn: () => fetchActivityLogs({ userId: selectedUserId ?? undefined }),
+    enabled: Boolean(selectedUserId),
+  });
 
   const createMutation = useMutation({
     mutationFn: () => apiClient.post("/users", formState),
@@ -142,6 +152,10 @@ const AdminUsers = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                <Button variant="outline" onClick={() => setLogUser(user)}>
+                  <Activity className="mr-2 h-4 w-4" />
+                  View Logs
+                </Button>
                 <Button variant="destructive" onClick={() => deleteMutation.mutate(user.id)}>
                   Remove
                 </Button>
@@ -150,6 +164,32 @@ const AdminUsers = () => {
           </Card>
         ))}
       </div>
+
+      <Dialog open={Boolean(logUser)} onOpenChange={(open) => !open && setLogUser(null)}>
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Activity Logs — {logUser?.name ?? ""}
+            </DialogTitle>
+          </DialogHeader>
+          {loadingLogs ? (
+            <p className="text-sm text-muted-foreground">Loading logs...</p>
+          ) : selectedLogs && selectedLogs.logs.length > 0 ? (
+            <div className="space-y-3">
+              {selectedLogs.logs.map((log) => (
+                <div key={log._id} className="rounded-2xl border border-border/60 p-3">
+                  <p className="text-sm font-semibold text-primary">{log.action}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(log.createdAt).toLocaleString()} • {log.entityType ?? "General"}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No activity recorded for this user yet.</p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
