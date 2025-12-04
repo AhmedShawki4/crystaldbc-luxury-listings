@@ -31,7 +31,7 @@ const PageHero = ({
 }: PageHeroProps) => (
   <section
     className={cn(
-      "relative isolate overflow-hidden border-b border-white/10 bg-gradient-to-br from-luxury-dark via-luxury-dark/95 to-black pt-28 pb-16 text-white",
+      "relative isolate overflow-hidden border-b border-white/10 bg-gradient-to-br from-luxury-dark via-luxury-dark/95 to-[#111] pt-28 pb-16 text-white",
       className
     )}
   >

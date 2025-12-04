@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Menu, X, Home, Building2, Info, PhoneCall, Heart, Sparkles } from "lucide-react";
+import { Menu, X, Home, Building2, Info, PhoneCall, Heart, Sparkles, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import useAuth from "@/hooks/useAuth";
@@ -22,6 +22,7 @@ const Navigation = () => {
   const navLinks: NavLinkItem[] = [
     { name: "Home", path: "/", icon: Home },
     { name: "Properties", path: "/listings", icon: Building2 },
+    { name: "Investment", path: "/investment", icon: TrendingUp },
     { name: "About", path: "/about", icon: Info },
     { name: "Contact", path: "/contact", icon: PhoneCall },
   ];
@@ -50,13 +51,13 @@ const Navigation = () => {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-white/10",
         useDarkNav
-          ? "bg-gradient-to-r from-luxury-dark via-luxury-dark/95 to-black/80 backdrop-blur-xl shadow-2xl"
+          ? "bg-gradient-to-r from-luxury-dark via-luxury-dark/95 to-[#111]/90 backdrop-blur-xl shadow-2xl"
           : "bg-transparent"
       )}
     >
-      <div className="absolute inset-x-1/2 top-3 hidden h-10 w-[60%] -translate-x-1/2 rounded-full bg-white/10 blur-3xl md:block" aria-hidden />
+      <div className="absolute inset-x-1/2 top-3 hidden h-10 w-[60%] -translate-x-1/2 rounded-full bg-white/10 blur-3xl lg:block" aria-hidden />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="hidden md:flex items-center justify-between pb-2 text-[10px] font-semibold uppercase tracking-[0.35em] text-white/60">
+        <div className="hidden lg:flex items-center justify-between pb-2 text-[10px] font-semibold uppercase tracking-[0.35em] text-white/60">
           <span className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-luxury-gold" />
             Luxury Experience
@@ -66,15 +67,15 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <img 
-              src="/crystaldbclogo.jpeg" 
-              alt="CrystalDBC Logo" 
+            <img
+              src="/crystaldbclogo.jpeg"
+              alt="CrystalDBC Logo"
               className="h-14 w-auto drop-shadow-lg transition-transform group-hover:scale-105"
             />
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
             {navLinks.map((link) => {
               const Icon = link.icon;
               return (
@@ -98,7 +99,7 @@ const Navigation = () => {
           </div>
 
           {/* Desktop CTA */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
             {loading ? (
               <span className="text-white/80 text-sm">Checking session...</span>
             ) : isAuthenticated ? (
@@ -134,7 +135,7 @@ const Navigation = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 text-white hover:text-white/80 transition-colors"
+            className="lg:hidden p-2 text-white hover:text-white/80 transition-colors"
             aria-label="Toggle menu"
           >
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -143,7 +144,7 @@ const Navigation = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden py-6 border-t border-white/20">
+          <div className="lg:hidden py-6 border-t border-white/20">
             <div className="flex flex-col gap-4">
               {navLinks.map((link) => {
                 const Icon = link.icon;

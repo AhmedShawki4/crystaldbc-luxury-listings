@@ -23,7 +23,7 @@ const Footer = () => {
 
   return (
     <footer className="relative overflow-hidden bg-luxury-dark text-white">
-      <div className="absolute inset-0 bg-gradient-to-br from-luxury-dark via-[#0b1c2c] to-black opacity-90" />
+      <div className="absolute inset-0 bg-gradient-to-br from-luxury-dark via-[#0b1c2c] to-[#111] opacity-90" />
       <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div>

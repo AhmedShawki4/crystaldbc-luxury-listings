@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
@@ -10,19 +10,25 @@ const formatDate = (value: string) => new Date(value).toLocaleString();
 
 const AdminActivityLogs = () => {
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const { data, isLoading } = useQuery({
-    queryKey: ["activity-logs", { search }],
-    queryFn: () => fetchActivityLogs({ search: search || undefined }),
+    queryKey: ["activity-logs", { search: debouncedSearch }],
+    queryFn: () => fetchActivityLogs({ search: debouncedSearch || undefined }),
   });
 
   const logs = data?.logs ?? [];
 
   if (isLoading) {
     return <p className="text-muted-foreground">Loading activity logs...</p>;
-  }
-
-  if (!logs.length) {
-    return <p className="text-muted-foreground">No activity recorded yet.</p>;
   }
 
   return (
@@ -48,35 +54,49 @@ const AdminActivityLogs = () => {
         </p>
       </div>
 
-      <div className="space-y-4">
-        {logs.map((log) => (
-          <Card key={log._id} className="border-border/70">
-            <CardContent className="p-5 space-y-2">
-              <div className="flex items-center justify-between gap-4 flex-wrap">
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-muted/70">
-                    <ShieldCheck className="h-5 w-5 text-luxury-gold" />
-                  </span>
-                  <div>
-                    <p className="font-semibold">{log.user?.name ?? "System"}</p>
-                    <p className="text-sm text-muted-foreground">{log.user?.email ?? "-"}</p>
+      {!logs.length ? (
+        <div className="text-center py-12 border border-dashed border-border rounded-lg">
+          <p className="text-muted-foreground">No activity recorded matching your criteria.</p>
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="mt-2 text-sm text-primary hover:underline"
+            >
+              Clear search
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {logs.map((log) => (
+            <Card key={log._id} className="border-border/70">
+              <CardContent className="p-5 space-y-2">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-muted/70">
+                      <ShieldCheck className="h-5 w-5 text-luxury-gold" />
+                    </span>
+                    <div>
+                      <p className="font-semibold">{log.user?.name ?? "System"}</p>
+                      <p className="text-sm text-muted-foreground">{log.user?.email ?? "-"}</p>
+                    </div>
                   </div>
+                  <p className="text-sm text-muted-foreground">{formatDate(log.createdAt)}</p>
                 </div>
-                <p className="text-sm text-muted-foreground">{formatDate(log.createdAt)}</p>
-              </div>
-              <p className="text-primary font-medium">{log.action}</p>
-              <p className="text-sm text-muted-foreground">
-                {log.entityType ? `${log.entityType} • ${log.entityId ?? "—"}` : "General"}
-              </p>
-              {log.metadata && (
-                <pre className="bg-muted/40 rounded-lg p-3 text-xs text-muted-foreground overflow-x-auto">
-                  {JSON.stringify(log.metadata, null, 2)}
-                </pre>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                <p className="text-primary font-medium">{log.action}</p>
+                <p className="text-sm text-muted-foreground">
+                  {log.entityType ? `${log.entityType} • ${log.entityId ?? "—"}` : "General"}
+                </p>
+                {log.metadata && (
+                  <pre className="bg-muted/40 rounded-lg p-3 text-xs text-muted-foreground overflow-x-auto">
+                    {JSON.stringify(log.metadata, null, 2)}
+                  </pre>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

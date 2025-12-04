@@ -5,6 +5,7 @@ import Hero from "@/components/Hero";
 import PropertyCard from "@/components/PropertyCard";
 import TrendingProjects from "@/components/TrendingProjects";
 import RealEstateChatBot from "@/components/RealEstateChatBot";
+import InvestmentBox from "@/components/InvestmentBox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -129,6 +130,13 @@ const Home = () => {
               </Link>
             </Button>
           </div>
+        </div>
+      </section>
+
+      {/* Investment Opportunity Section */}
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <InvestmentBox />
         </div>
       </section>
 
