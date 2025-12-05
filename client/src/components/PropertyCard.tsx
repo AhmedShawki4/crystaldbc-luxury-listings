@@ -14,6 +14,7 @@ interface PropertyCardProps {
   beds: number;
   baths: number;
   sqft: string;
+  status?: string;
 }
 
 const PropertyCard = ({
@@ -25,10 +26,19 @@ const PropertyCard = ({
   beds,
   baths,
   sqft,
+  status,
 }: PropertyCardProps) => {
   const { addToWishlist, activeId, isAdding } = useWishlistActions();
   const rawId = id?.toString();
   const propertyId = rawId && /^[a-f\d]{24}$/i.test(rawId) ? rawId : undefined;
+
+  const statusStyle: Record<string, string> = {
+    "For Rent": "bg-emerald-500 text-white",
+    "Under Construction": "bg-amber-500 text-white",
+    default: "bg-accent text-accent-foreground",
+  };
+
+  const statusClass = status ? statusStyle[status] || "bg-muted text-foreground" : "";
 
   const handleWishlist = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -46,6 +56,11 @@ const PropertyCard = ({
             alt={title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
+          {status ? (
+            <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold shadow ${statusClass}`}>
+              {status}
+            </div>
+          ) : null}
           <div className="absolute top-4 right-4 bg-accent text-accent-foreground px-4 py-2 rounded-full text-sm font-semibold">
             {price}
           </div>
@@ -53,7 +68,7 @@ const PropertyCard = ({
             type="button"
             size="icon"
             variant="secondary"
-            className="absolute top-4 left-4 rounded-full bg-white/90 text-primary hover:bg-white"
+            className="absolute bottom-4 left-4 rounded-full bg-white/90 text-primary hover:bg-white"
             onClick={handleWishlist}
             disabled={!propertyId || isSaving}
             aria-label="Save to wishlist"
@@ -61,7 +76,7 @@ const PropertyCard = ({
             <Heart className={`h-4 w-4 ${isSaving ? "animate-pulse" : ""}`} />
           </Button>
           {rawId && !propertyId && (
-            <span className="absolute bottom-4 left-4 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
+            <span className="absolute bottom-4 right-4 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
               Link property to save
             </span>
           )}

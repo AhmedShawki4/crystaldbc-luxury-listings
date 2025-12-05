@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Menu, X, Home, Building2, Info, PhoneCall, Heart, Sparkles, TrendingUp } from "lucide-react";
+import { Menu, X, Home, Building2, Info, PhoneCall, Heart, Sparkles, TrendingUp, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import useAuth from "@/hooks/useAuth";
@@ -22,6 +22,7 @@ const Navigation = () => {
   const navLinks: NavLinkItem[] = [
     { name: "Home", path: "/", icon: Home },
     { name: "Properties", path: "/listings", icon: Building2 },
+    { name: "For Rent", path: "/for-rent", icon: KeyRound },
     { name: "Investment", path: "/investment", icon: TrendingUp },
     { name: "About", path: "/about", icon: Info },
     { name: "Contact", path: "/contact", icon: PhoneCall },

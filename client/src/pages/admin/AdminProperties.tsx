@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import uploadImage from "@/lib/uploadImage";
 import { getMediaUrl } from "@/lib/media";
@@ -35,6 +36,8 @@ const initialFormState = {
   status: "For Sale",
   isFeatured: false,
 };
+
+const STATUS_OPTIONS = ["For Sale", "For Rent", "Under Construction"] as const;
 
 const AdminProperties = () => {
   const { data, isLoading } = useQuery({ queryKey: ["properties"], queryFn: fetchProperties });
@@ -285,7 +288,21 @@ const AdminProperties = () => {
             </div>
             <div>
               <label className="text-sm font-medium">Status</label>
-              <Input name="status" value={formState.status} onChange={handleChange} required />
+              <Select
+                value={formState.status}
+                onValueChange={(value) => setFormState((prev) => ({ ...prev, status: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUS_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <label className="text-sm font-medium">Featured</label>
@@ -333,6 +350,12 @@ const AdminProperties = () => {
                 </div>
               </div>
               <p className="text-muted-foreground text-sm">{property.priceLabel}</p>
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
+                <span className="px-2 py-1 rounded-full bg-muted text-foreground">{property.status}</span>
+                {property.isFeatured ? (
+                  <span className="px-2 py-1 rounded-full bg-accent/10 text-accent">Featured</span>
+                ) : null}
+              </div>
               <p className="text-sm">{property.description.slice(0, 120)}...</p>
             </CardContent>
           </Card>
