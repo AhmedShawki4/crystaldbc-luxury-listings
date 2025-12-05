@@ -68,6 +68,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem(TOKEN_KEY);
     setToken(null);
     setUser(null);
+    // Force navigation to home to clear protected routes quickly
+    if (typeof window !== "undefined") {
+      window.location.assign("/");
+    }
   };
 
   const refreshUser = async () => fetchProfile();

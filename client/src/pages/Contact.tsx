@@ -8,8 +8,10 @@ import apiClient from "@/lib/apiClient";
 import { useCmsSection } from "@/hooks/useCmsSection";
 import type { ContactContent } from "@/types";
 import PageHero from "@/components/PageHero";
+import { useTranslation } from "react-i18next";
 
 const Contact = () => {
+  const { t } = useTranslation();
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -23,8 +25,8 @@ const Contact = () => {
   });
   const [submitting, setSubmitting] = useState(false);
   const { data: contactContent } = useCmsSection<ContactContent>("contact", {
-    title: "Get in Touch",
-    subtitle: "Our advisors are ready to help you navigate Egypt's luxury real estate market.",
+    title: t("contact.heroTitle"),
+    subtitle: t("contact.heroDescription"),
     phone: "+1 (888) 555-1234",
     email: "info@crystaldbc.com",
     office: "123 Luxury Avenue, Beverly Hills, CA 90210",
@@ -49,13 +51,13 @@ const Contact = () => {
       });
 
       toast({
-        title: "Message sent",
-        description: "Thank you for contacting us. We'll respond shortly.",
+        title: t("common.messageSent"),
+        description: t("common.messageSentDesc"),
       });
       setFormData({ name: "", email: "", phone: "", message: "" });
     } catch (error) {
       console.error("Contact form failed", error);
-      toast({ title: "Failed to send", description: "Please try again.", variant: "destructive" });
+      toast({ title: t("common.messageFailed"), description: t("common.tryAgain"), variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -73,17 +75,14 @@ const Contact = () => {
   return (
     <div className="min-h-screen">
       <PageHero
-        eyebrow="Concierge"
-        title={contactContent?.title ?? "Get in Touch"}
-        description={
-          contactContent?.subtitle ??
-          "Ready to find your dream property? We're here to guide you every step of the way."
-        }
+        eyebrow={t("contact.heroEyebrow")}
+        title={contactContent?.title ?? t("contact.heroTitle")}
+        description={contactContent?.subtitle ?? t("contact.heroDescription")}
         icon={Phone}
         stats={[
-          { label: "Phone", value: contactContent?.phone ?? "+1 (888) 555-1234" },
-          { label: "Email", value: contactContent?.email ?? "info@crystaldbc.com" },
-          { label: "Office", value: "Cairo & Dubai", helper: "Worldwide network" },
+          { label: t("contact.stats.phone"), value: contactContent?.phone ?? "+1 (888) 555-1234" },
+          { label: t("contact.stats.email"), value: contactContent?.email ?? "info@crystaldbc.com" },
+          { label: t("contact.stats.office"), value: "Cairo & Dubai", helper: t("contact.stats.officeHelper") },
         ]}
         actions={(
           <>
@@ -91,14 +90,14 @@ const Contact = () => {
               asChild
               className="bg-luxury-gold text-luxury-dark hover:bg-luxury-gold/80 shadow-lg shadow-luxury-gold/20"
             >
-              <a href={`tel:${contactContent?.phone ?? "+18885551234"}`}>Call our advisors</a>
+              <a href={`tel:${contactContent?.phone ?? "+18885551234"}`}>{t("contact.actions.call")}</a>
             </Button>
             <Button
               asChild
               variant="outline"
               className="border-accent bg-accent/10 text-accent hover:bg-accent/20 hover:text-accent-foreground"
             >
-              <a href={`mailto:${contactContent?.email ?? "info@crystaldbc.com"}`}>Send an email</a>
+              <a href={`mailto:${contactContent?.email ?? "info@crystaldbc.com"}`}>{t("contact.actions.email")}</a>
             </Button>
           </>
         )}
@@ -111,10 +110,10 @@ const Contact = () => {
             {/* Contact Information */}
             <div className="rounded-3xl border border-border/60 bg-card/60 p-10 shadow-2xl shadow-black/5">
               <h2 className="text-3xl font-display font-bold text-primary mb-6">
-                Contact Information
+                {t("contact.infoTitle")}
               </h2>
               <p className="text-muted-foreground mb-8">
-                {contactContent?.subtitle ?? "Reach out to our team of luxury real estate experts. We're available to answer your questions and schedule property viewings."}
+                {contactContent?.subtitle ?? t("contact.infoSubtitle")}
               </p>
 
               <div className="space-y-6">
@@ -123,7 +122,7 @@ const Contact = () => {
                     <Phone className="h-6 w-6 text-accent" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-primary mb-1">Phone</h3>
+                    <h3 className="font-semibold text-primary mb-1">{t("common.phone")}</h3>
                     <a
                       href={`tel:${contactContent?.phone ?? "+18885551234"}`}
                       className="text-muted-foreground hover:text-accent transition-colors"
@@ -138,7 +137,7 @@ const Contact = () => {
                     <Mail className="h-6 w-6 text-accent" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-primary mb-1">Email</h3>
+                    <h3 className="font-semibold text-primary mb-1">{t("common.email")}</h3>
                     <a
                       href={`mailto:${contactContent?.email ?? "info@crystaldbc.com"}`}
                       className="text-muted-foreground hover:text-accent transition-colors"
@@ -153,7 +152,7 @@ const Contact = () => {
                     <MapPin className="h-6 w-6 text-accent" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-primary mb-1">Office</h3>
+                    <h3 className="font-semibold text-primary mb-1">{t("common.office")}</h3>
                     <p className="text-muted-foreground whitespace-pre-line">
                       {contactContent?.office ?? "123 Luxury Avenue\nBeverly Hills, CA 90210"}
                     </p>
@@ -163,7 +162,7 @@ const Contact = () => {
 
               <div className="mt-12 rounded-3xl border border-border/60 bg-muted/30 p-6">
                 <h3 className="text-xl font-display font-semibold text-primary mb-3">
-                  Office Hours
+                  {t("contact.officeHoursTitle")}
                 </h3>
                 <div className="space-y-2 text-muted-foreground">
                   {(contactContent?.officeHours ?? []).map((line) => (
@@ -177,13 +176,13 @@ const Contact = () => {
             <div>
               <form onSubmit={handleSubmit} className="rounded-3xl border border-border/60 bg-card/80 p-8 shadow-2xl shadow-black/10">
                 <h2 className="text-3xl font-display font-bold text-primary mb-6">
-                  Send us a Message
+                  {t("contact.formTitle")}
                 </h2>
 
                 <div className="space-y-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
-                      Your Name *
+                      {t("contact.form.name")}
                     </label>
                     <Input
                       id="name"
@@ -192,13 +191,13 @@ const Contact = () => {
                       required
                       value={formData.name}
                       onChange={handleChange}
-                      placeholder="John Doe"
+                      placeholder={t("contact.form.placeholders.name")}
                     />
                   </div>
 
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
-                      Email Address *
+                      {t("contact.form.email")}
                     </label>
                     <Input
                       id="email"
@@ -207,13 +206,13 @@ const Contact = () => {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="john@example.com"
+                      placeholder={t("contact.form.placeholders.email")}
                     />
                   </div>
 
                   <div>
                     <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-2">
-                      Phone Number
+                      {t("contact.form.phone")}
                     </label>
                     <Input
                       id="phone"
@@ -221,13 +220,13 @@ const Contact = () => {
                       type="tel"
                       value={formData.phone}
                       onChange={handleChange}
-                      placeholder="+1 (555) 123-4567"
+                      placeholder={t("contact.form.placeholders.phone")}
                     />
                   </div>
 
                   <div>
                     <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
-                      Message *
+                      {t("contact.form.message")}
                     </label>
                     <Textarea
                       id="message"
@@ -235,7 +234,7 @@ const Contact = () => {
                       required
                       value={formData.message}
                       onChange={handleChange}
-                      placeholder="Tell us about your property requirements..."
+                      placeholder={t("contact.form.placeholders.message")}
                       rows={6}
                     />
                   </div>
@@ -246,7 +245,7 @@ const Contact = () => {
                     size="lg"
                     disabled={submitting}
                   >
-                    {submitting ? "Sending..." : "Send Message"}
+                    {submitting ? t("contact.form.submitting") : t("contact.form.submit")}
                   </Button>
                 </div>
               </form>

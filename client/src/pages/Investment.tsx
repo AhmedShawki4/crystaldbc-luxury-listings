@@ -4,31 +4,38 @@ import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, TrendingUp, Building2, BarChart3, PieChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
 
 const Investment = () => {
+    const { t } = useTranslation();
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
+    const heroTitle = t("investment.heroTitle");
+    const heroTitleParts = heroTitle.split(" ");
+    const highlightWords = heroTitleParts.slice(-2).join(" ") || heroTitle;
+    const heroTitlePrefix = heroTitleParts.slice(0, heroTitleParts.length - 2).join(" ");
+
     const benefits = [
         {
-            title: "High ROI Potential",
-            description: "Targeted returns of 8-12% annually through strategic property acquisition and management.",
+            title: t("investment.benefits.roi.title"),
+            description: t("investment.benefits.roi.description"),
             icon: TrendingUp
         },
         {
-            title: "Asset-Backed Security",
-            description: "Your investment is secured by tangible, high-value luxury real estate assets.",
+            title: t("investment.benefits.security.title"),
+            description: t("investment.benefits.security.description"),
             icon: Building2
         },
         {
-            title: "Market Analysis",
-            description: "Data-driven insights and comprehensive market research guide every investment decision.",
+            title: t("investment.benefits.analysis.title"),
+            description: t("investment.benefits.analysis.description"),
             icon: BarChart3
         },
         {
-            title: "Diversification",
-            description: "Spread risk across a portfolio of premium properties in prime locations.",
+            title: t("investment.benefits.diversification.title"),
+            description: t("investment.benefits.diversification.description"),
             icon: PieChart
         }
     ];
@@ -43,20 +50,21 @@ const Investment = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <div className="text-center lg:text-left">
                             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-luxury-gold/20 text-luxury-gold border border-luxury-gold/30 mb-8 fade-in">
-                                <span className="text-sm font-semibold uppercase tracking-wider">CrystalDBC Investment</span>
+                                <span className="text-sm font-semibold uppercase tracking-wider">{t("investment.badge")}</span>
                             </div>
                             <h1 className="text-4xl md:text-6xl font-display font-bold mb-6 fade-in">
-                                Invest in <span className="text-luxury-gold">Luxury Real Estate</span>
+                                {heroTitlePrefix ? `${heroTitlePrefix} ` : ""}
+                                <span className="text-luxury-gold">{highlightWords}</span>
                             </h1>
                             <p className="text-xl text-white/80 max-w-2xl mx-auto lg:mx-0 mb-10 fade-in">
-                                Join an exclusive circle of investors and build wealth through our curated portfolio of premium properties.
+                                {t("investment.heroSubtitle")}
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start fade-in">
                                 <Button asChild size="lg" className="bg-luxury-gold hover:bg-luxury-gold-light text-luxury-dark font-semibold text-lg px-8">
-                                    <Link to="/contact">Start Investing</Link>
+                                    <Link to="/contact">{t("investment.ctaStart")}</Link>
                                 </Button>
                                 <Button size="lg" className="bg-white text-luxury-dark hover:bg-white/90 font-semibold text-lg px-8">
-                                    Download Brochure
+                                    {t("investment.ctaBrochure")}
                                 </Button>
                             </div>
                         </div>
@@ -87,10 +95,10 @@ const Investment = () => {
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl md:text-4xl font-display font-bold text-primary mb-4">
-                            Why Invest with CrystalDBC?
+                            {t("investment.benefitsTitle")}
                         </h2>
                         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                            We combine market expertise with exclusive access to deliver superior investment outcomes.
+                            {t("investment.benefitsSubtitle")}
                         </p>
                     </div>
 
@@ -121,18 +129,13 @@ const Investment = () => {
                         <div className="grid grid-cols-1 lg:grid-cols-2">
                             <div className="p-12 md:p-16 flex flex-col justify-center">
                                 <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-6">
-                                    Ready to Grow Your Portfolio?
+                                    {t("investment.ctaTitle")}
                                 </h2>
                                 <p className="text-lg text-white/80 mb-8">
-                                    Schedule a consultation with our investment advisors to discuss your goals and explore current opportunities.
+                                    {t("investment.ctaSubtitle")}
                                 </p>
                                 <ul className="space-y-4 mb-8">
-                                    {[
-                                        "Personalized Investment Strategy",
-                                        "Access to Off-Market Deals",
-                                        "Full-Service Asset Management",
-                                        "Quarterly Performance Reports"
-                                    ].map((item, i) => (
+                                    {(t("investment.ctaList", { returnObjects: true }) as string[]).map((item, i) => (
                                         <li key={i} className="flex items-center gap-3 text-white/90">
                                             <CheckCircle2 className="w-5 h-5 text-luxury-gold" />
                                             <span>{item}</span>
@@ -141,7 +144,7 @@ const Investment = () => {
                                 </ul>
                                 <Button size="lg" className="bg-luxury-gold hover:bg-luxury-gold-light text-luxury-dark font-semibold w-fit">
                                     <Link to="/contact">
-                                        Contact Investment Team
+                                        {t("investment.ctaButton")}
                                         <ArrowRight className="ml-2 w-5 h-5" />
                                     </Link>
                                 </Button>

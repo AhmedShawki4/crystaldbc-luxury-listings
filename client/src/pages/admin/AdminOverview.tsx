@@ -22,6 +22,27 @@ const AdminOverview = () => {
 
   const { stats, recentLeads } = data;
 
+  const pieData = [
+    { label: "Properties", value: stats.properties, color: "#34d399" },
+    { label: "Leads", value: stats.leads, color: "#60a5fa" },
+    { label: "Messages", value: stats.messages, color: "#fbbf24" },
+    { label: "Users", value: stats.users, color: "#f472b6" },
+    { label: "Wishlist", value: stats.wishlistItems, color: "#c084fc" },
+  ];
+  const pieTotal = pieData.reduce((sum, item) => sum + item.value, 0);
+  let pieGradient = "";
+  if (pieTotal > 0) {
+    let current = 0;
+    pieGradient = pieData
+      .map((item) => {
+        const start = (current / pieTotal) * 100;
+        current += item.value;
+        const end = (current / pieTotal) * 100;
+        return `${item.color} ${start}% ${end}%`;
+      })
+      .join(", ");
+  }
+
   const STAT_CONFIG: Record<keyof AnalyticsSummary["stats"], { label: string; icon: typeof Building2; accent: string }> = {
     properties: { label: "Properties", icon: Building2, accent: "text-emerald-400 bg-emerald-400/10" },
     leads: { label: "Leads", icon: Users2, accent: "text-sky-400 bg-sky-400/10" },
@@ -30,6 +51,39 @@ const AdminOverview = () => {
     wishlistItems: { label: "Wishlist Items", icon: ClipboardList, accent: "text-purple-400 bg-purple-400/10" },
   };
 
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="rounded-2xl border border-border/70 bg-background/80 p-6 shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Distribution</p>
+              <h3 className="text-2xl font-display font-semibold">Engagement Mix</h3>
+            </div>
+          </div>
+          {pieTotal === 0 ? (
+            <p className="text-muted-foreground">No data to visualize yet.</p>
+          ) : (
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div
+                className="h-48 w-48 rounded-full shadow-inner border border-border"
+                style={{ backgroundImage: `conic-gradient(${pieGradient})` }}
+                aria-label="Engagement distribution pie chart"
+              />
+              <div className="flex flex-col gap-3 w-full">
+                {pieData.map((item) => (
+                  <div key={item.label} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: item.color }} />
+                      <p className="text-sm text-muted-foreground">{item.label}</p>
+                    </div>
+                    <p className="text-sm font-semibold">{pieTotal ? Math.round((item.value / pieTotal) * 100) : 0}%</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
   return (
     <div className="space-y-10">
       <AdminPageHeader
