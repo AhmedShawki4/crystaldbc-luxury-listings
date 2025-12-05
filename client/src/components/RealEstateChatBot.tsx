@@ -1,10 +1,20 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, FormEvent } from "react";
 import { MessageCircle, X, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { properties, Property } from "@/data/properties";
 import { cn } from "@/lib/utils";
+import apiClient from "@/lib/apiClient";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
 
 interface Message {
@@ -21,13 +31,69 @@ const QUICK_ACTIONS = [
   "Can you share latest listings?",
 ];
 
+const getSuggestedReplies = (message: Message): string[] => {
+  const base: string[] = [];
+  const text = message.text.toLowerCase();
+
+  if (message.properties && message.properties.length > 0) {
+    base.push("Show more options", "Schedule a viewing", "Talk to an agent", "Save this listing");
+  } else if (text.includes("invest")) {
+    base.push("Share top investment areas", "Expected ROI?", "Talk to an agent");
+  } else if (text.includes("schedule") || text.includes("call")) {
+    base.push("Schedule a call", "Talk to an agent", "Show latest listings");
+  } else {
+    base.push("Show latest listings", "Talk to an agent", "What are your fees?");
+  }
+
+  return Array.from(new Set(base)).slice(0, 4);
+};
+
+const isPropertyQuery = (query: string) => {
+  const lower = query.toLowerCase();
+  return (
+    /listing|property|apartment|villa|house|penthouse|chalet/.test(lower) ||
+    /(\d+)\s*(million|m|k|thousand|egp|aed)/.test(lower) ||
+    /bed|bedroom/.test(lower) ||
+    lower.includes("buy") ||
+    lower.includes("purchase") ||
+    lower.includes("show me")
+  );
+};
+
+const wantsHumanSupport = (query: string) => {
+  const lower = query.toLowerCase();
+  return lower.includes("agent") || lower.includes("human") || lower.includes("representative") || lower.includes("advisor");
+};
+
+const detectPropertyType = (query: string): string | null => {
+  const lower = query.toLowerCase();
+  if (lower.includes("apartment")) return "apartment";
+  if (lower.includes("villa")) return "villa";
+  if (lower.includes("penthouse")) return "penthouse";
+  if (lower.includes("chalet")) return "chalet";
+  if (lower.includes("house")) return "house";
+  return null;
+};
+
 const RealEstateChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [showQuickActions, setShowQuickActions] = useState(true);
+  const [suggestedReplies, setSuggestedReplies] = useState<string[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [isLoadingProperties, setIsLoadingProperties] = useState(false);
+  const [showHandoffDialog, setShowHandoffDialog] = useState(false);
+  const [isSubmittingLead, setIsSubmittingLead] = useState(false);
+  const [handoffForm, setHandoffForm] = useState({
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    message: "",
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -47,6 +113,11 @@ const RealEstateChatBot = () => {
           sender: "bot",
           timestamp: new Date(),
         },
+      ]);
+      setSuggestedReplies([
+        "Show latest listings",
+        "Talk to an agent",
+        "Share investment tips",
       ]);
     }
   }, [isOpen, messages.length]);
@@ -105,6 +176,15 @@ const RealEstateChatBot = () => {
   const generateBotResponse = (userMessage: string): Message => {
     const lowerMessage = userMessage.toLowerCase();
 
+    if (wantsHumanSupport(userMessage)) {
+      return {
+        id: Date.now(),
+        text: "No problem—I can connect you to a live agent. Please share your name, email, and the best phone number. You can also press 'Talk to an agent' below to send your details now.",
+        sender: "bot",
+        timestamp: new Date(),
+      };
+    }
+
     // Schedule a call
     if (
       lowerMessage.includes("schedule") ||
@@ -113,7 +193,7 @@ const RealEstateChatBot = () => {
     ) {
       return {
         id: Date.now(),
-        text: "I'd be happy to schedule a call for you! � Please contact us at +1 (888) 555-1234 or email info@crystaldbc.com. You can also visit our Contact page for more options. Our team is available Monday-Friday 9 AM - 6 PM, Saturday 10 AM - 4 PM.",
+        text: "I'd be happy to schedule a call for you! Please contact us at +1 (888) 555-1234 or email info@crystaldbc.com. You can also visit our Contact page for more options. Our team is available Monday-Friday 9 AM - 6 PM, Saturday 10 AM - 4 PM.",
         sender: "bot",
         timestamp: new Date(),
       };
@@ -152,12 +232,19 @@ const RealEstateChatBot = () => {
       lowerMessage.includes("available") ||
       lowerMessage.includes("show me")
     ) {
+      const type = detectPropertyType(userMessage);
+      const availableText = lowerMessage.includes("available") || lowerMessage.includes("availability");
+      const typeFiltered = type ? properties.filter((p) => p.type.toLowerCase().includes(type)) : properties;
+      const result = typeFiltered.slice(0, 3);
+
       return {
         id: Date.now(),
-        text: "Here are some of our latest luxury listings:",
+        text: availableText
+          ? `Yes, here ${result.length === 1 ? "is" : "are"} the ${type ? `${type} ` : ""}options available right now:`
+          : "Here are some of our latest luxury listings:",
         sender: "bot",
         timestamp: new Date(),
-        properties: properties.slice(0, 3),
+        properties: result,
       };
     }
 
@@ -170,11 +257,15 @@ const RealEstateChatBot = () => {
       lowerMessage.includes("bedroom")
     ) {
       const filteredProps = filterProperties(userMessage);
+      const type = detectPropertyType(userMessage);
+      const availableText = lowerMessage.includes("available") || lowerMessage.includes("availability");
       
       if (filteredProps.length > 0) {
         return {
           id: Date.now(),
-          text: `I found ${filteredProps.length} ${filteredProps.length === 1 ? 'property' : 'properties'} matching your search! Here ${filteredProps.length === 1 ? 'it is' : 'are the top matches'}:`,
+          text: availableText
+            ? `Yes, here ${filteredProps.length === 1 ? "is" : "are"} the ${type ? `${type} ` : ""}options available right now:`
+            : `I found ${filteredProps.length} ${filteredProps.length === 1 ? "property" : "properties"} matching your search! Here ${filteredProps.length === 1 ? "it is" : "are the top matches"}:`,
           sender: "bot",
           timestamp: new Date(),
           properties: filteredProps.slice(0, 3),
@@ -237,11 +328,21 @@ const RealEstateChatBot = () => {
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setShowQuickActions(false);
+    setSuggestedReplies([]);
+    setIsTyping(true);
+    setIsLoadingProperties(isPropertyQuery(messageText));
 
     // Generate bot response
     setTimeout(() => {
       const botResponse = generateBotResponse(messageText);
       setMessages((prev) => [...prev, botResponse]);
+      setSuggestedReplies(getSuggestedReplies(botResponse));
+      setIsTyping(false);
+      setIsLoadingProperties(false);
+
+      if (wantsHumanSupport(messageText)) {
+        setShowHandoffDialog(true);
+      }
     }, 500);
   };
 
@@ -249,9 +350,50 @@ const RealEstateChatBot = () => {
     handleSendMessage(action);
   };
 
+  const handleSuggestedReply = (reply: string) => {
+    handleSendMessage(reply);
+  };
+
   const handlePropertyClick = (propertyId: number) => {
     navigate(`/property/${propertyId}`);
     setIsOpen(false);
+  };
+
+  const handleHandoffSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!handoffForm.fullName.trim() || !handoffForm.email.trim()) {
+      toast({ title: "Please add your name and email", variant: "destructive" });
+      return;
+    }
+
+    setIsSubmittingLead(true);
+
+    try {
+      await apiClient.post("/leads", {
+        ...handoffForm,
+        source: "other",
+        interestedIn: "Chatbot handoff",
+      });
+
+      setIsSubmittingLead(false);
+      setShowHandoffDialog(false);
+      setHandoffForm({ fullName: "", email: "", phoneNumber: "", message: "" });
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          text: "Thanks! A human agent will reach out shortly with a tailored response.",
+          sender: "bot",
+          timestamp: new Date(),
+        },
+      ]);
+      setSuggestedReplies(["Call me back", "Share the latest listings"]);
+    } catch (error) {
+      console.error("Failed to submit handoff", error);
+      setIsSubmittingLead(false);
+      toast({ title: "Could not send your details", description: "Please try again in a moment.", variant: "destructive" });
+    }
   };
 
   return (
@@ -364,6 +506,37 @@ const RealEstateChatBot = () => {
                 </div>
               ))}
 
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="bg-muted text-foreground rounded-lg p-2.5 sm:p-3 text-xs sm:text-sm max-w-[75%] sm:max-w-[70%] rounded-bl-none">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] sm:text-xs">CrystalDBC Agent is typing</span>
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <span className="h-2 w-2 bg-foreground/50 rounded-full animate-bounce" />
+                        <span className="h-2 w-2 bg-foreground/40 rounded-full animate-bounce [animation-delay:80ms]" />
+                        <span className="h-2 w-2 bg-foreground/30 rounded-full animate-bounce [animation-delay:160ms]" />
+                      </div>
+                    </div>
+
+                    {isLoadingProperties && (
+                      <div className="mt-2 space-y-2">
+                        {[1, 2, 3].map((item) => (
+                          <div
+                            key={item}
+                            className="bg-background border border-border rounded-lg p-2 sm:p-3 animate-pulse"
+                          >
+                            <div className="w-full h-20 sm:h-24 bg-muted rounded mb-2" />
+                            <div className="h-3 bg-muted rounded w-2/3 mb-1" />
+                            <div className="h-3 bg-muted rounded w-1/2 mb-1" />
+                            <div className="h-3 bg-muted rounded w-1/3" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Quick Actions */}
               {showQuickActions && messages.length === 1 && (
                 <div className="flex flex-col gap-1.5 sm:gap-2 mt-3 sm:mt-4">
@@ -380,6 +553,35 @@ const RealEstateChatBot = () => {
                   ))}
                 </div>
               )}
+
+              {suggestedReplies.length > 0 && !showQuickActions && (
+                <div className="flex flex-wrap gap-2 mt-1 sm:mt-2">
+                  {suggestedReplies.map((reply) => (
+                    <Button
+                      key={reply}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleSuggestedReply(reply)}
+                      className="h-auto py-2 px-2.5 sm:px-3 text-xs sm:text-sm"
+                    >
+                      {reply}
+                    </Button>
+                  ))}
+                </div>
+              )}
+
+              {/* Human handoff card */}
+              <div className="mt-3 sm:mt-4 border border-border bg-muted/30 rounded-lg p-2.5 sm:p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-xs sm:text-sm font-semibold">Need a human?</p>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground">Talk directly to an agent for tailored help.</p>
+                  </div>
+                  <Button size="sm" variant="secondary" className="text-xs sm:text-sm" onClick={() => setShowHandoffDialog(true)}>
+                    Talk to an agent
+                  </Button>
+                </div>
+              </div>
 
               <div ref={messagesEndRef} />
             </div>
@@ -412,6 +614,52 @@ const RealEstateChatBot = () => {
           </div>
         </div>
       )}
+
+      <Dialog open={showHandoffDialog} onOpenChange={(open) => !isSubmittingLead && setShowHandoffDialog(open)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Talk to an agent</DialogTitle>
+            <DialogDescription>
+              Share your details and a human agent will reach out quickly.
+            </DialogDescription>
+          </DialogHeader>
+          <form className="space-y-3" onSubmit={handleHandoffSubmit}>
+            <Input
+              value={handoffForm.fullName}
+              onChange={(e) => setHandoffForm((prev) => ({ ...prev, fullName: e.target.value }))}
+              placeholder="Full name"
+              required
+            />
+            <Input
+              type="email"
+              value={handoffForm.email}
+              onChange={(e) => setHandoffForm((prev) => ({ ...prev, email: e.target.value }))}
+              placeholder="Email"
+              required
+            />
+            <Input
+              value={handoffForm.phoneNumber}
+              onChange={(e) => setHandoffForm((prev) => ({ ...prev, phoneNumber: e.target.value }))}
+              placeholder="Phone (optional)"
+            />
+            <textarea
+              value={handoffForm.message}
+              onChange={(e) => setHandoffForm((prev) => ({ ...prev, message: e.target.value }))}
+              placeholder="What do you need help with?"
+              className="w-full rounded-md border border-border bg-background p-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              rows={4}
+            />
+            <DialogFooter className="flex gap-2 sm:gap-3">
+              <Button type="submit" disabled={isSubmittingLead}>
+                {isSubmittingLead ? "Sending..." : "Send to agent"}
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => setShowHandoffDialog(false)} disabled={isSubmittingLead}>
+                Cancel
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
