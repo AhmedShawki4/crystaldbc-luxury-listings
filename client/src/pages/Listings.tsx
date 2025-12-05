@@ -64,7 +64,7 @@ const Listings = () => {
     <div className="min-h-screen">
       <PageHero
         eyebrow="Luxury Listings"
-        title="Egypt Properties"
+        title="Properties"
         description="Discover premium residences across New Cairo, North Coast, and the Red Sea — curated for discerning investors."
         icon={Building2}
         stats={[
