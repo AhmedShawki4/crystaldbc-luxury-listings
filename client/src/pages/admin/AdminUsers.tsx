@@ -25,6 +25,7 @@ const AdminUsers = () => {
   const { toast } = useToast();
   const [formState, setFormState] = useState({ name: "", email: "", password: "", role: "user" as Role });
   const [logUser, setLogUser] = useState<User | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const selectedUserId = logUser?.id ?? null;
   const { data: selectedLogs, isLoading: loadingLogs } = useQuery({
@@ -65,6 +66,16 @@ const AdminUsers = () => {
     event.preventDefault();
     createMutation.mutate();
   };
+
+  const filteredUsers = (data ?? []).filter((user) => {
+    if (!searchTerm.trim()) return true;
+    const term = searchTerm.toLowerCase();
+    return (
+      user.name.toLowerCase().includes(term) ||
+      user.email.toLowerCase().includes(term) ||
+      user.role.toLowerCase().includes(term)
+    );
+  });
 
   return (
     <div className="space-y-8">
@@ -123,8 +134,19 @@ const AdminUsers = () => {
         </CardContent>
       </Card>
 
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <h2 className="text-lg font-display font-semibold">Manage Users</h2>
+        <div className="w-full md:w-72">
+          <Input
+            placeholder="Search by name, email, or role"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-4">
-        {data?.map((user) => (
+        {filteredUsers.map((user) => (
           <Card key={user.id} className="border-border/70">
             <CardContent className="p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -163,6 +185,13 @@ const AdminUsers = () => {
             </CardContent>
           </Card>
         ))}
+        {filteredUsers.length === 0 && (
+          <Card className="border-dashed border-border/60">
+            <CardContent className="p-6 text-muted-foreground text-sm">
+              No users match your search.
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <Dialog open={Boolean(logUser)} onOpenChange={(open) => !open && setLogUser(null)}>

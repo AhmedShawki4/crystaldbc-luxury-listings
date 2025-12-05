@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -29,89 +30,96 @@ import AdminActivityLogs from "./pages/admin/AdminActivityLogs";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <RegisterInterestDialog />
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="listings" element={<Listings />} />
-            <Route path="for-rent" element={<ForRent />} />
-            <Route path="property/:propertyId" element={<PropertyDetail />} />
-            <Route path="about" element={<About />} />
-            <Route path="contact" element={<Contact />} />
-            <Route path="investment" element={<Investment />} />
-            <Route
-              path="wishlist"
-              element={
-                <ProtectedRoute roles={["user", "admin", "employee"]}>
-                  <Wishlist />
-                </ProtectedRoute>
-              }
-            />
-          </Route>
+const App = () => {
+  useEffect(() => {
+    document.documentElement.classList.add("dark");
+    document.body.classList.add("bg-background");
+  }, []);
 
-          <Route path="auth">
-            <Route path="login" element={<AuthPage mode="login" />} />
-            <Route path="register" element={<AuthPage mode="register" />} />
-          </Route>
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <RegisterInterestDialog />
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="listings" element={<Listings />} />
+              <Route path="for-rent" element={<ForRent />} />
+              <Route path="property/:propertyId" element={<PropertyDetail />} />
+              <Route path="about" element={<About />} />
+              <Route path="contact" element={<Contact />} />
+              <Route path="investment" element={<Investment />} />
+              <Route
+                path="wishlist"
+                element={
+                  <ProtectedRoute roles={["user", "admin", "employee"]}>
+                    <Wishlist />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
 
-          <Route
-            path="admin"
-            element={
-              <ProtectedRoute roles={["admin", "employee"]}>
-                <AdminLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<AdminOverview />} />
-            <Route path="properties" element={<AdminProperties />} />
+            <Route path="auth">
+              <Route path="login" element={<AuthPage mode="login" />} />
+              <Route path="register" element={<AuthPage mode="register" />} />
+            </Route>
+
             <Route
-              path="projects"
-              element={
-                <ProtectedRoute roles={["admin"]}>
-                  <AdminProjects />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="cms"
-              element={
-                <ProtectedRoute roles={["admin"]}>
-                  <AdminCMS />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="leads" element={<AdminLeads />} />
-            <Route path="messages" element={<AdminMessages />} />
-            <Route
-              path="reports"
+              path="admin"
               element={
                 <ProtectedRoute roles={["admin", "employee"]}>
-                  <AdminReports />
+                  <AdminLayout />
                 </ProtectedRoute>
               }
-            />
-            <Route
-              path="activity"
-              element={
-                <ProtectedRoute roles={["admin"]}>
-                  <AdminActivityLogs />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="users" element={<ProtectedRoute roles={["admin"]}><AdminUsers /></ProtectedRoute>} />
-          </Route>
+            >
+              <Route index element={<AdminOverview />} />
+              <Route path="properties" element={<AdminProperties />} />
+              <Route
+                path="projects"
+                element={
+                  <ProtectedRoute roles={["admin"]}>
+                    <AdminProjects />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="cms"
+                element={
+                  <ProtectedRoute roles={["admin"]}>
+                    <AdminCMS />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="leads" element={<AdminLeads />} />
+              <Route path="messages" element={<AdminMessages />} />
+              <Route
+                path="reports"
+                element={
+                  <ProtectedRoute roles={["admin", "employee"]}>
+                    <AdminReports />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="activity"
+                element={
+                  <ProtectedRoute roles={["admin"]}>
+                    <AdminActivityLogs />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="users" element={<ProtectedRoute roles={["admin"]}><AdminUsers /></ProtectedRoute>} />
+            </Route>
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

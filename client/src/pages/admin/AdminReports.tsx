@@ -14,6 +14,26 @@ const fetchSummary = async () => {
 const AdminReports = () => {
   const { data, isLoading } = useQuery({ queryKey: ["analytics", "reports"], queryFn: fetchSummary });
 
+  const handleExportPdf = () => {
+    window.print();
+  };
+
+  const handleDownloadCsv = () => {
+    if (!data?.recentLeads?.length) return;
+    const header = ["Name", "Email", "Status", "Source"];
+    const rows = data.recentLeads.map((lead) => [lead.fullName, lead.email, lead.status, lead.source]);
+    const csv = [header, ...rows].map((row) => row.map((cell) => `"${(cell ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "recent-leads.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   if (isLoading) {
     return <p className="text-muted-foreground">Loading reports...</p>;
   }
@@ -43,7 +63,7 @@ const AdminReports = () => {
         title="Reports & Intelligence"
         description="Export high-level performance snapshots and compare roles."
         actions={
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2" onClick={handleExportPdf}>
             <Download className="h-4 w-4" />
             Export PDF
           </Button>
@@ -80,7 +100,7 @@ const AdminReports = () => {
               <h2 className="text-xl font-display font-semibold">Recent Leads</h2>
               <p className="text-sm text-muted-foreground">Top-of-funnel activity snapshot</p>
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleDownloadCsv} disabled={!recentLeads.length}>
               <Download className="h-4 w-4" />
               Download CSV
             </Button>
