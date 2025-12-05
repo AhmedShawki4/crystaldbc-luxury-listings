@@ -403,8 +403,7 @@ const RealEstateChatBot = () => {
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "fixed bottom-4 right-4 sm:bottom-6 sm:right-6 h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-luxury z-50 group",
-          "text-white transition-all duration-500 hover:scale-105",
-          "bg-gradient-to-br from-[#FFE53B] via-[#FF7A3D] to-[#FF2525] bg-[length:220%_220%] hover:bg-[position:85%_85%]",
+          "text-white transition-all duration-500 hover:scale-105 chat-gradient",
           isOpen && "scale-0"
         )}
         aria-label="Open chat"

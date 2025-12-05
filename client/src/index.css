@@ -140,6 +140,27 @@ All colors MUST be HSL.
   .fade-in {
     animation: fadeIn 0.6s ease-out;
   }
+
+  .chat-gradient {
+    background: linear-gradient(147deg, #ffe53b, #ff7a3d, #ff2525, #ffe53b);
+    background-size: 320% 320%;
+    animation: chat-pan 7s linear infinite;
+  }
+  .chat-gradient:hover {
+    animation-duration: 5s;
+  }
+
+  @keyframes chat-pan {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
   
   @keyframes fadeIn {
     from {
