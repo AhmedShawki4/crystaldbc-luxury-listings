@@ -50,7 +50,34 @@ const AdminOverview = () => {
     users: { label: "Users", icon: HeartHandshake, accent: "text-pink-400 bg-pink-400/10" },
     wishlistItems: { label: "Wishlist Items", icon: ClipboardList, accent: "text-purple-400 bg-purple-400/10" },
   };
+  return (
+    <div className="space-y-10">
+      <AdminPageHeader
+        icon={Gauge}
+        title="Executive Overview"
+        description="Key metrics across CrystalDBC in real time."
+      />
 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {Object.entries(stats).map(([key, value]) => {
+          const typedKey = key as keyof AnalyticsSummary["stats"];
+          const config = STAT_CONFIG[typedKey];
+          const Icon = config.icon;
+          return (
+            <div key={key} className="rounded-2xl border border-border/70 bg-background/80 p-6 shadow-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">{config.label}</p>
+                  <p className="text-3xl font-display font-bold mt-3">{value}</p>
+                </div>
+                <span className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl ${config.accent}`}>
+                  <Icon className="h-5 w-5" />
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="rounded-2xl border border-border/70 bg-background/80 p-6 shadow-lg">
@@ -83,34 +110,6 @@ const AdminOverview = () => {
             </div>
           )}
         </div>
-      </div>
-  return (
-    <div className="space-y-10">
-      <AdminPageHeader
-        icon={Gauge}
-        title="Executive Overview"
-        description="Key metrics across CrystalDBC in real time."
-      />
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {Object.entries(stats).map(([key, value]) => {
-          const typedKey = key as keyof AnalyticsSummary["stats"];
-          const config = STAT_CONFIG[typedKey];
-          const Icon = config.icon;
-          return (
-            <div key={key} className="rounded-2xl border border-border/70 bg-background/80 p-6 shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{config.label}</p>
-                  <p className="text-3xl font-display font-bold mt-3">{value}</p>
-                </div>
-                <span className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl ${config.accent}`}>
-                  <Icon className="h-5 w-5" />
-                </span>
-              </div>
-            </div>
-          );
-        })}
       </div>
 
       <div className="bg-background border border-border rounded-xl p-6">

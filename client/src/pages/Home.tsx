@@ -83,34 +83,6 @@ const Home = () => {
     <div className="min-h-screen">
       <Hero />
 
-      {/* Curved marquees */}
-      <section className="py-6 bg-gradient-to-br from-[#0b1220] via-[#0e1626] to-[#0b1220] text-white relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none" style={{
-          background:
-            "radial-gradient(circle at 10% 20%, rgba(255,215,128,0.12), transparent 30%)," +
-            "radial-gradient(circle at 80% 0%, rgba(98,179,255,0.12), transparent 28%)," +
-            "linear-gradient(120deg, rgba(255,255,255,0.04), rgba(255,255,255,0))",
-        }} />
-        <br /><br />
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative space-y-3">
-            <CurvedLoop
-              marqueeText="Luxury. Trust. CrystalDBC."
-              speed={1.6}
-              curveAmount={-40}
-              className="drop-shadow-lg"
-              fillGradient={["#f8d675", "#f7b733"]}
-            />
-            <CurvedLoop
-              marqueeText="Invest with confidence • Tailored experiences • Award-winning advisors"
-              curveAmount={-40}
-              speed={1.9}
-              direction="right"
-              className="text-white/80"
-              fillGradient={["#a6d4ff", "#5fa8ff"]}
-            />
-        </div>
-      </section>
-
       {/* Trending Projects Section */}
       <TrendingProjects />
 
