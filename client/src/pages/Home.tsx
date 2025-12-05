@@ -114,6 +114,7 @@ const Home = () => {
                 beds={property.beds}
                 baths={property.baths}
                 sqft={property.sqftLabel}
+                status={property.status}
               />
             ))}
           </div>

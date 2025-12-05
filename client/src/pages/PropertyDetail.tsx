@@ -395,6 +395,7 @@ const PropertyDetail = () => {
               beds={prop.beds}
               baths={prop.baths}
               sqft={prop.sqftLabel}
+              status={prop.status}
             />
           ))}
         </div>

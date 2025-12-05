@@ -1,42 +1,40 @@
 import { useMemo, useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import PageHero from "@/components/PageHero";
 import PropertyCard from "@/components/PropertyCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Search, MapPin, Home, DollarSign, Bed, SlidersHorizontal, Building2, Hammer } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { DollarSign, Home, MapPin, Bed, SlidersHorizontal, KeyRound, Search } from "lucide-react";
 import useProperties, { type PropertyFilters } from "@/hooks/useProperties";
-import PageHero from "@/components/PageHero";
 
-const Listings = () => {
+const ForRent = () => {
   const [sortBy, setSortBy] = useState("featured");
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [priceFilter, setPriceFilter] = useState("all");
+  const [bedsFilter, setBedsFilter] = useState("all");
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [priceFilter, setPriceFilter] = useState("all");
-  const [bedsFilter, setBedsFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [showFilters, setShowFilters] = useState(false);
 
   const filters = useMemo<PropertyFilters>(() => {
-    const params: PropertyFilters = {};
+    const params: PropertyFilters = { status: "For Rent" };
     if (searchQuery) params.search = searchQuery;
     if (locationFilter !== "all") params.location = locationFilter;
     if (typeFilter !== "all") params.type = typeFilter;
-    if (statusFilter !== "all") params.status = statusFilter;
     if (bedsFilter !== "all") params.minBeds = Number(bedsFilter);
 
     if (priceFilter !== "all") {
-      if (priceFilter === "0-5m") {
-        params.priceMax = 5_000_000;
-      } else if (priceFilter === "5m-10m") {
-        params.priceMin = 5_000_000;
-        params.priceMax = 10_000_000;
-      } else if (priceFilter === "10m+") {
-        params.priceMin = 10_000_000;
+      if (priceFilter === "0-100k") {
+        params.priceMax = 100_000;
+      } else if (priceFilter === "100k-250k") {
+        params.priceMin = 100_000;
+        params.priceMax = 250_000;
+      } else if (priceFilter === "250k+") {
+        params.priceMin = 250_000;
       }
     }
 
@@ -45,7 +43,7 @@ const Listings = () => {
     }
 
     return params;
-  }, [searchQuery, locationFilter, typeFilter, statusFilter, bedsFilter, priceFilter, sortBy]);
+  }, [searchQuery, locationFilter, typeFilter, bedsFilter, priceFilter, sortBy]);
 
   const { data: properties = [], isLoading } = useProperties(filters);
 
@@ -65,22 +63,22 @@ const Listings = () => {
   return (
     <div className="min-h-screen">
       <PageHero
-        eyebrow="Luxury Listings"
-        title="Properties"
-        description="Discover premium residences across New Cairo, North Coast, and the Red Sea — curated for discerning investors."
-        icon={Building2}
+        eyebrow="Luxury Rentals"
+        title="Properties for Rent"
+        description="Fully-managed villas, penthouses, and apartments curated for premium tenants. Flexible terms, high-touch service, and move-in ready experiences."
+        icon={KeyRound}
         stats={[
-          { label: "Active Listings", value: isLoading ? "..." : `${properties.length}` },
+          { label: "Rental Listings", value: isLoading ? "..." : `${properties.length}` },
           { label: "Cities", value: `${cityCount}`, helper: "Across Egypt" },
           { label: "Property Types", value: `${typeCount}`, helper: "Villas, penthouses, more" },
         ]}
         actions={(
           <>
             <Button asChild className="bg-luxury-gold text-luxury-dark hover:bg-luxury-gold/80 shadow-lg shadow-luxury-gold/20">
-              <a href="#filters">Refine Search</a>
+              <a href="#filters">Browse Rentals</a>
             </Button>
             <Button asChild variant="outline" className="border-accent bg-accent/10 text-accent hover:bg-accent/20 hover:text-accent-foreground">
-              <a href="/contact">Talk to an Advisor</a>
+              <a href="/contact">Book a Viewing</a>
             </Button>
           </>
         )}
@@ -89,19 +87,17 @@ const Listings = () => {
       {/* Search and Filters */}
       <section id="filters" className="py-8 bg-background border-b border-border">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Search Bar */}
           <div className="relative mb-6">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search properties by name or location..."
+              placeholder="Search rentals by name or location..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-12 h-14 text-base"
             />
           </div>
 
-          {/* Filters Row */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <Button
               variant="outline"
@@ -112,102 +108,84 @@ const Listings = () => {
               <span className="font-medium">Filters</span>
             </Button>
             <div className="text-sm text-muted-foreground">
-              {isLoading ? "Loading properties..." : (
+              {isLoading ? "Loading rentals..." : (
                 <>
-                  <span className="font-semibold text-foreground">{properties.length}</span> properties found
+                  <span className="font-semibold text-foreground">{properties.length}</span> rentals found
                 </>
               )}
             </div>
           </div>
 
-          {/* Filter Dropdowns */}
           {showFilters && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-6 animate-in fade-in slide-in-from-top-2 duration-200">
-            <Select value={locationFilter} onValueChange={setLocationFilter}>
-              <SelectTrigger className="h-12">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <SelectValue placeholder="All Locations" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
-                {locations.filter(loc => loc !== "all").map(location => (
-                  <SelectItem key={location} value={location}>{location}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 animate-in fade-in slide-in-from-top-2 duration-200">
+              <Select value={locationFilter} onValueChange={setLocationFilter}>
+                <SelectTrigger className="h-12">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <SelectValue placeholder="All Locations" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Locations</SelectItem>
+                  {locations.filter((loc) => loc !== "all").map((location) => (
+                    <SelectItem key={location} value={location}>{location}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="h-12">
-                <div className="flex items-center gap-2">
-                  <Home className="h-4 w-4 text-muted-foreground" />
-                  <SelectValue placeholder="All Types" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                {types.filter(type => type !== "all").map(type => (
-                  <SelectItem key={type} value={type}>{type}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="h-12">
+                  <div className="flex items-center gap-2">
+                    <Home className="h-4 w-4 text-muted-foreground" />
+                    <SelectValue placeholder="All Types" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  {types.filter((type) => type !== "all").map((type) => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            <Select value={priceFilter} onValueChange={setPriceFilter}>
-              <SelectTrigger className="h-12">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  <SelectValue placeholder="Any Price" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Any Price</SelectItem>
-                <SelectItem value="0-5m">Under $5M</SelectItem>
-                <SelectItem value="5m-10m">$5M - $10M</SelectItem>
-                <SelectItem value="10m+">$10M+</SelectItem>
-              </SelectContent>
-            </Select>
+              <Select value={priceFilter} onValueChange={setPriceFilter}>
+                <SelectTrigger className="h-12">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    <SelectValue placeholder="Any Price" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Any Price</SelectItem>
+                  <SelectItem value="0-100k">Under 100k</SelectItem>
+                  <SelectItem value="100k-250k">100k - 250k</SelectItem>
+                  <SelectItem value="250k+">250k+</SelectItem>
+                </SelectContent>
+              </Select>
 
-            <Select value={bedsFilter} onValueChange={setBedsFilter}>
-              <SelectTrigger className="h-12">
-                <div className="flex items-center gap-2">
-                  <Bed className="h-4 w-4 text-muted-foreground" />
-                  <SelectValue placeholder="Any Bedrooms" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Any Bedrooms</SelectItem>
-                <SelectItem value="1">1+ Bedrooms</SelectItem>
-                <SelectItem value="2">2+ Bedrooms</SelectItem>
-                <SelectItem value="3">3+ Bedrooms</SelectItem>
-                <SelectItem value="4">4+ Bedrooms</SelectItem>
-                <SelectItem value="5">5+ Bedrooms</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="h-12">
-                <div className="flex items-center gap-2">
-                  <Hammer className="h-4 w-4 text-muted-foreground" />
-                  <SelectValue placeholder="Any Status" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Any Status</SelectItem>
-                <SelectItem value="For Sale">For Sale</SelectItem>
-                <SelectItem value="For Rent">For Rent</SelectItem>
-                <SelectItem value="Under Construction">Under Construction</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+              <Select value={bedsFilter} onValueChange={setBedsFilter}>
+                <SelectTrigger className="h-12">
+                  <div className="flex items-center gap-2">
+                    <Bed className="h-4 w-4 text-muted-foreground" />
+                    <SelectValue placeholder="Any Bedrooms" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Any Bedrooms</SelectItem>
+                  <SelectItem value="1">1+ Bedrooms</SelectItem>
+                  <SelectItem value="2">2+ Bedrooms</SelectItem>
+                  <SelectItem value="3">3+ Bedrooms</SelectItem>
+                  <SelectItem value="4">4+ Bedrooms</SelectItem>
+                  <SelectItem value="5">5+ Bedrooms</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           )}
         </div>
       </section>
 
-      {/* Listings */}
       <section className="py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Sort Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div className="flex items-center gap-2">
               <label htmlFor="sort" className="text-sm text-muted-foreground">
@@ -228,9 +206,8 @@ const Listings = () => {
             </div>
           </div>
 
-          {/* Property Grid */}
           {isLoading ? (
-            <p className="text-muted-foreground">Loading listings...</p>
+            <p className="text-muted-foreground">Loading rentals...</p>
           ) : properties.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {properties.map((property) => (
@@ -250,7 +227,7 @@ const Listings = () => {
             </div>
           ) : (
             <div className="text-center py-16">
-              <p className="text-lg text-muted-foreground">No properties found matching your criteria.</p>
+              <p className="text-lg text-muted-foreground">No rentals found matching your criteria.</p>
               <Button
                 onClick={() => {
                   setSearchQuery("");
@@ -272,4 +249,4 @@ const Listings = () => {
   );
 };
 
-export default Listings;
+export default ForRent;
