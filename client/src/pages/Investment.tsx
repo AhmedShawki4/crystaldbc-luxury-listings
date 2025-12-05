@@ -52,8 +52,8 @@ const Investment = () => {
                                 Join an exclusive circle of investors and build wealth through our curated portfolio of premium properties.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start fade-in">
-                                <Button size="lg" className="bg-luxury-gold hover:bg-luxury-gold-light text-luxury-dark font-semibold text-lg px-8">
-                                    Start Investing
+                                <Button asChild size="lg" className="bg-luxury-gold hover:bg-luxury-gold-light text-luxury-dark font-semibold text-lg px-8">
+                                    <Link to="/contact">Start Investing</Link>
                                 </Button>
                                 <Button size="lg" className="bg-white text-luxury-dark hover:bg-white/90 font-semibold text-lg px-8">
                                     Download Brochure
