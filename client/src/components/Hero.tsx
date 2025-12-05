@@ -20,7 +20,7 @@ const Hero = () => {
   const heroImage = content.backgroundImage ? getMediaUrl(content.backgroundImage) : fallbackHero.backgroundImage;
 
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[80vh] md:h-screen flex items-center justify-center overflow-hidden pt-20 md:pt-28">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img
@@ -34,18 +34,18 @@ const Hero = () => {
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="max-w-4xl mx-auto fade-in">
-          <h1 className="text-5xl md:text-7xl font-display font-bold text-white mb-6 leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-display font-bold text-white mb-6 leading-tight">
             {content.heading}
             <span className="block text-gradient mt-3 md:mt-4 pb-2">{content.highlight}</span>
           </h1>
-          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto font-light">
+          <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto font-light">
             {content.subheading}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button
               asChild
               size="lg"
-              className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 py-6 h-auto"
+              className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 py-6 h-auto w-full sm:w-auto"
             >
               <Link to={content.primaryCta.href}>
                 {content.primaryCta.label}
@@ -56,7 +56,7 @@ const Hero = () => {
               asChild
               size="lg"
               variant="outline"
-              className="bg-white/10 hover:bg-white/20 text-white border-white/30 backdrop-blur-sm text-lg px-8 py-6 h-auto"
+              className="bg-white/10 hover:bg-white/20 text-white border-white/30 backdrop-blur-sm text-lg px-8 py-6 h-auto w-full sm:w-auto"
             >
               <Link to={content.secondaryCta.href}>{content.secondaryCta.label}</Link>
             </Button>

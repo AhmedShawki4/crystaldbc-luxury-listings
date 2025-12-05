@@ -49,7 +49,7 @@ const Navigation = () => {
   return (
     <nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-white/10",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-white/10 pt-[env(safe-area-inset-top)]",
         useDarkNav
           ? "bg-gradient-to-r from-luxury-dark via-luxury-dark/95 to-[#111]/90 backdrop-blur-xl shadow-2xl"
           : "bg-transparent"
@@ -64,13 +64,13 @@ const Navigation = () => {
           </span>
           <span className="text-white/40">Egypt | Dubai | Riyadh</span>
         </div>
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
             <img
               src="/crystaldbclogo.jpeg"
               alt="CrystalDBC Logo"
-              className="h-14 w-auto drop-shadow-lg transition-transform group-hover:scale-105"
+              className="h-12 md:h-14 w-auto drop-shadow-lg transition-transform group-hover:scale-105"
             />
           </Link>
 
@@ -144,7 +144,7 @@ const Navigation = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="lg:hidden py-6 border-t border-white/20">
+          <div className="lg:hidden py-6 border-t border-white/20 max-h-[70vh] overflow-y-auto">
             <div className="flex flex-col gap-4">
               {navLinks.map((link) => {
                 const Icon = link.icon;
@@ -154,7 +154,7 @@ const Navigation = () => {
                     to={link.path}
                     onClick={() => setIsOpen(false)}
                     className={cn(
-                      "flex items-center gap-3 rounded-2xl border px-4 py-3",
+                      "flex items-center gap-3 rounded-2xl border px-4 py-3 min-h-[44px]",
                       isActive(link.path)
                         ? "border-white/30 bg-white/10 text-white"
                         : "border-white/10 bg-transparent text-white/90"
@@ -199,7 +199,7 @@ const Navigation = () => {
                   </Link>
                 </div>
               )}
-              <Button asChild className="mt-4 bg-accent hover:bg-accent/90 text-accent-foreground">
+              <Button asChild className="mt-4 bg-accent hover:bg-accent/90 text-accent-foreground w-full">
                 <Link to="/contact" onClick={() => setIsOpen(false)}>
                   Schedule Viewing
                 </Link>
