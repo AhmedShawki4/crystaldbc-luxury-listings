@@ -6,8 +6,10 @@ import { Search, MapPin, Home, DollarSign, Bed, SlidersHorizontal, Building2, Ha
 import { Button } from "@/components/ui/button";
 import useProperties, { type PropertyFilters } from "@/hooks/useProperties";
 import PageHero from "@/components/PageHero";
+import { useTranslation } from "react-i18next";
 
 const Listings = () => {
+  const { t } = useTranslation();
   const [sortBy, setSortBy] = useState("featured");
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
@@ -65,22 +67,22 @@ const Listings = () => {
   return (
     <div className="min-h-screen">
       <PageHero
-        eyebrow="Luxury Listings"
-        title="Properties"
-        description="Discover premium residences across New Cairo, North Coast, and the Red Sea — curated for discerning investors."
+        eyebrow={t("listings.heroEyebrow")}
+        title={t("listings.heroTitle")}
+        description={t("listings.heroDescription")}
         icon={Building2}
         stats={[
-          { label: "Active Listings", value: isLoading ? "..." : `${properties.length}` },
-          { label: "Cities", value: `${cityCount}`, helper: "Across Egypt" },
-          { label: "Property Types", value: `${typeCount}`, helper: "Villas, penthouses, more" },
+          { label: t("listings.stats.active"), value: isLoading ? "..." : `${properties.length}` },
+          { label: t("listings.stats.cities"), value: `${cityCount}`, helper: t("listings.stats.citiesHelper") },
+          { label: t("listings.stats.types"), value: `${typeCount}`, helper: t("listings.stats.typesHelper") },
         ]}
         actions={(
           <>
             <Button asChild className="bg-luxury-gold text-luxury-dark hover:bg-luxury-gold/80 shadow-lg shadow-luxury-gold/20">
-              <a href="#filters">Refine Search</a>
+              <a href="#filters">{t("listings.ctas.refine")}</a>
             </Button>
             <Button asChild variant="outline" className="border-accent bg-accent/10 text-accent hover:bg-accent/20 hover:text-accent-foreground">
-              <a href="/contact">Talk to an Advisor</a>
+              <a href="/contact">{t("listings.ctas.advisor")}</a>
             </Button>
           </>
         )}
@@ -94,7 +96,7 @@ const Listings = () => {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search properties by name or location..."
+              placeholder={t("listings.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-12 h-14 text-base"
@@ -109,12 +111,12 @@ const Listings = () => {
               className="flex items-center gap-2"
             >
               <SlidersHorizontal className="h-5 w-5" />
-              <span className="font-medium">Filters</span>
+              <span className="font-medium">{t("listings.filters")}</span>
             </Button>
             <div className="text-sm text-muted-foreground">
-              {isLoading ? "Loading properties..." : (
+              {isLoading ? t("listings.loading") : (
                 <>
-                  <span className="font-semibold text-foreground">{properties.length}</span> properties found
+                  <span className="font-semibold text-foreground">{properties.length}</span> {t("listings.resultsLabel")}
                 </>
               )}
             </div>
@@ -127,11 +129,11 @@ const Listings = () => {
               <SelectTrigger className="h-12">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <SelectValue placeholder="All Locations" />
+                  <SelectValue placeholder={t("listings.filterOptions.allLocations")} />
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
+                <SelectItem value="all">{t("listings.filterOptions.allLocations")}</SelectItem>
                 {locations.filter(loc => loc !== "all").map(location => (
                   <SelectItem key={location} value={location}>{location}</SelectItem>
                 ))}
@@ -142,11 +144,11 @@ const Listings = () => {
               <SelectTrigger className="h-12">
                 <div className="flex items-center gap-2">
                   <Home className="h-4 w-4 text-muted-foreground" />
-                  <SelectValue placeholder="All Types" />
+                  <SelectValue placeholder={t("listings.filterOptions.allTypes")} />
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="all">{t("listings.filterOptions.allTypes")}</SelectItem>
                 {types.filter(type => type !== "all").map(type => (
                   <SelectItem key={type} value={type}>{type}</SelectItem>
                 ))}
@@ -157,14 +159,14 @@ const Listings = () => {
               <SelectTrigger className="h-12">
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  <SelectValue placeholder="Any Price" />
+                  <SelectValue placeholder={t("listings.filterOptions.anyPrice")} />
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Any Price</SelectItem>
-                <SelectItem value="0-5m">Under $5M</SelectItem>
-                <SelectItem value="5m-10m">$5M - $10M</SelectItem>
-                <SelectItem value="10m+">$10M+</SelectItem>
+                <SelectItem value="all">{t("listings.filterOptions.anyPrice")}</SelectItem>
+                <SelectItem value="0-5m">{t("listings.filterOptions.under5m")}</SelectItem>
+                <SelectItem value="5m-10m">{t("listings.filterOptions.between5And10")}</SelectItem>
+                <SelectItem value="10m+">{t("listings.filterOptions.over10")}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -172,16 +174,16 @@ const Listings = () => {
               <SelectTrigger className="h-12">
                 <div className="flex items-center gap-2">
                   <Bed className="h-4 w-4 text-muted-foreground" />
-                  <SelectValue placeholder="Any Bedrooms" />
+                  <SelectValue placeholder={t("listings.filterOptions.anyBeds")} />
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Any Bedrooms</SelectItem>
-                <SelectItem value="1">1+ Bedrooms</SelectItem>
-                <SelectItem value="2">2+ Bedrooms</SelectItem>
-                <SelectItem value="3">3+ Bedrooms</SelectItem>
-                <SelectItem value="4">4+ Bedrooms</SelectItem>
-                <SelectItem value="5">5+ Bedrooms</SelectItem>
+                <SelectItem value="all">{t("listings.filterOptions.anyBeds")}</SelectItem>
+                <SelectItem value="1">{t("listings.filterOptions.onePlus")}</SelectItem>
+                <SelectItem value="2">{t("listings.filterOptions.twoPlus")}</SelectItem>
+                <SelectItem value="3">{t("listings.filterOptions.threePlus")}</SelectItem>
+                <SelectItem value="4">{t("listings.filterOptions.fourPlus")}</SelectItem>
+                <SelectItem value="5">{t("listings.filterOptions.fivePlus")}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -189,14 +191,14 @@ const Listings = () => {
               <SelectTrigger className="h-12">
                 <div className="flex items-center gap-2">
                   <Hammer className="h-4 w-4 text-muted-foreground" />
-                  <SelectValue placeholder="Any Status" />
+                  <SelectValue placeholder={t("listings.filterOptions.anyStatus")} />
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Any Status</SelectItem>
-                <SelectItem value="For Sale">For Sale</SelectItem>
-                <SelectItem value="For Rent">For Rent</SelectItem>
-                <SelectItem value="Under Construction">Under Construction</SelectItem>
+                <SelectItem value="all">{t("listings.filterOptions.anyStatus")}</SelectItem>
+                <SelectItem value="For Sale">{t("listings.filterOptions.forSale")}</SelectItem>
+                <SelectItem value="For Rent">{t("listings.filterOptions.forRent")}</SelectItem>
+                <SelectItem value="Under Construction">{t("listings.filterOptions.underConstruction")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -211,18 +213,18 @@ const Listings = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div className="flex items-center gap-2">
               <label htmlFor="sort" className="text-sm text-muted-foreground">
-                Sort by:
+                {t("listings.sortLabel")}
               </label>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger id="sort" className="w-[180px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="featured">Featured</SelectItem>
-                  <SelectItem value="price-low">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high">Price: High to Low</SelectItem>
-                  <SelectItem value="beds">Most Bedrooms</SelectItem>
-                  <SelectItem value="sqft">Largest Size</SelectItem>
+                  <SelectItem value="featured">{t("listings.sortOptions.featured")}</SelectItem>
+                  <SelectItem value="price-low">{t("listings.sortOptions.priceLow")}</SelectItem>
+                  <SelectItem value="price-high">{t("listings.sortOptions.priceHigh")}</SelectItem>
+                  <SelectItem value="beds">{t("listings.sortOptions.beds")}</SelectItem>
+                  <SelectItem value="sqft">{t("listings.sortOptions.sqft")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -230,7 +232,7 @@ const Listings = () => {
 
           {/* Property Grid */}
           {isLoading ? (
-            <p className="text-muted-foreground">Loading listings...</p>
+            <p className="text-muted-foreground">{t("common.loadingListings")}</p>
           ) : properties.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {properties.map((property) => (
@@ -250,7 +252,7 @@ const Listings = () => {
             </div>
           ) : (
             <div className="text-center py-16">
-              <p className="text-lg text-muted-foreground">No properties found matching your criteria.</p>
+              <p className="text-lg text-muted-foreground">{t("listings.emptyTitle")}</p>
               <Button
                 onClick={() => {
                   setSearchQuery("");
@@ -262,7 +264,7 @@ const Listings = () => {
                 className="mt-4"
                 variant="outline"
               >
-                Clear Filters
+                {t("common.clearFilters")}
               </Button>
             </div>
           )}

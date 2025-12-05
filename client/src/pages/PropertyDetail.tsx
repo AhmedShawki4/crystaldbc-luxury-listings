@@ -11,6 +11,7 @@ import type { Property as ApiProperty } from "@/types";
 import useProperties from "@/hooks/useProperties";
 import { getMediaUrl } from "@/lib/media";
 import useWishlistActions from "@/hooks/useWishlistActions";
+import useAuth from "@/hooks/useAuth";
 
 type DetailedProperty = {
   id: string;
@@ -87,6 +88,7 @@ const PropertyDetail = () => {
     limit: 3,
   });
   const { addToWishlist, activeId, isAdding } = useWishlistActions();
+  const { user } = useAuth();
   const fallbackSimilar = useMemo(
     () =>
       properties
@@ -152,6 +154,7 @@ const PropertyDetail = () => {
 
   const persistedPropertyId = property && /^[a-f\d]{24}$/i.test(property.id) ? property.id : undefined;
   const isWishlistSaving = Boolean(persistedPropertyId && activeId === persistedPropertyId && isAdding);
+  const isStaff = user?.role === "admin" || user?.role === "employee";
 
   if (isLoading) {
     return (
@@ -317,13 +320,15 @@ const PropertyDetail = () => {
                   </a>
                 </Button>
                 
-                <Button 
-                  onClick={() => setIsDialogOpen(true)}
-                  className="w-full bg-accent hover:bg-accent/90 text-accent-foreground flex items-center justify-center gap-2"
-                >
-                  <Mail className="h-4 w-4" />
-                  I am Interested
-                </Button>
+                {!isStaff && (
+                  <Button 
+                    onClick={() => setIsDialogOpen(true)}
+                    className="w-full bg-accent hover:bg-accent/90 text-accent-foreground flex items-center justify-center gap-2"
+                  >
+                    <Mail className="h-4 w-4" />
+                    I am Interested
+                  </Button>
+                )}
 
                 <Button
                   type="button"
@@ -336,12 +341,14 @@ const PropertyDetail = () => {
                   {persistedPropertyId ? (isWishlistSaving ? "Saving..." : "Save to Wishlist") : "Link property to enable"}
                 </Button>
                 
-                <RegisterInterestDialog
-                  open={isDialogOpen}
-                  onOpenChange={setIsDialogOpen}
-                  propertyId={property.id}
-                  propertyTitle={property.title}
-                />
+                {!isStaff && (
+                  <RegisterInterestDialog
+                    open={isDialogOpen}
+                    onOpenChange={setIsDialogOpen}
+                    propertyId={property.id}
+                    propertyTitle={property.title}
+                  />
+                )}
               </div>
             </div>
             

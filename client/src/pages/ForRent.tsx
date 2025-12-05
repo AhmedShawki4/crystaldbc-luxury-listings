@@ -6,8 +6,10 @@ import PropertyCard from "@/components/PropertyCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DollarSign, Home, MapPin, Bed, SlidersHorizontal, KeyRound, Search } from "lucide-react";
 import useProperties, { type PropertyFilters } from "@/hooks/useProperties";
+import { useTranslation } from "react-i18next";
 
 const ForRent = () => {
+  const { t } = useTranslation();
   const [sortBy, setSortBy] = useState("featured");
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
@@ -63,22 +65,22 @@ const ForRent = () => {
   return (
     <div className="min-h-screen">
       <PageHero
-        eyebrow="Luxury Rentals"
-        title="Properties for Rent"
-        description="Fully-managed villas, penthouses, and apartments curated for premium tenants. Flexible terms, high-touch service, and move-in ready experiences."
+        eyebrow={t("rentals.heroEyebrow")}
+        title={t("rentals.heroTitle")}
+        description={t("rentals.heroDescription")}
         icon={KeyRound}
         stats={[
-          { label: "Rental Listings", value: isLoading ? "..." : `${properties.length}` },
-          { label: "Cities", value: `${cityCount}`, helper: "Across Egypt" },
-          { label: "Property Types", value: `${typeCount}`, helper: "Villas, penthouses, more" },
+          { label: t("rentals.stats.listings"), value: isLoading ? "..." : `${properties.length}` },
+          { label: t("rentals.stats.cities"), value: `${cityCount}`, helper: t("rentals.stats.citiesHelper") },
+          { label: t("rentals.stats.types"), value: `${typeCount}`, helper: t("rentals.stats.typesHelper") },
         ]}
         actions={(
           <>
             <Button asChild className="bg-luxury-gold text-luxury-dark hover:bg-luxury-gold/80 shadow-lg shadow-luxury-gold/20">
-              <a href="#filters">Browse Rentals</a>
+              <a href="#filters">{t("rentals.ctas.browse")}</a>
             </Button>
             <Button asChild variant="outline" className="border-accent bg-accent/10 text-accent hover:bg-accent/20 hover:text-accent-foreground">
-              <a href="/contact">Book a Viewing</a>
+              <a href="/contact">{t("rentals.ctas.viewing")}</a>
             </Button>
           </>
         )}
@@ -91,7 +93,7 @@ const ForRent = () => {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search rentals by name or location..."
+              placeholder={t("rentals.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-12 h-14 text-base"
@@ -105,12 +107,12 @@ const ForRent = () => {
               className="flex items-center gap-2"
             >
               <SlidersHorizontal className="h-5 w-5" />
-              <span className="font-medium">Filters</span>
+              <span className="font-medium">{t("rentals.filters")}</span>
             </Button>
             <div className="text-sm text-muted-foreground">
-              {isLoading ? "Loading rentals..." : (
+              {isLoading ? t("rentals.loading") : (
                 <>
-                  <span className="font-semibold text-foreground">{properties.length}</span> rentals found
+                  <span className="font-semibold text-foreground">{properties.length}</span> {t("rentals.resultsLabel")}
                 </>
               )}
             </div>
@@ -122,11 +124,11 @@ const ForRent = () => {
                 <SelectTrigger className="h-12">
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <SelectValue placeholder="All Locations" />
+                    <SelectValue placeholder={t("rentals.filterOptions.allLocations")} />
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Locations</SelectItem>
+                  <SelectItem value="all">{t("rentals.filterOptions.allLocations")}</SelectItem>
                   {locations.filter((loc) => loc !== "all").map((location) => (
                     <SelectItem key={location} value={location}>{location}</SelectItem>
                   ))}
@@ -137,11 +139,11 @@ const ForRent = () => {
                 <SelectTrigger className="h-12">
                   <div className="flex items-center gap-2">
                     <Home className="h-4 w-4 text-muted-foreground" />
-                    <SelectValue placeholder="All Types" />
+                    <SelectValue placeholder={t("rentals.filterOptions.allTypes")} />
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="all">{t("rentals.filterOptions.allTypes")}</SelectItem>
                   {types.filter((type) => type !== "all").map((type) => (
                     <SelectItem key={type} value={type}>{type}</SelectItem>
                   ))}
@@ -152,14 +154,14 @@ const ForRent = () => {
                 <SelectTrigger className="h-12">
                   <div className="flex items-center gap-2">
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    <SelectValue placeholder="Any Price" />
+                    <SelectValue placeholder={t("rentals.filterOptions.anyPrice")} />
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Any Price</SelectItem>
-                  <SelectItem value="0-100k">Under 100k</SelectItem>
-                  <SelectItem value="100k-250k">100k - 250k</SelectItem>
-                  <SelectItem value="250k+">250k+</SelectItem>
+                  <SelectItem value="all">{t("rentals.filterOptions.anyPrice")}</SelectItem>
+                  <SelectItem value="0-100k">{t("rentals.filterOptions.under100")}</SelectItem>
+                  <SelectItem value="100k-250k">{t("rentals.filterOptions.between100And250")}</SelectItem>
+                  <SelectItem value="250k+">{t("rentals.filterOptions.over250")}</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -167,16 +169,16 @@ const ForRent = () => {
                 <SelectTrigger className="h-12">
                   <div className="flex items-center gap-2">
                     <Bed className="h-4 w-4 text-muted-foreground" />
-                    <SelectValue placeholder="Any Bedrooms" />
+                    <SelectValue placeholder={t("rentals.filterOptions.anyBeds")} />
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Any Bedrooms</SelectItem>
-                  <SelectItem value="1">1+ Bedrooms</SelectItem>
-                  <SelectItem value="2">2+ Bedrooms</SelectItem>
-                  <SelectItem value="3">3+ Bedrooms</SelectItem>
-                  <SelectItem value="4">4+ Bedrooms</SelectItem>
-                  <SelectItem value="5">5+ Bedrooms</SelectItem>
+                  <SelectItem value="all">{t("rentals.filterOptions.anyBeds")}</SelectItem>
+                  <SelectItem value="1">{t("rentals.filterOptions.onePlus")}</SelectItem>
+                  <SelectItem value="2">{t("rentals.filterOptions.twoPlus")}</SelectItem>
+                  <SelectItem value="3">{t("rentals.filterOptions.threePlus")}</SelectItem>
+                  <SelectItem value="4">{t("rentals.filterOptions.fourPlus")}</SelectItem>
+                  <SelectItem value="5">{t("rentals.filterOptions.fivePlus")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -189,25 +191,25 @@ const ForRent = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div className="flex items-center gap-2">
               <label htmlFor="sort" className="text-sm text-muted-foreground">
-                Sort by:
+                {t("rentals.sortLabel")}
               </label>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger id="sort" className="w-[180px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="featured">Featured</SelectItem>
-                  <SelectItem value="price-low">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high">Price: High to Low</SelectItem>
-                  <SelectItem value="beds">Most Bedrooms</SelectItem>
-                  <SelectItem value="sqft">Largest Size</SelectItem>
+                  <SelectItem value="featured">{t("rentals.sortOptions.featured")}</SelectItem>
+                  <SelectItem value="price-low">{t("rentals.sortOptions.priceLow")}</SelectItem>
+                  <SelectItem value="price-high">{t("rentals.sortOptions.priceHigh")}</SelectItem>
+                  <SelectItem value="beds">{t("rentals.sortOptions.beds")}</SelectItem>
+                  <SelectItem value="sqft">{t("rentals.sortOptions.sqft")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           {isLoading ? (
-            <p className="text-muted-foreground">Loading rentals...</p>
+            <p className="text-muted-foreground">{t("rentals.loading")}</p>
           ) : properties.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {properties.map((property) => (
@@ -227,7 +229,7 @@ const ForRent = () => {
             </div>
           ) : (
             <div className="text-center py-16">
-              <p className="text-lg text-muted-foreground">No rentals found matching your criteria.</p>
+              <p className="text-lg text-muted-foreground">{t("rentals.emptyTitle")}</p>
               <Button
                 onClick={() => {
                   setSearchQuery("");
@@ -239,7 +241,7 @@ const ForRent = () => {
                 className="mt-4"
                 variant="outline"
               >
-                Clear Filters
+                {t("common.clearFilters")}
               </Button>
             </div>
           )}

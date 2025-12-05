@@ -6,6 +6,7 @@ import PropertyCard from "@/components/PropertyCard";
 import TrendingProjects from "@/components/TrendingProjects";
 import RealEstateChatBot from "@/components/RealEstateChatBot";
 import InvestmentBox from "@/components/InvestmentBox";
+import CurvedLoop from "@/components/CurvedLoop";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,16 +16,18 @@ import useProperties from "@/hooks/useProperties";
 import apiClient from "@/lib/apiClient";
 import { useCmsSection } from "@/hooks/useCmsSection";
 import type { ContactContent } from "@/types";
+import { useTranslation } from "react-i18next";
 
 const Home = () => {
+  const { t } = useTranslation();
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const { data: featuredProperties = [], isLoading: isLoadingFeatured } = useProperties({ featured: true, limit: 3 });
   const { data: contactContent } = useCmsSection<ContactContent>("contact", {
-    title: "Contact Information",
-    subtitle: "Reach out to our team of luxury real estate experts.",
+    title: t("contact.infoTitle"),
+    subtitle: t("contact.infoSubtitle"),
     phone: "+1 (888) 555-1234",
     email: "info@crystaldbc.com",
     office: "123 Luxury Avenue, Beverly Hills, CA 90210",
@@ -55,13 +58,13 @@ const Home = () => {
         page: "home",
       });
       toast({
-        title: "Message sent",
-        description: "Thank you for reaching out. Our team will respond shortly.",
+        title: t("common.messageSent"),
+        description: t("common.messageSentDesc"),
       });
       setFormData({ name: "", email: "", phone: "", message: "" });
     } catch (error) {
       console.error("Home contact error", error);
-      toast({ title: "Failed to send", description: "Please try again.", variant: "destructive" });
+      toast({ title: t("common.messageFailed"), description: t("common.tryAgain"), variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -80,6 +83,34 @@ const Home = () => {
     <div className="min-h-screen">
       <Hero />
 
+      {/* Curved marquees */}
+      <section className="py-6 bg-gradient-to-br from-[#0b1220] via-[#0e1626] to-[#0b1220] text-white relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background:
+            "radial-gradient(circle at 10% 20%, rgba(255,215,128,0.12), transparent 30%)," +
+            "radial-gradient(circle at 80% 0%, rgba(98,179,255,0.12), transparent 28%)," +
+            "linear-gradient(120deg, rgba(255,255,255,0.04), rgba(255,255,255,0))",
+        }} />
+        <br /><br />
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative space-y-3">
+            <CurvedLoop
+              marqueeText="Luxury. Trust. CrystalDBC."
+              speed={1.6}
+              curveAmount={-40}
+              className="drop-shadow-lg"
+              fillGradient={["#f8d675", "#f7b733"]}
+            />
+            <CurvedLoop
+              marqueeText="Invest with confidence • Tailored experiences • Award-winning advisors"
+              curveAmount={-40}
+              speed={1.9}
+              direction="right"
+              className="text-white/80"
+              fillGradient={["#a6d4ff", "#5fa8ff"]}
+            />
+        </div>
+      </section>
+
       {/* Trending Projects Section */}
       <TrendingProjects />
 
@@ -91,17 +122,17 @@ const Home = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 fade-in">
             <h2 className="text-4xl md:text-5xl font-display font-bold text-primary mb-4">
-              Featured Properties
+              {t("home.featuredTitle")}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Explore our handpicked selection of exceptional luxury properties
+              {t("home.featuredSubtitle")}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {isLoadingFeatured && <p className="text-muted-foreground">Loading featured listings...</p>}
+            {isLoadingFeatured && <p className="text-muted-foreground">{t("common.loadingListings")}</p>}
             {!isLoadingFeatured && featuredProperties.length === 0 && (
-              <p className="text-muted-foreground">No featured properties available right now.</p>
+              <p className="text-muted-foreground">{t("listings.emptyTitle")}</p>
             )}
             {featuredProperties.map((property) => (
               <PropertyCard
@@ -126,7 +157,7 @@ const Home = () => {
               className="bg-accent hover:bg-accent/90 text-accent-foreground"
             >
               <Link to="/listings">
-                View All Properties
+                {t("home.viewAll")}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
@@ -146,10 +177,10 @@ const Home = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-display font-bold text-primary mb-4">
-              Why Choose CrystalDBC
+              {t("home.whyTitle")}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Excellence in every detail, service beyond expectations
+              {t("home.whySubtitle")}
             </p>
           </div>
 
@@ -159,10 +190,10 @@ const Home = () => {
                 <Award className="h-10 w-10 text-accent" />
               </div>
               <h3 className="text-2xl font-display font-semibold text-primary mb-3">
-                Award-Winning
+                {t("home.whyItems.award.title")}
               </h3>
               <p className="text-muted-foreground">
-                Recognized excellence in luxury real estate with numerous industry awards
+                {t("home.whyItems.award.description")}
               </p>
             </div>
 
@@ -171,10 +202,10 @@ const Home = () => {
                 <Users className="h-10 w-10 text-accent" />
               </div>
               <h3 className="text-2xl font-display font-semibold text-primary mb-3">
-                Expert Team
+                {t("home.whyItems.team.title")}
               </h3>
               <p className="text-muted-foreground">
-                Dedicated professionals with decades of combined experience in luxury markets
+                {t("home.whyItems.team.description")}
               </p>
             </div>
 
@@ -183,10 +214,10 @@ const Home = () => {
                 <HomeIcon className="h-10 w-10 text-accent" />
               </div>
               <h3 className="text-2xl font-display font-semibold text-primary mb-3">
-                Exclusive Listings
+                {t("home.whyItems.listings.title")}
               </h3>
               <p className="text-muted-foreground">
-                Access to premium properties and off-market opportunities you won't find elsewhere
+                {t("home.whyItems.listings.description")}
               </p>
             </div>
           </div>
@@ -198,10 +229,10 @@ const Home = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-display font-bold mb-4">
-              Ready to Find Your Dream Home?
+              {t("home.contactTitle")}
             </h2>
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              Let our team of experts guide you through your luxury real estate journey
+              {t("home.contactSubtitle")}
             </p>
           </div>
 
@@ -217,7 +248,7 @@ const Home = () => {
                     <Phone className="h-6 w-6 text-accent" />
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-1">Phone</h4>
+                    <h4 className="font-semibold mb-1">{t("common.phone")}</h4>
                     <a href={`tel:${contactContent?.phone}`} className="text-white/80 hover:text-accent transition-colors">
                       {contactContent?.phone}
                     </a>
@@ -229,7 +260,7 @@ const Home = () => {
                     <Mail className="h-6 w-6 text-accent" />
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-1">Email</h4>
+                    <h4 className="font-semibold mb-1">{t("common.email")}</h4>
                     <a href={`mailto:${contactContent?.email}`} className="text-white/80 hover:text-accent transition-colors">
                       {contactContent?.email}
                     </a>
@@ -241,7 +272,7 @@ const Home = () => {
                     <MapPin className="h-6 w-6 text-accent" />
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-1">Office</h4>
+                    <h4 className="font-semibold mb-1">{t("common.office")}</h4>
                     <p className="text-white/80">{contactContent?.office}</p>
                   </div>
                 </div>
@@ -249,7 +280,7 @@ const Home = () => {
 
               <div className="mt-12 p-6 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
                 <h4 className="text-xl font-display font-semibold mb-3">
-                  Office Hours
+                  {t("contact.officeHoursTitle")}
                 </h4>
                 <div className="space-y-2 text-white/80">
                   {contactContent?.officeHours.map((line) => (
@@ -263,13 +294,13 @@ const Home = () => {
             <div>
               <form onSubmit={handleSubmit} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-8">
                 <h3 className="text-3xl font-display font-bold mb-6">
-                  Send us a Message
+                  {t("home.contactFormTitle")}
                 </h3>
 
                 <div className="space-y-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium mb-2">
-                      Your Name *
+                      {t("home.form.name")}
                     </label>
                     <Input
                       id="name"
@@ -278,14 +309,14 @@ const Home = () => {
                       required
                       value={formData.name}
                       onChange={handleChange}
-                      placeholder="John Doe"
+                      placeholder={t("contact.form.placeholders.name")}
                       className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                     />
                   </div>
 
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium mb-2">
-                      Email Address *
+                      {t("home.form.email")}
                     </label>
                     <Input
                       id="email"
@@ -294,14 +325,14 @@ const Home = () => {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="john@example.com"
+                      placeholder={t("contact.form.placeholders.email")}
                       className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                     />
                   </div>
 
                   <div>
                     <label htmlFor="phone" className="block text-sm font-medium mb-2">
-                      Phone Number
+                      {t("home.form.phone")}
                     </label>
                     <Input
                       id="phone"
@@ -309,14 +340,14 @@ const Home = () => {
                       type="tel"
                       value={formData.phone}
                       onChange={handleChange}
-                      placeholder="+1 (555) 123-4567"
+                      placeholder={t("contact.form.placeholders.phone")}
                       className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                     />
                   </div>
 
                   <div>
                     <label htmlFor="message" className="block text-sm font-medium mb-2">
-                      Message *
+                      {t("home.form.message")}
                     </label>
                     <Textarea
                       id="message"
@@ -324,7 +355,7 @@ const Home = () => {
                       required
                       value={formData.message}
                       onChange={handleChange}
-                      placeholder="Tell us about your property requirements..."
+                      placeholder={t("home.form.placeholder")}
                       rows={6}
                       className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                     />
@@ -336,7 +367,7 @@ const Home = () => {
                     size="lg"
                     disabled={submitting}
                   >
-                    {submitting ? "Sending..." : "Send Message"}
+                    {submitting ? t("home.form.submitting") : t("home.form.submit")}
                   </Button>
                 </div>
               </form>
