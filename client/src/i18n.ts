@@ -20,7 +20,7 @@ const resources = {
       },
       layout: {
         tagline: "Luxury Experience",
-        locations: "Egypt | Dubai | Riyadh",
+        locations: "Egypt | Dubai",
       },
       common: {
         loading: "Loading...",
