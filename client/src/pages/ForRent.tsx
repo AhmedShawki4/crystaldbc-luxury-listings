@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import PageHero from "@/components/PageHero";
 import PropertyCard from "@/components/PropertyCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DollarSign, Home, MapPin, Bed, SlidersHorizontal, KeyRound, Search } from "lucide-react";
+import { DollarSign, Home, MapPin, Bed, KeyRound, Search } from "lucide-react";
 import useProperties, { type PropertyFilters } from "@/hooks/useProperties";
 import { useTranslation } from "react-i18next";
 
@@ -16,7 +16,6 @@ const ForRent = () => {
   const [typeFilter, setTypeFilter] = useState("all");
   const [priceFilter, setPriceFilter] = useState("all");
   const [bedsFilter, setBedsFilter] = useState("all");
-  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -75,114 +74,107 @@ const ForRent = () => {
           { label: t("rentals.stats.types"), value: `${typeCount}`, helper: t("rentals.stats.typesHelper") },
         ]}
         actions={(
-          <>
-            <Button asChild className="bg-luxury-gold text-luxury-dark hover:bg-luxury-gold/80 shadow-lg shadow-luxury-gold/20">
-              <a href="#filters">{t("rentals.ctas.browse")}</a>
-            </Button>
-            <Button asChild variant="outline" className="border-accent bg-accent/10 text-accent hover:bg-accent/20 hover:text-accent-foreground">
-              <a href="/contact">{t("rentals.ctas.viewing")}</a>
-            </Button>
-          </>
+          <Button asChild className="bg-luxury-gold text-luxury-dark hover:bg-luxury-gold/85 shadow-lg shadow-luxury-gold/20">
+            <a href="/auth/login">Pay Your Rent</a>
+          </Button>
         )}
       />
 
       {/* Search and Filters */}
-      <section id="filters" className="py-8 bg-background border-b border-border">
+      <section id="filters" className="relative isolate py-12 bg-gradient-to-b from-luxury-dark/40 via-background to-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative mb-6">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder={t("rentals.searchPlaceholder")}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 h-14 text-base"
-            />
-          </div>
+          <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-luxury-dark/40 backdrop-blur-xl shadow-2xl shadow-luxury-gold/15">
+            <div className="space-y-6 p-6 sm:p-8">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">{t("rentals.filters")}</p>
+                  <h2 className="text-2xl font-display font-semibold text-foreground">{t("rentals.heroTitle")}</h2>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {isLoading ? t("rentals.loading") : (
+                    <>
+                      <span className="font-semibold text-foreground">{properties.length}</span> {t("rentals.resultsLabel")}
+                    </>
+                  )}
+                </div>
+              </div>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <Button
-              variant="outline"
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2"
-            >
-              <SlidersHorizontal className="h-5 w-5" />
-              <span className="font-medium">{t("rentals.filters")}</span>
-            </Button>
-            <div className="text-sm text-muted-foreground">
-              {isLoading ? t("rentals.loading") : (
-                <>
-                  <span className="font-semibold text-foreground">{properties.length}</span> {t("rentals.resultsLabel")}
-                </>
-              )}
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder={t("rentals.searchPlaceholder")}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 h-14 text-base shadow-inner"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <Select value={locationFilter} onValueChange={setLocationFilter}>
+                  <SelectTrigger className="h-12">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <SelectValue placeholder={t("rentals.filterOptions.allLocations")} />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("rentals.filterOptions.allLocations")}</SelectItem>
+                    {locations.filter((loc) => loc !== "all").map((location) => (
+                      <SelectItem key={location} value={location}>{location}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger className="h-12">
+                    <div className="flex items-center gap-2">
+                      <Home className="h-4 w-4 text-muted-foreground" />
+                      <SelectValue placeholder={t("rentals.filterOptions.allTypes")} />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("rentals.filterOptions.allTypes")}</SelectItem>
+                    {types.filter((type) => type !== "all").map((type) => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={priceFilter} onValueChange={setPriceFilter}>
+                  <SelectTrigger className="h-12">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4 text-muted-foreground" />
+                      <SelectValue placeholder={t("rentals.filterOptions.anyPrice")} />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("rentals.filterOptions.anyPrice")}</SelectItem>
+                    <SelectItem value="0-100k">{t("rentals.filterOptions.under100")}</SelectItem>
+                    <SelectItem value="100k-250k">{t("rentals.filterOptions.between100And250")}</SelectItem>
+                    <SelectItem value="250k+">{t("rentals.filterOptions.over250")}</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={bedsFilter} onValueChange={setBedsFilter}>
+                  <SelectTrigger className="h-12">
+                    <div className="flex items-center gap-2">
+                      <Bed className="h-4 w-4 text-muted-foreground" />
+                      <SelectValue placeholder={t("rentals.filterOptions.anyBeds")} />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("rentals.filterOptions.anyBeds")}</SelectItem>
+                    <SelectItem value="1">{t("rentals.filterOptions.onePlus")}</SelectItem>
+                    <SelectItem value="2">{t("rentals.filterOptions.twoPlus")}</SelectItem>
+                    <SelectItem value="3">{t("rentals.filterOptions.threePlus")}</SelectItem>
+                    <SelectItem value="4">{t("rentals.filterOptions.fourPlus")}</SelectItem>
+                    <SelectItem value="5">{t("rentals.filterOptions.fivePlus")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
-
-          {showFilters && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 animate-in fade-in slide-in-from-top-2 duration-200">
-              <Select value={locationFilter} onValueChange={setLocationFilter}>
-                <SelectTrigger className="h-12">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <SelectValue placeholder={t("rentals.filterOptions.allLocations")} />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t("rentals.filterOptions.allLocations")}</SelectItem>
-                  {locations.filter((loc) => loc !== "all").map((location) => (
-                    <SelectItem key={location} value={location}>{location}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="h-12">
-                  <div className="flex items-center gap-2">
-                    <Home className="h-4 w-4 text-muted-foreground" />
-                    <SelectValue placeholder={t("rentals.filterOptions.allTypes")} />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t("rentals.filterOptions.allTypes")}</SelectItem>
-                  {types.filter((type) => type !== "all").map((type) => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={priceFilter} onValueChange={setPriceFilter}>
-                <SelectTrigger className="h-12">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    <SelectValue placeholder={t("rentals.filterOptions.anyPrice")} />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t("rentals.filterOptions.anyPrice")}</SelectItem>
-                  <SelectItem value="0-100k">{t("rentals.filterOptions.under100")}</SelectItem>
-                  <SelectItem value="100k-250k">{t("rentals.filterOptions.between100And250")}</SelectItem>
-                  <SelectItem value="250k+">{t("rentals.filterOptions.over250")}</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={bedsFilter} onValueChange={setBedsFilter}>
-                <SelectTrigger className="h-12">
-                  <div className="flex items-center gap-2">
-                    <Bed className="h-4 w-4 text-muted-foreground" />
-                    <SelectValue placeholder={t("rentals.filterOptions.anyBeds")} />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t("rentals.filterOptions.anyBeds")}</SelectItem>
-                  <SelectItem value="1">{t("rentals.filterOptions.onePlus")}</SelectItem>
-                  <SelectItem value="2">{t("rentals.filterOptions.twoPlus")}</SelectItem>
-                  <SelectItem value="3">{t("rentals.filterOptions.threePlus")}</SelectItem>
-                  <SelectItem value="4">{t("rentals.filterOptions.fourPlus")}</SelectItem>
-                  <SelectItem value="5">{t("rentals.filterOptions.fivePlus")}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
         </div>
       </section>
 

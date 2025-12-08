@@ -101,7 +101,7 @@ const Navigation = () => {
                   key={link.path}
                   to={link.path}
                   className={cn(
-                    "group relative inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[13px] md:text-sm font-medium transition-all",
+                    "group relative inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[13px] md:text-sm font-medium transition-all shrink-0 whitespace-nowrap",
                     isActive(link.path)
                       ? "border-white/40 bg-white/15 text-white shadow-lg shadow-black/20"
                       : "border-white/10 bg-white/5 text-white/80 hover:border-white/30 hover:bg-white/10 hover:text-white"
