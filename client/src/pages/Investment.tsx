@@ -63,7 +63,10 @@ const Investment = () => {
                                 <Button asChild size="lg" className="bg-luxury-gold hover:bg-luxury-gold-light text-luxury-dark font-semibold text-lg px-8">
                                     <Link to="/contact">{t("investment.ctaStart")}</Link>
                                 </Button>
-                                <Button size="lg" className="bg-white text-luxury-dark hover:bg-white/90 font-semibold text-lg px-8">
+                                <Button asChild size="lg" className="bg-white text-luxury-dark hover:bg-white/90 font-semibold text-lg px-8">
+                                    <Link to="/my-investments">Your Investments</Link>
+                                </Button>
+                                <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white/10 font-semibold text-lg px-8">
                                     {t("investment.ctaBrochure")}
                                 </Button>
                             </div>

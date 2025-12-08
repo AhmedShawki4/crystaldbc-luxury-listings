@@ -13,6 +13,7 @@ import PropertyDetail from "./pages/PropertyDetail";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Investment from "./pages/Investment";
+import MyInvestments from "./pages/MyInvestments";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/Auth";
 import Wishlist from "./pages/Wishlist";
@@ -52,6 +53,7 @@ const App = () => {
               <Route path="about" element={<About />} />
               <Route path="contact" element={<Contact />} />
               <Route path="investment" element={<Investment />} />
+              <Route path="my-investments" element={<MyInvestments />} />
               <Route
                 path="wishlist"
                 element={
