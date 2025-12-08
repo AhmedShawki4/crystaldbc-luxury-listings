@@ -177,4 +177,29 @@ All colors MUST be HSL.
       transform: translateY(0);
     }
   }
+
+  /* Custom scrollbar for dialogs */
+  .dialog-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--luxury-gold)) hsl(var(--luxury-dark));
+  }
+
+  .dialog-scroll::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  .dialog-scroll::-webkit-scrollbar-track {
+    background: linear-gradient(180deg, hsl(var(--luxury-dark)) 0%, hsl(var(--luxury-dark) / 0.7) 100%);
+    border-radius: 9999px;
+  }
+
+  .dialog-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, hsl(var(--luxury-gold)) 0%, hsl(var(--luxury-gold-light)) 100%);
+    border-radius: 9999px;
+    border: 2px solid hsl(var(--luxury-dark));
+  }
+
+  .dialog-scroll::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, hsl(var(--luxury-gold-light)) 0%, hsl(var(--luxury-gold)) 100%);
+  }
 }

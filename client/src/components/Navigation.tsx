@@ -73,7 +73,7 @@ const Navigation = () => {
           : "bg-transparent"
       )}
     >
-      <div className="absolute inset-x-1/2 top-3 hidden h-10 w-[60%] -translate-x-1/2 rounded-full bg-white/10 blur-3xl lg:block" aria-hidden />
+      <div className="pointer-events-none absolute inset-x-1/2 top-3 hidden h-10 w-[60%] -translate-x-1/2 rounded-full bg-white/10 blur-3xl lg:block" aria-hidden />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="hidden lg:flex items-center justify-between pb-1 text-[9px] font-semibold uppercase tracking-[0.32em] text-white/60">
           <span className="flex items-center gap-1.5">

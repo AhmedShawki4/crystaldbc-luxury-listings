@@ -46,6 +46,7 @@ const RegisterInterestDialog = ({
   const { user } = useAuth();
 
   const isStaff = user?.role === "admin" || user?.role === "employee";
+  const hideOnAuth = location.pathname.startsWith("/auth");
 
   const promptStorageKey = useMemo(() => `crystaldbc:lastInterestPrompt:${user?.id ?? "guest"}`, [user?.id]);
 
@@ -118,24 +119,24 @@ const RegisterInterestDialog = ({
     setIsOpen(false);
   };
 
-  if (isStaff) {
+  if (isStaff || hideOnAuth) {
     return null;
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] sm:max-h-[90vh] overflow-y-auto bg-luxury-dark text-white border-white/20 p-0 gap-0 [&>button]:text-white [&>button]:hover:text-white/80 [&>button]:top-3 [&>button]:right-3 sm:[&>button]:top-4 sm:[&>button]:right-4 [&>button>svg]:h-5 [&>button>svg]:w-5 [&>button]:z-10">
+      <DialogContent className="dialog-scroll w-[95vw] max-w-[520px] sm:max-w-[500px] max-h-[85vh] sm:max-h-[90vh] overflow-y-auto bg-luxury-dark text-white border-white/20 p-0 gap-0 rounded-2xl mx-auto my-6 [&>button]:text-white [&>button]:hover:text-white/80 [&>button]:top-3 [&>button]:right-3 sm:[&>button]:top-4 sm:[&>button]:right-4 [&>button>svg]:h-5 [&>button>svg]:w-5 [&>button]:z-10">
         {/* Header */}
-        <div className="bg-gradient-to-br from-luxury-dark via-luxury-dark to-primary/20 px-4 pt-4 pb-4 sm:px-6 sm:pt-6 sm:pb-6 sticky top-0 z-10">
-          <div className="flex items-center gap-2 mb-2 pr-10 sm:gap-3 sm:mb-2 sm:pr-12">
-            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+        <div className="px-4 sm:px-6 pt-5 pb-4 sm:pt-6 sm:pb-4 sticky top-0 z-10 border-b border-white/10 bg-luxury-dark/85 backdrop-blur">
+          <div className="flex items-center gap-3 pr-8 sm:pr-10">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0">
               <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
             </div>
             <div>
-              <DialogTitle className="text-base sm:text-xl font-display font-bold text-white mb-0.5 sm:mb-1">
+              <DialogTitle className="text-lg sm:text-xl font-display font-bold text-white mb-1">
                 Register Your Interest
               </DialogTitle>
-              <p className="text-xs sm:text-sm text-white/70">
+              <p className="text-xs sm:text-sm text-white/70 leading-relaxed">
                 Be first to access Egypt's best properties
               </p>
             </div>
