@@ -1,8 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Menu, X, Home, Building2, Info, PhoneCall, Heart, Sparkles, TrendingUp, KeyRound } from "lucide-react";
+import { Menu, X, Home, Building2, Info, PhoneCall, Heart, Sparkles, TrendingUp, KeyRound, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { US, EG, DE } from 'country-flag-icons/react/3x2';
 import { cn } from "@/lib/utils";
 import useAuth from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
@@ -21,9 +22,9 @@ const Navigation = () => {
   const { user, isAuthenticated, logout, loading } = useAuth();
   const { t, i18n } = useTranslation();
   const languages = [
-    { code: "en", label: "EN" },
-    { code: "ar", label: "AR" },
-    { code: "de", label: "DE" },
+    { code: "en", label: "EN", Flag: US },
+    { code: "ar", label: "AR", Flag: EG },
+    { code: "de", label: "DE", Flag: DE },
   ];
   const [activeLang, setActiveLang] = useState(i18n.language || "en");
 
@@ -118,17 +119,45 @@ const Navigation = () => {
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-1.5">
-            <select
-              value={activeLang}
-              onChange={(e) => handleLanguageChange(e.target.value)}
-              className="rounded-md border border-white/20 bg-white/10 text-white text-xs px-2 py-1 focus:outline-none"
-            >
-              {languages.map((lang) => (
-                <option key={lang.code} value={lang.code} className="text-black">
-                  {lang.label}
-                </option>
-              ))}
-            </select>
+            <div className="relative group">
+              <button
+                type="button"
+                onClick={() => document.getElementById('lang-desktop')?.classList.toggle('hidden')}
+                onBlur={() => setTimeout(() => document.getElementById('lang-desktop')?.classList.add('hidden'), 200)}
+                className="flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 hover:bg-white/15 px-3 py-1.5 text-white text-sm transition-all"
+              >
+                <div className="w-5 h-3.5 flex-shrink-0">
+                  {(() => {
+                    const FlagComponent = languages.find(l => l.code === activeLang)?.Flag;
+                    return FlagComponent ? <FlagComponent /> : null;
+                  })()}
+                </div>
+                <span className="font-medium">{languages.find(l => l.code === activeLang)?.label}</span>
+                <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+              </button>
+              <div id="lang-desktop" className="hidden absolute right-0 mt-2 w-36 rounded-lg border border-white/20 bg-luxury-dark/95 backdrop-blur-xl shadow-xl overflow-hidden z-50">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    type="button"
+                    onClick={() => {
+                      handleLanguageChange(lang.code);
+                      document.getElementById('lang-desktop')?.classList.add('hidden');
+                    }}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                      activeLang === lang.code
+                        ? 'bg-white/15 text-white font-semibold'
+                        : 'text-white/80 hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    <div className="w-5 h-3.5 flex-shrink-0">
+                      <lang.Flag />
+                    </div>
+                    <span>{lang.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
             {loading ? (
               <span className="text-white/80 text-sm">Checking session...</span>
             ) : isAuthenticated ? (
@@ -191,19 +220,27 @@ const Navigation = () => {
                   </Link>
                 );
               })}
-              <div className="flex items-center gap-2 border-t border-white/10 pt-4">
-                <span className="text-white/80 text-sm">Language</span>
-                <select
-                  value={activeLang}
-                  onChange={(e) => handleLanguageChange(e.target.value)}
-                  className="flex-1 rounded-lg border border-white/20 bg-white/10 text-white text-sm px-2 py-1"
-                >
+              <div className="border-t border-white/10 pt-4">
+                <span className="text-white/80 text-sm mb-2 block">Language</span>
+                <div className="flex flex-col gap-2">
                   {languages.map((lang) => (
-                    <option key={lang.code} value={lang.code} className="text-black">
-                      {lang.label}
-                    </option>
+                    <button
+                      key={lang.code}
+                      type="button"
+                      onClick={() => handleLanguageChange(lang.code)}
+                      className={`flex items-center gap-3 rounded-lg border px-4 py-2.5 transition-all ${
+                        activeLang === lang.code
+                          ? 'border-white/30 bg-white/15 text-white'
+                          : 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
+                      }`}
+                    >
+                      <div className="w-6 h-4 flex-shrink-0">
+                        <lang.Flag />
+                      </div>
+                      <span className="font-medium">{lang.label}</span>
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
               {loading ? (
                 <span className="text-white/80 text-sm">Checking session...</span>
@@ -230,11 +267,19 @@ const Navigation = () => {
                   </button>
                 </div>
               ) : (
-                <div className="flex flex-col gap-2 border-t border-white/10 pt-4">
-                  <Link to="/auth/login" onClick={() => setIsOpen(false)} className="text-white font-semibold">
+                <div className="flex flex-col gap-3 border-t border-white/10 pt-4">
+                  <Link 
+                    to="/auth/login" 
+                    onClick={() => setIsOpen(false)} 
+                    className="flex items-center justify-center rounded-lg border border-white/30 bg-white/10 hover:bg-white/15 px-4 py-3 text-white font-semibold transition-all"
+                  >
                     {t("nav.login")}
                   </Link>
-                  <Link to="/auth/register" onClick={() => setIsOpen(false)} className="text-white">
+                  <Link 
+                    to="/auth/register" 
+                    onClick={() => setIsOpen(false)} 
+                    className="flex items-center justify-center rounded-lg bg-accent hover:bg-accent/90 px-4 py-3 text-accent-foreground font-semibold shadow-lg transition-all"
+                  >
                     {t("nav.createAccount")}
                   </Link>
                 </div>
