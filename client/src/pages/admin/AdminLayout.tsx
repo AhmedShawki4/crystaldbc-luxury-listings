@@ -13,7 +13,11 @@ import {
   BarChart3,
   ClipboardList,
   ShieldCheck,
+  PanelLeft,
+  LogOut,
+  Home,
 } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 const NAV_ITEMS: Array<{ to: string; label: string; exact?: boolean; roles?: Role[]; icon: LucideIcon }> = [
   { to: "/admin", label: "Overview", exact: true, roles: ["admin", "employee"], icon: Gauge },
@@ -85,13 +89,57 @@ const AdminLayout = () => {
             <p className="text-sm text-muted-foreground">Signed in as</p>
             <p className="font-semibold">{user?.name}</p>
           </div>
-          <div className="flex gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link to="/">Home</Link>
-            </Button>
-            <Button variant="ghost" size="sm" onClick={logout}>
-              Logout
-            </Button>
+          <div className="flex items-center gap-2">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <PanelLeft className="h-4 w-4" />
+                  Menu
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[280px] bg-gradient-to-b from-[#030b14] via-luxury-dark to-[#0a1a2a] text-white p-0">
+                <SheetHeader className="px-4 pt-5 pb-3 border-b border-white/10 text-left">
+                  <SheetTitle className="text-lg font-display text-white">Admin Menu</SheetTitle>
+                  <p className="text-xs text-white/60">{user?.name} · {user?.role}</p>
+                </SheetHeader>
+                <nav className="px-3 py-4 space-y-1">
+                  {NAV_ITEMS.filter((item) => !item.roles || (user?.role && item.roles.includes(user.role))).map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <NavLink
+                        key={item.to}
+                        to={item.to}
+                        end={item.exact}
+                        className={({ isActive }) =>
+                          `flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all border border-transparent ${
+                            isActive
+                              ? "bg-white/10 text-white border-white/20 shadow-lg"
+                              : "text-white/70 hover:text-white hover:bg-white/5 border-white/5"
+                          }`
+                        }
+                      >
+                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <span>{item.label}</span>
+                      </NavLink>
+                    );
+                  })}
+                </nav>
+                <div className="px-3 py-4 border-t border-white/10 space-y-2">
+                  <Button asChild className="w-full bg-luxury-gold text-luxury-dark font-semibold" size="sm">
+                    <Link to="/">
+                      <Home className="h-4 w-4 mr-2" />
+                      Go to Homepage
+                    </Link>
+                  </Button>
+                  <Button variant="outline" className="w-full border-white/30 text-white" size="sm" onClick={logout}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign out
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </header>
         <main className="p-4 md:p-8">

@@ -250,9 +250,12 @@ const Navigation = () => {
                     <Link
                       to="/admin"
                       onClick={() => setIsOpen(false)}
-                      className="text-white font-semibold"
+                      className={cn(
+                        "flex items-center gap-3 rounded-2xl border px-3 py-2.5 min-h-[44px] border-white/30 bg-white/10 text-white font-semibold hover:bg-white/20 transition-all"
+                      )}
                     >
-                      {t("nav.dashboard")}
+                      <Sparkles className="h-5 w-5" />
+                      <span className="text-base">{t("nav.dashboard")}</span>
                     </Link>
                   )}
                   <button
@@ -261,9 +264,10 @@ const Navigation = () => {
                       logout();
                       setIsOpen(false);
                     }}
-                    className="text-left text-white/90 hover:text-white"
+                    className="flex items-center gap-3 rounded-2xl border px-3 py-2.5 min-h-[44px] border-red-400/40 bg-red-500/10 text-red-300 font-semibold hover:bg-red-500/20 transition-all"
                   >
-                    {t("nav.logout")}
+                    <X className="h-5 w-5" />
+                    <span className="text-base">{t("nav.logout")}</span>
                   </button>
                 </div>
               ) : (
