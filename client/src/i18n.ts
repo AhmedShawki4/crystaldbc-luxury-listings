@@ -359,7 +359,7 @@ const resources = {
       },
       layout: {
         tagline: "تجربة فاخرة",
-        locations: "مصر | دبي | الرياض",
+        locations: "مصر | دبي  ",
       },
       common: {
         loading: "جاري التحميل...",
@@ -698,7 +698,7 @@ const resources = {
       },
       layout: {
         tagline: "Luxus Erlebnis",
-        locations: "Ägypten | Dubai | Riad",
+        locations: "Ägypten | Dubai",
       },
       common: {
         loading: "Laden...",
