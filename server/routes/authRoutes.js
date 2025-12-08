@@ -13,16 +13,10 @@ router.post(
     body("name").notEmpty(),
     body("email").isEmail(),
     body("password")
-      .isLength({ min: 10 })
-      .withMessage("Password must be at least 10 characters long.")
-      .matches(/[a-z]/)
-      .withMessage("Password must include a lowercase letter.")
-      .matches(/[A-Z]/)
-      .withMessage("Password must include an uppercase letter.")
+      .isLength({ min: 6 })
+      .withMessage("Password must be at least 6 characters long.")
       .matches(/\d/)
-      .withMessage("Password must include a number.")
-      .matches(/[^A-Za-z0-9]/)
-      .withMessage("Password must include a special character."),
+      .withMessage("Password must include a number."),
   ],
   register
 );
