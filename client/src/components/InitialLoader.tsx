@@ -3,15 +3,11 @@ import { useTranslation } from "react-i18next";
 import apiClient from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 
-const BOOT_KEY = "crystaldbc_booted";
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const InitialLoader = () => {
   const { t } = useTranslation();
-  const [booting, setBooting] = useState(() => {
-    if (typeof sessionStorage === "undefined") return true;
-    return !sessionStorage.getItem(BOOT_KEY);
-  });
+  const [booting, setBooting] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const subtitle = useMemo(() => {
@@ -37,7 +33,6 @@ const InitialLoader = () => {
           await sleep(minDuration - elapsed);
         }
         if (!cancelled) {
-          sessionStorage.setItem(BOOT_KEY, "true");
           setBooting(false);
         }
       } catch (_err) {

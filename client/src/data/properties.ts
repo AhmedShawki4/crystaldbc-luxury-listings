@@ -14,6 +14,7 @@ export interface Property {
   features: string[];
   type: string;
   status: string;
+  isInvestable?: boolean;
 }
 
 export const properties: Property[] = [

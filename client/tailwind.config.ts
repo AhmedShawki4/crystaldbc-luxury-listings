@@ -15,8 +15,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Playfair Display', 'serif'],
-        body: ['Inter', 'sans-serif'],
+        display: ['"DM Serif Display"', 'serif'],
+        body: ['"Manrope"', 'Inter', 'sans-serif'],
       },
       colors: {
         'luxury-gold': 'hsl(var(--luxury-gold))',

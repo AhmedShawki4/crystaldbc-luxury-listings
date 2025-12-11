@@ -12,6 +12,7 @@ export interface PropertyFilters {
   priceMin?: number;
   priceMax?: number;
   featured?: boolean;
+  investable?: boolean;
   limit?: number;
   sort?: string;
   exclude?: string;

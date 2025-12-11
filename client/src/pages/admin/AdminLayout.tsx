@@ -16,6 +16,7 @@ import {
   PanelLeft,
   LogOut,
   Home,
+  CircleDollarSign,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
@@ -29,6 +30,7 @@ const NAV_ITEMS: Array<{ to: string; label: string; exact?: boolean; roles?: Rol
   { to: "/admin/reports", label: "Reports", roles: ["admin", "employee"], icon: BarChart3 },
   { to: "/admin/activity", label: "Activity Logs", roles: ["admin"], icon: ClipboardList },
   { to: "/admin/users", label: "Users", roles: ["admin"], icon: ShieldCheck },
+  { to: "/admin/investments", label: "Investments", roles: ["admin"], icon: CircleDollarSign },
 ];
 
 const AdminLayout = () => {

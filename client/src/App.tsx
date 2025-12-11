@@ -29,6 +29,7 @@ import AdminMessages from "./pages/admin/AdminMessages";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminActivityLogs from "./pages/admin/AdminActivityLogs";
+import AdminInvestments from "./pages/admin/AdminInvestments";
 
 const queryClient = new QueryClient();
 
@@ -126,6 +127,14 @@ const App = () => {
                 element={
                   <ProtectedRoute roles={["admin"]}>
                     <AdminActivityLogs />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="investments"
+                element={
+                  <ProtectedRoute roles={["admin"]}>
+                    <AdminInvestments />
                   </ProtectedRoute>
                 }
               />

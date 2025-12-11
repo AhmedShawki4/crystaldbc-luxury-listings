@@ -27,6 +27,23 @@ export interface Property {
   type: string;
   status: string;
   isFeatured: boolean;
+  isInvestable?: boolean;
+  roiPercentage?: number;
+  createdAt: string;
+}
+
+export interface Investment {
+  _id: string;
+  user?: { _id: string; name: string; email: string; role: Role; phone?: string };
+  property: Pick<Property, "_id" | "title" | "location" | "coverImage" | "priceLabel">;
+  investmentAmount: number;
+  amountReceived: number;
+  expectedProfit: number;
+  status: "Pending" | "Approved" | "Rejected";
+  paymentStatus: "Not Paid" | "Partially Paid" | "Paid";
+  roiPercentage: number;
+  notes?: string;
+  payoutDate?: string;
   createdAt: string;
 }
 
@@ -124,6 +141,9 @@ export interface AnalyticsSummary {
     messages: number;
     users: number;
     wishlistItems: number;
+    investedProperties?: number;
+    totalInvested?: number;
+    actualProfit?: number;
   };
   recentLeads: Lead[];
 }

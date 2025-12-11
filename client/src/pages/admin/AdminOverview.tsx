@@ -1,9 +1,9 @@
-import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
 import type { AnalyticsSummary } from "@/types";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { Building2, Mail, HeartHandshake, Users2, ClipboardList, Gauge, CircleDollarSign, TrendingUp, Sparkles } from "lucide-react";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
 const fetchSummary = async () => {
   const { data } = await apiClient.get<AnalyticsSummary>("/analytics/summary");
@@ -12,26 +12,7 @@ const fetchSummary = async () => {
 
 const AdminOverview = () => {
   const { data, isLoading } = useQuery({ queryKey: ["analytics"], queryFn: fetchSummary });
-
-  const sparklinePath = useMemo(() => {
-    const pts = [
-      { x: 0, y: 58 },
-      { x: 20, y: 72 },
-      { x: 40, y: 68 },
-      { x: 60, y: 82 },
-      { x: 80, y: 74 },
-      { x: 100, y: 96 },
-      { x: 120, y: 86 },
-      { x: 140, y: 112 },
-      { x: 160, y: 104 },
-      { x: 180, y: 126 },
-      { x: 200, y: 118 },
-      { x: 220, y: 138 },
-      { x: 240, y: 130 },
-      { x: 260, y: 148 },
-    ];
-    return pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
-  }, []);
+  const formatCurrency = (value: number) => `EGP ${Math.round(value).toLocaleString()}`;
 
   if (isLoading) {
     return <p className="text-muted-foreground">Loading dashboard...</p>;
@@ -42,6 +23,18 @@ const AdminOverview = () => {
   }
 
   const { stats, recentLeads } = data;
+  const actualProfit = stats.actualProfit ?? 0;
+  const investedProperties = stats.investedProperties ?? 0;
+  const totalInvested = stats.totalInvested ?? 0;
+  const roiPercent = totalInvested > 0 ? Math.min(150, (actualProfit / totalInvested) * 100) : 0;
+  const outstanding = Math.max(totalInvested - actualProfit, 0);
+  const coverageRatio = totalInvested > 0 ? Math.min(actualProfit / totalInvested, 1) : 0;
+
+  const chartData = [0.18, 0.32, 0.46, 0.63, 0.78, 1].map((ratio, idx) => ({
+    label: `Q${idx + 1}`,
+    invested: Math.round(totalInvested * ratio),
+    received: Math.round(actualProfit * ratio),
+  }));
 
   const pieData = [
     { label: "Properties", value: stats.properties, color: "#7c3aed" },
@@ -79,82 +72,125 @@ const AdminOverview = () => {
         description="Key metrics across CrystalDBC in real time."
       />
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2 rounded-3xl bg-gradient-to-br from-[#0e1527] via-[#10192f] to-[#0b1020] text-white border border-white/10 p-6 shadow-[0_20px_80px_-24px_rgba(0,0,0,0.55)]">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between flex-wrap">
             <div>
               <p className="text-xs uppercase tracking-[0.28em] text-white/60">Performance</p>
-              <h3 className="text-2xl font-display font-semibold">Beyond the Numbers</h3>
+              <h3 className="text-2xl font-display font-semibold">Live Investment Snapshot</h3>
             </div>
-            <div className="rounded-full bg-white/10 px-3 py-1 text-sm text-white/80">ROI 35%</div>
+            <div className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm text-white/80">
+              <Sparkles className="h-4 w-4 text-amber-300" />
+              Auto-refreshed from analytics
+            </div>
           </div>
-          <div className="relative mt-2 h-48 w-full overflow-hidden rounded-2xl bg-white/5">
-            <svg viewBox="0 0 280 180" className="w-full h-full">
-              <defs>
-                <linearGradient id="gradAdmin" x1="0%" x2="0%" y1="0%" y2="100%">
-                  <stop offset="0%" stopColor="#a855f7" stopOpacity="0.95" />
-                  <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.35" />
-                </linearGradient>
-              </defs>
-              <path d={sparklinePath} fill="none" stroke="url(#gradAdmin)" strokeWidth="4" strokeLinecap="round" />
-              {sparklinePath.split(" ").filter(Boolean).map((segment, idx) => {
-                const parts = segment.slice(1).split(",");
-                if (parts.length !== 2) return null;
-                const [x, y] = parts;
-                return <circle key={idx} cx={Number(x)} cy={Number(y)} r={4} fill="#22d3ee" />;
-              })}
-            </svg>
+
+          <div className="mt-4 h-56 w-full rounded-2xl border border-white/10 bg-white/5 p-3">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ left: 0, right: 0, top: 10, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="overviewInvested" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--luxury-gold))" stopOpacity={0.9} />
+                    <stop offset="95%" stopColor="hsl(var(--luxury-gold))" stopOpacity={0.1} />
+                  </linearGradient>
+                  <linearGradient id="overviewReceived" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.85} />
+                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0.1} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
+                <XAxis dataKey="label" tick={{ fill: "rgba(255,255,255,0.7)" }} stroke="rgba(255,255,255,0.3)" />
+                <Tooltip
+                  contentStyle={{ background: "#0b1020", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12 }}
+                  labelStyle={{ color: "#fff" }}
+                  formatter={(val: number, key) => [`EGP ${Math.round(val).toLocaleString()}`, key === "invested" ? "Invested" : "Received"]}
+                />
+                <Area type="monotone" dataKey="invested" stroke="hsl(var(--luxury-gold))" strokeWidth={3} fill="url(#overviewInvested)" />
+                <Area type="monotone" dataKey="received" stroke="#22c55e" strokeWidth={3} fill="url(#overviewReceived)" />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-              <p className="text-white/60">Profit</p>
-              <p className="text-2xl font-bold text-white">$69,432</p>
-              <p className="text-xs text-white/50">Net after fees</p>
+              <p className="text-white/60">Total Invested</p>
+              <p className="text-2xl font-bold text-white">{formatCurrency(totalInvested)}</p>
+              <p className="text-xs text-white/50">Capital across all approved deals</p>
             </div>
             <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-              <p className="text-white/60">Cash Flow</p>
-              <p className="text-2xl font-bold text-white">$143,432</p>
-              <p className="text-xs text-white/50">Investments vs Sales</p>
+              <p className="text-white/60">Outstanding Payouts</p>
+              <p className="text-2xl font-bold text-white">{formatCurrency(outstanding)}</p>
+              <p className="text-xs text-white/50">Total invested minus amounts paid</p>
+              <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-luxury-gold to-luxury-gold-light"
+                  style={{ width: `${coverageRatio * 100}%` }}
+                />
+              </div>
+            </div>
+            <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
+              <p className="text-white/60">Invested Properties</p>
+              <p className="text-2xl font-bold text-white">{investedProperties}</p>
+              <p className="text-xs text-white/50">Projects currently funded</p>
+            </div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl bg-white/5 border border-white/10 p-4 flex items-center justify-between flex-wrap gap-4">
+              <div>
+                <p className="text-white/70">Portfolio Coverage</p>
+                <p className="text-2xl font-bold text-white">{(coverageRatio * 100).toFixed(1)}%</p>
+                <p className="text-xs text-white/50">Paid vs total invested</p>
+              </div>
+              <CircleDollarSign className="h-10 w-10 text-luxury-gold" />
+            </div>
+            <div className="rounded-2xl bg-white/5 border border-white/10 p-4 flex items-center justify-between flex-wrap gap-4">
+              <div>
+                <p className="text-white/70">ROI to Date</p>
+                <p className="text-2xl font-bold text-white">{roiPercent.toFixed(1)}%</p>
+                <p className="text-xs text-white/50">Actual profit vs invested</p>
+              </div>
+              <TrendingUp className="h-10 w-10 text-emerald-300" />
             </div>
           </div>
         </div>
 
-        <div className="rounded-3xl bg-white border border-border p-6 shadow-xl">
+        <div className="rounded-3xl bg-gradient-to-br from-[#0f1625] via-[#0c1220] to-[#0a101b] border border-white/10 p-6 shadow-xl text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">ROI</p>
-              <p className="text-3xl font-display font-bold">35%</p>
-              <p className="text-xs text-muted-foreground mt-1">vs last quarter</p>
+              <p className="text-sm text-white/70">ROI</p>
+              <p className="text-3xl font-display font-bold">{roiPercent.toFixed(1)}%</p>
+              <p className="text-xs text-white/60 mt-1">Realized vs invested</p>
             </div>
             <div className="relative h-24 w-24">
               <div
                 className="absolute inset-0 rounded-full"
-                style={{ background: "conic-gradient(#7c3aed 0% 35%, #e5e7eb 35% 100%)" }}
+                style={{ background: `conic-gradient(#7c3aed 0% ${roiPercent}%, rgba(255,255,255,0.08) ${roiPercent}% 100%)` }}
               />
-              <div className="absolute inset-3 rounded-full bg-background border border-border" />
-              <div className="absolute inset-0 flex items-center justify-center text-lg font-semibold">35%</div>
+              <div className="absolute inset-3 rounded-full bg-[#0b1020] border border-white/10" />
+              <div className="absolute inset-0 flex items-center justify-center text-lg font-semibold">{roiPercent.toFixed(0)}%</div>
             </div>
           </div>
           <div className="mt-6 grid grid-cols-2 gap-3 text-sm">
-            <div className="rounded-xl border border-border bg-muted/30 p-3">
-              <p className="text-muted-foreground">Messages</p>
-              <p className="text-xl font-semibold flex items-center gap-2"><Mail className="h-4 w-4 text-amber-500" />{stats.messages}</p>
-              <p className="text-xs text-muted-foreground">Engagement</p>
+            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+              <p className="text-white/70">Messages</p>
+              <p className="text-xl font-semibold flex items-center gap-2"><Mail className="h-4 w-4 text-amber-400" />{stats.messages}</p>
+              <p className="text-xs text-white/60">Engagement</p>
             </div>
-            <div className="rounded-xl border border-border bg-muted/30 p-3">
-              <p className="text-muted-foreground">Wishlist</p>
-              <p className="text-xl font-semibold flex items-center gap-2"><ClipboardList className="h-4 w-4 text-purple-500" />{stats.wishlistItems}</p>
-              <p className="text-xs text-muted-foreground">Saved items</p>
+            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+              <p className="text-white/70">Wishlist</p>
+              <p className="text-xl font-semibold flex items-center gap-2"><ClipboardList className="h-4 w-4 text-purple-300" />{stats.wishlistItems}</p>
+              <p className="text-xs text-white/60">Saved items</p>
             </div>
-            <div className="rounded-xl border border-border bg-muted/30 p-3">
-              <p className="text-muted-foreground">Users</p>
-              <p className="text-xl font-semibold flex items-center gap-2"><HeartHandshake className="h-4 w-4 text-rose-500" />{stats.users}</p>
-              <p className="text-xs text-muted-foreground">Active</p>
+            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+              <p className="text-white/70">Users</p>
+              <p className="text-xl font-semibold flex items-center gap-2"><HeartHandshake className="h-4 w-4 text-rose-300" />{stats.users}</p>
+              <p className="text-xs text-white/60">Active</p>
             </div>
-            <div className="rounded-xl border border-border bg-muted/30 p-3">
-              <p className="text-muted-foreground">Properties</p>
-              <p className="text-xl font-semibold flex items-center gap-2"><Building2 className="h-4 w-4 text-emerald-500" />{stats.properties}</p>
-              <p className="text-xs text-muted-foreground">Live</p>
+            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+              <p className="text-white/70">Invested Properties</p>
+              <p className="text-xl font-semibold flex items-center gap-2"><Building2 className="h-4 w-4 text-emerald-300" />{investedProperties}</p>
+              <p className="text-xs text-white/60">Currently funded</p>
             </div>
           </div>
         </div>

@@ -168,11 +168,19 @@ const Navigation = () => {
                   <p className="text-[11px] text-white/70 capitalize">{user?.role}</p>
                 </div>
                 {(user?.role === "admin" || user?.role === "employee" || user?.role === "property-handler") && (
-                  <Button asChild variant="outline" className="h-9 border-white/30 text-white bg-transparent hover:bg-white/10 px-3">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="h-9 border-white/30 text-white bg-transparent px-3 transition-colors hover:border-luxury-gold hover:text-luxury-gold hover:bg-luxury-gold/10"
+                  >
                     <Link to="/admin">{t("nav.dashboard")}</Link>
                   </Button>
                 )}
-                <Button variant="outline" className="h-9 border-white/30 text-white bg-transparent hover:bg-white/10 px-3" onClick={logout}>
+                <Button
+                  variant="outline"
+                  className="h-9 border-white/30 text-white bg-transparent px-3 transition-colors hover:border-luxury-gold hover:text-luxury-gold hover:bg-luxury-gold/10"
+                  onClick={logout}
+                >
                   {t("nav.logout")}
                 </Button>
               </div>
@@ -252,7 +260,7 @@ const Navigation = () => {
                       to="/admin"
                       onClick={() => setIsOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 rounded-2xl border px-3 py-2.5 min-h-[44px] border-white/30 bg-white/10 text-white font-semibold hover:bg-white/20 transition-all"
+                        "flex items-center gap-3 rounded-2xl border px-3 py-2.5 min-h-[44px] border-white/30 bg-white/10 text-white font-semibold transition-all hover:border-luxury-gold hover:text-luxury-gold hover:bg-luxury-gold/10"
                       )}
                     >
                       <Sparkles className="h-5 w-5" />
@@ -265,7 +273,7 @@ const Navigation = () => {
                       logout();
                       setIsOpen(false);
                     }}
-                    className="flex items-center gap-3 rounded-2xl border px-3 py-2.5 min-h-[44px] border-red-400/40 bg-red-500/10 text-red-300 font-semibold hover:bg-red-500/20 transition-all"
+                    className="flex items-center gap-3 rounded-2xl border px-3 py-2.5 min-h-[44px] border-red-400/40 bg-red-500/10 text-red-300 font-semibold transition-all hover:border-luxury-gold hover:text-luxury-gold hover:bg-luxury-gold/10"
                   >
                     <X className="h-5 w-5" />
                     <span className="text-base">{t("nav.logout")}</span>

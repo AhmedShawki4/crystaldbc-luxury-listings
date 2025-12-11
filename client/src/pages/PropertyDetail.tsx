@@ -1,17 +1,22 @@
 import { useParams, Link } from "react-router-dom";
-import { MapPin, Bed, Bath, Square, ArrowLeft, Check, Phone, Mail, Heart } from "lucide-react";
+import { MapPin, Bed, Bath, Square, ArrowLeft, Check, Phone, Mail, Heart, TrendingUp, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { properties } from "@/data/properties";
 import type { Property as StaticProperty } from "@/data/properties";
 import { useState, useEffect, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import RegisterInterestDialog from "@/components/RegisterInterestDialog";
 import PropertyCard from "@/components/PropertyCard";
 import apiClient from "@/lib/apiClient";
-import type { Property as ApiProperty } from "@/types";
+import type { Investment, Property as ApiProperty } from "@/types";
 import useProperties from "@/hooks/useProperties";
 import { getMediaUrl } from "@/lib/media";
 import useWishlistActions from "@/hooks/useWishlistActions";
 import useAuth from "@/hooks/useAuth";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 type DetailedProperty = {
   id: string;
@@ -29,6 +34,8 @@ type DetailedProperty = {
   features: string[];
   type: string;
   status: string;
+  isInvestable: boolean;
+  roiPercentage?: number;
 };
 
 const normalizeStaticProperty = (property: StaticProperty): DetailedProperty => ({
@@ -47,6 +54,8 @@ const normalizeStaticProperty = (property: StaticProperty): DetailedProperty => 
   features: property.features,
   type: property.type,
   status: property.status,
+  isInvestable: property.isInvestable ?? false,
+  roiPercentage: property.roiPercentage ?? 0,
 });
 
 const normalizeApiProperty = (property: ApiProperty): DetailedProperty => ({
@@ -65,6 +74,8 @@ const normalizeApiProperty = (property: ApiProperty): DetailedProperty => ({
   features: property.features ?? [],
   type: property.type,
   status: property.status,
+  isInvestable: Boolean(property.isInvestable),
+  roiPercentage: property.roiPercentage ?? 0,
 });
 
 const formatProjectCode = (id: string) => {
@@ -81,6 +92,10 @@ const PropertyDetail = () => {
   const [property, setProperty] = useState<DetailedProperty | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isInvestDialogOpen, setIsInvestDialogOpen] = useState(false);
+  const [investmentAmount, setInvestmentAmount] = useState("");
+  const [investmentNotes, setInvestmentNotes] = useState("");
+  const [submittingInvestment, setSubmittingInvestment] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { data: similarProperties = [], isLoading: loadingSimilar } = useProperties({
@@ -88,7 +103,16 @@ const PropertyDetail = () => {
     limit: 3,
   });
   const { addToWishlist, activeId, isAdding } = useWishlistActions();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
+  const { data: myInvestments } = useQuery<{ investments: Investment[] }>({
+    queryKey: ["my-investments", propertyId],
+    queryFn: async () => {
+      const { data } = await apiClient.get<{ investments: Investment[] }>("/investments/my");
+      return data;
+    },
+    enabled: Boolean(isAuthenticated && propertyId && user?.role === "user"),
+  });
   const fallbackSimilar = useMemo(
     () =>
       properties
@@ -154,7 +178,53 @@ const PropertyDetail = () => {
 
   const persistedPropertyId = property && /^[a-f\d]{24}$/i.test(property.id) ? property.id : undefined;
   const isWishlistSaving = Boolean(persistedPropertyId && activeId === persistedPropertyId && isAdding);
-  const isStaff = user?.role === "admin" || user?.role === "employee";
+  const canUseInterest = user?.role === "user";
+  const alreadyInvested = useMemo(() => {
+    if (!property?.id || !myInvestments?.investments?.length) return false;
+    return myInvestments.investments.some((inv) => inv.property?._id === property.id);
+  }, [myInvestments?.investments, property?.id]);
+  const investmentDisabledReason = (() => {
+    if (!property?.isInvestable) return "Investment not available for this property";
+    if (!isAuthenticated) return "Please sign in as a user to invest";
+    if (user?.role !== "user") return "Only user accounts can request investments";
+    if (alreadyInvested) return "You already invested in this property";
+    return null;
+  })();
+
+  const handleInvestmentSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!property) return;
+
+    const amountNumber = Number(investmentAmount);
+    if (Number.isNaN(amountNumber) || amountNumber <= 0) {
+      toast({ title: "Enter a valid amount", variant: "destructive" });
+      return;
+    }
+
+    if (alreadyInvested) {
+      toast({ title: "Already invested", description: "You can't invest twice in the same property." });
+      return;
+    }
+
+    setSubmittingInvestment(true);
+    try {
+      await apiClient.post("/investments", {
+        propertyId: property.id,
+        investmentAmount: amountNumber,
+        notes: investmentNotes.trim() || undefined,
+      });
+
+      toast({ title: "Request submitted", description: "Your investment request is now pending approval." });
+      setIsInvestDialogOpen(false);
+      setInvestmentAmount("");
+      setInvestmentNotes("");
+    } catch (err) {
+      console.error("Investment request failed", err);
+      toast({ title: "Unable to submit", description: "Please try again later.", variant: "destructive" });
+    } finally {
+      setSubmittingInvestment(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -235,6 +305,16 @@ const PropertyDetail = () => {
                 <span className="px-4 py-2 bg-muted text-foreground rounded-full text-sm font-semibold">
                   {property.type}
                 </span>
+                <span
+                  className={`px-4 py-2 rounded-full text-sm font-semibold border ${property.isInvestable ? "bg-green-500/10 text-green-400 border-green-400/30" : "bg-slate-500/10 text-slate-300 border-slate-400/30"}`}
+                >
+                  {property.isInvestable ? "Available for Investment" : "Not Investable"}
+                </span>
+                {property.isInvestable && (
+                  <span className="px-4 py-2 rounded-full text-sm font-semibold border border-luxury-gold/40 bg-luxury-gold/10 text-luxury-gold flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4" /> ROI {property.roiPercentage ?? 0}%
+                  </span>
+                )}
               </div>
               <h1 className="text-4xl md:text-5xl font-display font-bold text-primary mb-4">
                 {property.title}
@@ -320,7 +400,7 @@ const PropertyDetail = () => {
                   </a>
                 </Button>
                 
-                {!isStaff && (
+                {canUseInterest && (
                   <Button 
                     onClick={() => setIsDialogOpen(true)}
                     className="w-full bg-accent hover:bg-accent/90 text-accent-foreground flex items-center justify-center gap-2"
@@ -328,6 +408,21 @@ const PropertyDetail = () => {
                     <Mail className="h-4 w-4" />
                     I am Interested
                   </Button>
+                )}
+
+                {property.isInvestable && (
+                  <Button
+                    onClick={() => setIsInvestDialogOpen(true)}
+                    disabled={Boolean(investmentDisabledReason)}
+                    className="w-full bg-gradient-to-r from-luxury-gold to-luxury-gold-dark text-luxury-dark hover:brightness-110 flex items-center justify-center gap-2"
+                  >
+                    <DollarSign className="h-4 w-4" />
+                    Invest in this Property
+                  </Button>
+                )}
+
+                {investmentDisabledReason && property.isInvestable && (
+                  <p className="text-sm text-muted-foreground text-center">{investmentDisabledReason}</p>
                 )}
 
                 <Button
@@ -341,7 +436,7 @@ const PropertyDetail = () => {
                   {persistedPropertyId ? (isWishlistSaving ? "Saving..." : "Save to Wishlist") : "Link property to enable"}
                 </Button>
                 
-                {!isStaff && (
+                {canUseInterest && (
                   <RegisterInterestDialog
                     open={isDialogOpen}
                     onOpenChange={setIsDialogOpen}
@@ -349,6 +444,48 @@ const PropertyDetail = () => {
                     propertyTitle={property.title}
                   />
                 )}
+
+                <Dialog open={isInvestDialogOpen} onOpenChange={setIsInvestDialogOpen}>
+                  <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl font-display flex items-center gap-2">
+                        <TrendingUp className="h-5 w-5 text-luxury-gold" />
+                        Invest in {property.title}
+                      </DialogTitle>
+                      <DialogDescription>
+                        Submit your investment request. Our team will review and confirm the next steps.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleInvestmentSubmit} className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Investment Amount (EGP)</label>
+                        <Input
+                          type="number"
+                          min={0}
+                          value={investmentAmount}
+                          onChange={(e) => setInvestmentAmount(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Notes (optional)</label>
+                        <Textarea
+                          value={investmentNotes}
+                          onChange={(e) => setInvestmentNotes(e.target.value)}
+                          placeholder="Add context, timelines, or preferences"
+                        />
+                      </div>
+                      <div className="flex items-center justify-end gap-3">
+                        <Button type="button" variant="ghost" onClick={() => setIsInvestDialogOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button type="submit" disabled={submittingInvestment}>
+                          {submittingInvestment ? "Submitting..." : "Submit Request"}
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
             
