@@ -35,6 +35,7 @@ type DetailedProperty = {
   type: string;
   status: string;
   isInvestable: boolean;
+  minInvestmentAmount: number;
   roiPercentage?: number;
 };
 
@@ -55,6 +56,7 @@ const normalizeStaticProperty = (property: StaticProperty): DetailedProperty => 
   type: property.type,
   status: property.status,
   isInvestable: property.isInvestable ?? false,
+  minInvestmentAmount: property.minInvestmentAmount ?? 0,
   roiPercentage: property.roiPercentage ?? 0,
 });
 
@@ -75,6 +77,7 @@ const normalizeApiProperty = (property: ApiProperty): DetailedProperty => ({
   type: property.type,
   status: property.status,
   isInvestable: Boolean(property.isInvestable),
+  minInvestmentAmount: property.minInvestmentAmount ?? 0,
   roiPercentage: property.roiPercentage ?? 0,
 });
 
@@ -201,6 +204,11 @@ const PropertyDetail = () => {
       return;
     }
 
+    if (property.minInvestmentAmount > 0 && amountNumber < property.minInvestmentAmount) {
+      toast({ title: "Amount below minimum", description: `Minimum investment is EGP ${Math.round(property.minInvestmentAmount).toLocaleString()}.`, variant: "destructive" });
+      return;
+    }
+
     if (alreadyInvested) {
       toast({ title: "Already invested", description: "You can't invest twice in the same property." });
       return;
@@ -313,6 +321,11 @@ const PropertyDetail = () => {
                 {property.isInvestable && (
                   <span className="px-4 py-2 rounded-full text-sm font-semibold border border-luxury-gold/40 bg-luxury-gold/10 text-luxury-gold flex items-center gap-2">
                     <TrendingUp className="h-4 w-4" /> ROI {property.roiPercentage ?? 0}%
+                  </span>
+                )}
+                {property.isInvestable && property.minInvestmentAmount > 0 && (
+                  <span className="px-4 py-2 rounded-full text-sm font-semibold border border-emerald-400/40 bg-emerald-400/10 text-emerald-300 flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" /> Min EGP {Math.round(property.minInvestmentAmount).toLocaleString()}
                   </span>
                 )}
               </div>
@@ -461,11 +474,14 @@ const PropertyDetail = () => {
                         <label className="text-sm font-medium">Investment Amount (EGP)</label>
                         <Input
                           type="number"
-                          min={0}
+                          min={property.minInvestmentAmount || 0}
                           value={investmentAmount}
                           onChange={(e) => setInvestmentAmount(e.target.value)}
                           required
                         />
+                        {property.minInvestmentAmount > 0 && (
+                          <p className="text-xs text-muted-foreground">Minimum allowed: EGP {Math.round(property.minInvestmentAmount).toLocaleString()}</p>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Notes (optional)</label>

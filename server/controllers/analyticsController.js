@@ -7,47 +7,72 @@ const Investment = require("../models/Investment");
 
 exports.getSummary = async (_req, res) => {
   try {
-      const [propertyCount, leadCount, messageCount, userCount, wishlistCount, recentLeads, investmentAgg] =
-        await Promise.all([
-          Property.countDocuments(),
-          Lead.countDocuments(),
-          Message.countDocuments(),
-          User.countDocuments(),
-          WishlistItem.countDocuments(),
-          Lead.find().sort({ createdAt: -1 }).limit(5),
-          Investment.aggregate([
-            {
-              $facet: {
-                totals: [
-                  {
-                    $group: {
-                      _id: null,
-                      totalReceived: { $sum: "$amountReceived" },
-                      totalInvested: { $sum: "$investmentAmount" },
-                    },
+    const [propertyCount, leadCount, messageCount, userCount, wishlistCount, recentLeads, investmentAgg, investmentTimeline] =
+      await Promise.all([
+        Property.countDocuments(),
+        Lead.countDocuments(),
+        Message.countDocuments(),
+        User.countDocuments(),
+        WishlistItem.countDocuments(),
+        Lead.find().sort({ createdAt: -1 }).limit(5),
+        Investment.aggregate([
+          {
+            $facet: {
+              totals: [
+                {
+                  $group: {
+                    _id: null,
+                    totalReceived: { $sum: "$amountReceived" },
+                    totalInvested: { $sum: "$investmentAmount" },
                   },
-                ],
-                investedProperties: [
-                  { $match: { amountReceived: { $gt: 0 } } },
-                  { $group: { _id: "$property" } },
-                  { $count: "count" },
-                ],
-              },
+                },
+              ],
+              investedProperties: [
+                { $match: { amountReceived: { $gt: 0 } } },
+                { $group: { _id: "$property" } },
+                { $count: "count" },
+              ],
             },
-            {
-              $project: {
-                totalReceived: { $ifNull: [{ $arrayElemAt: ["$totals.totalReceived", 0] }, 0] },
-                totalInvested: { $ifNull: [{ $arrayElemAt: ["$totals.totalInvested", 0] }, 0] },
-                investedProperties: { $ifNull: [{ $arrayElemAt: ["$investedProperties.count", 0] }, 0] },
-              },
+          },
+          {
+            $project: {
+              totalReceived: { $ifNull: [{ $arrayElemAt: ["$totals.totalReceived", 0] }, 0] },
+              totalInvested: { $ifNull: [{ $arrayElemAt: ["$totals.totalInvested", 0] }, 0] },
+              investedProperties: { $ifNull: [{ $arrayElemAt: ["$investedProperties.count", 0] }, 0] },
             },
-          ]),
-        ]);
+          },
+        ]),
+        Investment.aggregate([
+          { $sort: { createdAt: 1 } },
+          {
+            $group: {
+              _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
+              invested: { $sum: "$investmentAmount" },
+              received: { $sum: "$amountReceived" },
+            },
+          },
+          { $sort: { "_id.year": 1, "_id.month": 1 } },
+          {
+            $project: {
+              _id: 0,
+              label: {
+                $dateToString: {
+                  format: "%b %Y",
+                  date: { $dateFromParts: { year: "$_id.year", month: "$_id.month", day: 1 } },
+                },
+              },
+              invested: 1,
+              received: 1,
+              outstanding: { $max: [{ $subtract: ["$invested", "$received"] }, 0] },
+            },
+          },
+        ]),
+      ]);
 
-      const investmentSummary = investmentAgg?.[0] || { totalReceived: 0, totalInvested: 0, investedProperties: 0 };
-      const actualProfit = investmentSummary.totalReceived || 0;
-      const investedProperties = investmentSummary.investedProperties || 0;
-      const totalInvested = investmentSummary.totalInvested || 0;
+    const investmentSummary = investmentAgg?.[0] || { totalReceived: 0, totalInvested: 0, investedProperties: 0 };
+    const actualProfit = investmentSummary.totalReceived || 0;
+    const investedProperties = investmentSummary.investedProperties || 0;
+    const totalInvested = investmentSummary.totalInvested || 0;
 
     res.json({
       stats: {
@@ -60,6 +85,7 @@ exports.getSummary = async (_req, res) => {
           totalInvested,
         actualProfit,
       },
+      investmentTimeline: investmentTimeline || [],
       recentLeads,
     });
   } catch (error) {

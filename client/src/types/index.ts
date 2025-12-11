@@ -28,6 +28,7 @@ export interface Property {
   status: string;
   isFeatured: boolean;
   isInvestable?: boolean;
+  minInvestmentAmount?: number;
   roiPercentage?: number;
   createdAt: string;
 }
@@ -145,6 +146,7 @@ export interface AnalyticsSummary {
     totalInvested?: number;
     actualProfit?: number;
   };
+  investmentTimeline: { label: string; invested: number; received: number; outstanding: number }[];
   recentLeads: Lead[];
 }
 

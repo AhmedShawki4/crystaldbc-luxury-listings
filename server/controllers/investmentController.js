@@ -22,8 +22,9 @@ const canManageInvestment = (user, investment) => {
 exports.createInvestment = async (req, res) => {
   try {
     const { propertyId, investmentAmount, notes } = req.body;
+    const parsedAmount = Number(investmentAmount);
 
-    if (!propertyId || typeof investmentAmount !== "number") {
+    if (!propertyId || !Number.isFinite(parsedAmount) || parsedAmount <= 0) {
       return res.status(400).json({ message: "Property and investment amount are required" });
     }
 
@@ -35,6 +36,11 @@ exports.createInvestment = async (req, res) => {
       return res.status(400).json({ message: "This property is not open for investments" });
     }
 
+    const minAmount = property.minInvestmentAmount || 0;
+    if (minAmount > 0 && parsedAmount < minAmount) {
+      return res.status(400).json({ message: `Minimum investment for this property is EGP ${minAmount.toLocaleString()}` });
+    }
+
     const existing = await Investment.findOne({ user: req.user._id, property: propertyId });
     if (existing) {
       return res.status(400).json({ message: "You already have an investment for this property" });
@@ -43,7 +49,7 @@ exports.createInvestment = async (req, res) => {
     const investment = await Investment.create({
       user: req.user._id,
       property: property._id,
-      investmentAmount,
+      investmentAmount: parsedAmount,
       notes,
     });
 

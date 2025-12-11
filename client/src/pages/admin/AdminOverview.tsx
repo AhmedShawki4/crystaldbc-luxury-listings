@@ -3,7 +3,7 @@ import apiClient from "@/lib/apiClient";
 import type { AnalyticsSummary } from "@/types";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { Building2, Mail, HeartHandshake, Users2, ClipboardList, Gauge, CircleDollarSign, TrendingUp, Sparkles } from "lucide-react";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis } from "recharts";
+import { Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 const fetchSummary = async () => {
   const { data } = await apiClient.get<AnalyticsSummary>("/analytics/summary");
@@ -30,10 +30,12 @@ const AdminOverview = () => {
   const outstanding = Math.max(totalInvested - actualProfit, 0);
   const coverageRatio = totalInvested > 0 ? Math.min(actualProfit / totalInvested, 1) : 0;
 
-  const chartData = [0.18, 0.32, 0.46, 0.63, 0.78, 1].map((ratio, idx) => ({
-    label: `Q${idx + 1}`,
-    invested: Math.round(totalInvested * ratio),
-    received: Math.round(actualProfit * ratio),
+  const chartData = (data.investmentTimeline?.length
+    ? data.investmentTimeline
+    : [{ label: "To Date", invested: totalInvested, received: actualProfit, outstanding }]
+  ).map((item) => ({
+    ...item,
+    outstanding: Math.max(item.outstanding ?? item.invested - item.received, 0),
   }));
 
   const pieData = [
@@ -57,13 +59,6 @@ const AdminOverview = () => {
       .join(", ");
   }
 
-  const STAT_CONFIG: Record<keyof AnalyticsSummary["stats"], { label: string; icon: typeof Building2; accent: string }> = {
-    properties: { label: "Properties", icon: Building2, accent: "text-emerald-300 bg-emerald-400/10" },
-    leads: { label: "Leads", icon: Users2, accent: "text-sky-300 bg-sky-400/10" },
-    messages: { label: "Messages", icon: Mail, accent: "text-amber-300 bg-amber-400/10" },
-    users: { label: "Users", icon: HeartHandshake, accent: "text-pink-300 bg-pink-400/10" },
-    wishlistItems: { label: "Wishlist Items", icon: ClipboardList, accent: "text-purple-300 bg-purple-400/10" },
-  };
   return (
     <div className="space-y-10">
       <AdminPageHeader
@@ -85,37 +80,47 @@ const AdminOverview = () => {
             </div>
           </div>
 
-          <div className="mt-4 h-56 w-full rounded-2xl border border-white/10 bg-white/5 p-3">
+          <div className="mt-4 h-60 w-full rounded-2xl border border-white/10 bg-white/5 p-3">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ left: 0, right: 0, top: 10, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="overviewInvested" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--luxury-gold))" stopOpacity={0.9} />
-                    <stop offset="95%" stopColor="hsl(var(--luxury-gold))" stopOpacity={0.1} />
-                  </linearGradient>
-                  <linearGradient id="overviewReceived" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.85} />
-                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0.1} />
-                  </linearGradient>
-                </defs>
+              <ComposedChart data={chartData} margin={{ left: 8, right: 8, top: 10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
                 <XAxis dataKey="label" tick={{ fill: "rgba(255,255,255,0.7)" }} stroke="rgba(255,255,255,0.3)" />
+                <YAxis
+                  tick={{ fill: "rgba(255,255,255,0.7)" }}
+                  stroke="rgba(255,255,255,0.3)"
+                  tickFormatter={(v) => (v >= 1_000_000 ? `${Math.round(v / 1_000_000)}m` : `${Math.round(v / 1000)}k`)}
+                />
                 <Tooltip
                   contentStyle={{ background: "#0b1020", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12 }}
-                  labelStyle={{ color: "#fff" }}
-                  formatter={(val: number, key) => [`EGP ${Math.round(val).toLocaleString()}`, key === "invested" ? "Invested" : "Received"]}
+                  labelStyle={{ color: "#fff", fontWeight: 600 }}
+                  formatter={(val: number, key) => [`EGP ${Math.round(val).toLocaleString()}`, key === "invested" ? "Invested" : key === "received" ? "Received" : "Outstanding"]}
                 />
-                <Area type="monotone" dataKey="invested" stroke="hsl(var(--luxury-gold))" strokeWidth={3} fill="url(#overviewInvested)" />
-                <Area type="monotone" dataKey="received" stroke="#22c55e" strokeWidth={3} fill="url(#overviewReceived)" />
-              </AreaChart>
+                <Legend wrapperStyle={{ color: "#cbd5e1" }} />
+                <Bar dataKey="invested" name="Invested" fill="hsl(var(--luxury-gold))" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="received" name="Received" fill="#22c55e" radius={[6, 6, 0, 0]} />
+                <Line
+                  type="monotone"
+                  dataKey="outstanding"
+                  name="Outstanding"
+                  stroke="#7c3aed"
+                  strokeWidth={3}
+                  dot={{ r: 4, strokeWidth: 2, stroke: "#0b1020", fill: "#7c3aed" }}
+                  activeDot={{ r: 6, stroke: "white", strokeWidth: 2 }}
+                />
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
               <p className="text-white/60">Total Invested</p>
               <p className="text-2xl font-bold text-white">{formatCurrency(totalInvested)}</p>
               <p className="text-xs text-white/50">Capital across all approved deals</p>
+            </div>
+            <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
+              <p className="text-white/60">Actual Profit</p>
+              <p className="text-2xl font-bold text-white">{formatCurrency(actualProfit)}</p>
+              <p className="text-xs text-white/50">Sum of received payouts</p>
             </div>
             <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
               <p className="text-white/60">Outstanding Payouts</p>
@@ -128,29 +133,17 @@ const AdminOverview = () => {
                 />
               </div>
             </div>
-            <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-              <p className="text-white/60">Invested Properties</p>
-              <p className="text-2xl font-bold text-white">{investedProperties}</p>
-              <p className="text-xs text-white/50">Projects currently funded</p>
-            </div>
-          </div>
-
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="rounded-2xl bg-white/5 border border-white/10 p-4 flex items-center justify-between flex-wrap gap-4">
               <div>
-                <p className="text-white/70">Portfolio Coverage</p>
-                <p className="text-2xl font-bold text-white">{(coverageRatio * 100).toFixed(1)}%</p>
-                <p className="text-xs text-white/50">Paid vs total invested</p>
+                <p className="text-white/70">Invested Properties</p>
+                <p className="text-2xl font-bold text-white">{investedProperties}</p>
+                <p className="text-xs text-white/50">Projects currently funded</p>
+                <p className="text-xs text-white/60 mt-2">Portfolio coverage { (coverageRatio * 100).toFixed(1)}%</p>
               </div>
-              <CircleDollarSign className="h-10 w-10 text-luxury-gold" />
-            </div>
-            <div className="rounded-2xl bg-white/5 border border-white/10 p-4 flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <p className="text-white/70">ROI to Date</p>
-                <p className="text-2xl font-bold text-white">{roiPercent.toFixed(1)}%</p>
-                <p className="text-xs text-white/50">Actual profit vs invested</p>
+              <div className="flex items-center gap-3">
+                <CircleDollarSign className="h-10 w-10 text-luxury-gold" />
+                <TrendingUp className="h-10 w-10 text-emerald-300" />
               </div>
-              <TrendingUp className="h-10 w-10 text-emerald-300" />
             </div>
           </div>
         </div>
