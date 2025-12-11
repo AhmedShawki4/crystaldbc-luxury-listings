@@ -76,18 +76,16 @@ const Investment = () => {
                             {/* @ts-ignore */}
                             <model-viewer
                                 src="/base_basic_pbr.glb"
-                                ios-src=""
                                 poster="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
                                 alt="A 3D model of a luxury property"
                                 shadow-intensity="1"
-                                camera-controls
-                                disable-zoom
                                 auto-rotate
-                                ar
+                                rotation-per-second="45deg"
+                                interaction-prompt="none"
+                                disable-zoom
+                                disable-tap
                                 style={{ width: '100%', height: '100%' }}
-                            >
-                                {/* @ts-ignore */}
-                            </model-viewer>
+                            />
                         </div>
                     </div>
                 </div>
@@ -138,12 +136,14 @@ const Investment = () => {
                                     {t("investment.ctaSubtitle")}
                                 </p>
                                 <ul className="space-y-4 mb-8">
-                                    {(t("investment.ctaList", { returnObjects: true }) as string[]).map((item, i) => (
-                                        <li key={i} className="flex items-center gap-3 text-white/90">
-                                            <CheckCircle2 className="w-5 h-5 text-luxury-gold" />
-                                            <span>{item}</span>
-                                        </li>
-                                    ))}
+                                    {Array.isArray(t("investment.ctaList", { returnObjects: true }))
+                                      ? (t("investment.ctaList", { returnObjects: true }) as string[]).map((item, i) => (
+                                          <li key={i} className="flex items-center gap-3 text-white/90">
+                                              <CheckCircle2 className="w-5 h-5 text-luxury-gold" />
+                                              <span>{item}</span>
+                                          </li>
+                                        ))
+                                      : null}
                                 </ul>
                                 <Button size="lg" className="bg-luxury-gold hover:bg-luxury-gold-light text-luxury-dark font-semibold w-fit">
                                     <Link to="/contact">

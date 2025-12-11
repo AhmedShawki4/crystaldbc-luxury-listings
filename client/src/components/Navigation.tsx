@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Menu, X, Home, Building2, Info, PhoneCall, Heart, Sparkles, TrendingUp, KeyRound, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { US, EG, DE } from 'country-flag-icons/react/3x2';
+import { US, EG, DE, RU } from 'country-flag-icons/react/3x2';
 import { cn } from "@/lib/utils";
 import useAuth from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
@@ -25,6 +25,7 @@ const Navigation = () => {
     { code: "en", label: "EN", Flag: US },
     { code: "ar", label: "AR", Flag: EG },
     { code: "de", label: "DE", Flag: DE },
+    { code: "ru", label: "RU", Flag: RU },
   ];
   const [activeLang, setActiveLang] = useState(i18n.language || "en");
 
@@ -166,7 +167,7 @@ const Navigation = () => {
                   <p className="text-sm font-semibold leading-none">{user?.name}</p>
                   <p className="text-[11px] text-white/70 capitalize">{user?.role}</p>
                 </div>
-                {(user?.role === "admin" || user?.role === "employee") && (
+                {(user?.role === "admin" || user?.role === "employee" || user?.role === "property-handler") && (
                   <Button asChild variant="outline" className="h-9 border-white/30 text-white bg-transparent hover:bg-white/10 px-3">
                     <Link to="/admin">{t("nav.dashboard")}</Link>
                   </Button>
@@ -246,7 +247,7 @@ const Navigation = () => {
                 <span className="text-white/80 text-sm">Checking session...</span>
               ) : isAuthenticated ? (
                 <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
-                  {(user?.role === "admin" || user?.role === "employee") && (
+                  {(user?.role === "admin" || user?.role === "employee" || user?.role === "property-handler") && (
                     <Link
                       to="/admin"
                       onClick={() => setIsOpen(false)}

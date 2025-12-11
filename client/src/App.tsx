@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
+import InitialLoader from "./components/InitialLoader";
 import RegisterInterestDialog from "./components/RegisterInterestDialog";
 import Home from "./pages/Home";
 import Listings from "./pages/Listings";
@@ -42,6 +43,7 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <InitialLoader />
         <BrowserRouter>
           <RegisterInterestDialog />
           <Routes>
@@ -57,7 +59,7 @@ const App = () => {
               <Route
                 path="wishlist"
                 element={
-                  <ProtectedRoute roles={["user", "admin", "employee"]}>
+                  <ProtectedRoute roles={["user", "admin", "employee", "property-handler"]}>
                     <Wishlist />
                   </ProtectedRoute>
                 }
@@ -72,7 +74,7 @@ const App = () => {
             <Route
               path="admin"
               element={
-                <ProtectedRoute roles={["admin", "employee"]}>
+                <ProtectedRoute roles={["admin", "employee", "property-handler"]}>
                   <AdminLayout />
                 </ProtectedRoute>
               }
@@ -95,8 +97,22 @@ const App = () => {
                   </ProtectedRoute>
                 }
               />
-              <Route path="leads" element={<AdminLeads />} />
-              <Route path="messages" element={<AdminMessages />} />
+              <Route
+                path="leads"
+                element={
+                  <ProtectedRoute roles={["admin", "employee"]}>
+                    <AdminLeads />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="messages"
+                element={
+                  <ProtectedRoute roles={["admin", "employee"]}>
+                    <AdminMessages />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="reports"
                 element={

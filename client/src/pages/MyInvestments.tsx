@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { TrendingUp, DollarSign, Home, Calendar, ArrowUpRight, ArrowDownRight, X, MapPin, Bed, Bath, Maximize, Users, TrendingDown } from "lucide-react";
+import { TrendingUp, DollarSign, Home, Calendar, ArrowUpRight, ArrowDownRight, X, MapPin, Bed, Bath, Maximize, Users, TrendingDown, Sparkles, CircleDollarSign } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTranslation } from "react-i18next";
 import PageHero from "@/components/PageHero";
@@ -126,6 +126,32 @@ const MyInvestments = () => {
     properties: 3,
   };
 
+  const roiSnapshot = {
+    roi: "35%",
+    profit: "$69,432",
+    cashFlow: "$143,432",
+    roiYtd: "$193,796",
+  };
+
+  const sparklinePoints = [
+    { x: 0, y: 32 },
+    { x: 20, y: 55 },
+    { x: 40, y: 45 },
+    { x: 60, y: 70 },
+    { x: 80, y: 60 },
+    { x: 100, y: 78 },
+    { x: 120, y: 68 },
+    { x: 140, y: 90 },
+    { x: 160, y: 80 },
+    { x: 180, y: 105 },
+    { x: 200, y: 95 },
+    { x: 220, y: 118 },
+    { x: 240, y: 110 },
+    { x: 260, y: 130 },
+  ];
+
+  const sparklinePath = sparklinePoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
+
   const portfolioTrend = [
     { month: "Jan", value: 15000000 },
     { month: "Mar", value: 15400000 },
@@ -226,6 +252,79 @@ const MyInvestments = () => {
           { label: "Total ROI", value: investmentStats.roi },
         ]}
       />
+
+      {/* ROI Snapshot moved from Investment page */}
+      <section className="py-16 bg-gradient-to-br from-[#0d1323] via-[#0b1020] to-[#0f1a2f] text-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 sm:p-8 shadow-[0_20px_80px_-24px_rgba(0,0,0,0.45)]">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 rounded-3xl bg-white/5 border border-white/10 p-6 sm:p-8 shadow-inner">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.25em] text-white/60">{t("investment.stats.storyBadge")}</p>
+                    <h3 className="text-2xl font-display font-semibold">{t("investment.stats.storyTitle")}</h3>
+                  </div>
+                  <div className="rounded-full bg-white/10 px-3 py-1 text-sm text-white/80">{roiSnapshot.roi}</div>
+                </div>
+                <div className="relative mt-4 h-48 w-full overflow-hidden rounded-2xl bg-gradient-to-b from-white/5 to-transparent">
+                  <svg viewBox="0 0 280 160" className="w-full h-full">
+                    <defs>
+                      <linearGradient id="gradLine" x1="0%" x2="0%" y1="0%" y2="100%">
+                        <stop offset="0%" stopColor="#9f7aea" stopOpacity="0.95" />
+                        <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.35" />
+                      </linearGradient>
+                    </defs>
+                    <path d={sparklinePath} fill="none" stroke="url(#gradLine)" strokeWidth="4" strokeLinecap="round" />
+                    {sparklinePoints.map((p, idx) => (
+                      <circle key={idx} cx={p.x} cy={p.y} r={4} fill="#22d3ee" />
+                    ))}
+                  </svg>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-4 text-sm text-white/80">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1"><Sparkles className="h-4 w-4" /> {t("investment.stats.growthChip1")}</span>
+                  <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1"><TrendingUp className="h-4 w-4" /> {t("investment.stats.growthChip2")}</span>
+                  <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1"><CircleDollarSign className="h-4 w-4" /> {t("investment.stats.growthChip3")}</span>
+                </div>
+              </div>
+
+              <div className="rounded-3xl bg-white/5 border border-white/10 p-6 sm:p-8 flex flex-col gap-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-white/70">{t("investment.stats.donutLabel")}</p>
+                    <p className="text-3xl font-bold">{roiSnapshot.roi}</p>
+                    <p className="text-xs text-white/60 mt-1">{t("investment.stats.donutNote")}</p>
+                  </div>
+                  <div className="relative h-24 w-24">
+                    <div
+                      className="absolute inset-0 rounded-full"
+                      style={{ background: "conic-gradient(#9f7aea 0% 35%, #1e293b 35% 100%)" }}
+                    />
+                    <div className="absolute inset-3 rounded-full bg-[#0f1625] border border-white/10" />
+                    <div className="absolute inset-0 flex items-center justify-center text-lg font-semibold">{roiSnapshot.roi}</div>
+                  </div>
+                </div>
+                <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
+                  <p className="text-sm text-white/60">{t("investment.stats.profitLabel")}</p>
+                  <p className="text-2xl font-bold">{roiSnapshot.profit}</p>
+                  <p className="text-xs text-white/50">{t("investment.stats.profitNote")}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="rounded-2xl bg-white/5 border border-white/10 p-3">
+                    <p className="text-white/70">{t("investment.stats.cashFlowLabel")}</p>
+                    <p className="text-lg font-semibold text-white">{roiSnapshot.cashFlow}</p>
+                    <p className="text-xs text-white/50">{t("investment.stats.cashFlowNote")}</p>
+                  </div>
+                  <div className="rounded-2xl bg-white/5 border border-white/10 p-3">
+                    <p className="text-white/70">{t("investment.stats.roiYtdLabel")}</p>
+                    <p className="text-lg font-semibold text-white">{roiSnapshot.roiYtd}</p>
+                    <p className="text-xs text-white/50">{t("investment.stats.roiYtdNote")}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">

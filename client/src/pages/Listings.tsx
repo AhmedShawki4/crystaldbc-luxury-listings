@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import PropertyCard from "@/components/PropertyCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Search, MapPin, Home, DollarSign, Bed, Building2, Hammer } from "lucide-react";
+import { Search, MapPin, Home, DollarSign, Bed, Building2, Hammer, Bath, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import useProperties, { type PropertyFilters } from "@/hooks/useProperties";
 import PageHero from "@/components/PageHero";
@@ -20,7 +20,9 @@ const Listings = () => {
   const [typeFilter, setTypeFilter] = useState("all");
   const [priceFilter, setPriceFilter] = useState("all");
   const [bedsFilter, setBedsFilter] = useState("all");
+  const [bathsFilter, setBathsFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [featuredOnly, setFeaturedOnly] = useState(false);
 
   const filters = useMemo<PropertyFilters>(() => {
     const params: PropertyFilters = {};
@@ -29,6 +31,8 @@ const Listings = () => {
     if (typeFilter !== "all") params.type = typeFilter;
     if (statusFilter !== "all") params.status = statusFilter;
     if (bedsFilter !== "all") params.minBeds = Number(bedsFilter);
+    if (bathsFilter !== "all") params.minBaths = Number(bathsFilter);
+    if (featuredOnly) params.featured = true;
 
     if (priceFilter !== "all") {
       if (priceFilter === "0-5m") {
@@ -46,7 +50,7 @@ const Listings = () => {
     }
 
     return params;
-  }, [searchQuery, locationFilter, typeFilter, statusFilter, bedsFilter, priceFilter, sortBy]);
+  }, [searchQuery, locationFilter, typeFilter, statusFilter, bedsFilter, bathsFilter, priceFilter, featuredOnly, sortBy]);
 
   const { data: properties = [], isLoading } = useProperties(filters);
 
@@ -107,7 +111,7 @@ const Listings = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
                 <Select value={locationFilter} onValueChange={setLocationFilter}>
                   <SelectTrigger className="h-12">
                     <div className="flex items-center gap-2">
@@ -170,6 +174,22 @@ const Listings = () => {
                   </SelectContent>
                 </Select>
 
+                <Select value={bathsFilter} onValueChange={setBathsFilter}>
+                  <SelectTrigger className="h-12">
+                    <div className="flex items-center gap-2">
+                      <Bath className="h-4 w-4 text-muted-foreground" />
+                      <SelectValue placeholder={t("listings.filterOptions.anyBaths")} />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("listings.filterOptions.anyBaths")}</SelectItem>
+                    <SelectItem value="1">{t("listings.filterOptions.onePlusBaths")}</SelectItem>
+                    <SelectItem value="2">{t("listings.filterOptions.twoPlusBaths")}</SelectItem>
+                    <SelectItem value="3">{t("listings.filterOptions.threePlusBaths")}</SelectItem>
+                    <SelectItem value="4">{t("listings.filterOptions.fourPlusBaths")}</SelectItem>
+                  </SelectContent>
+                </Select>
+
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="h-12">
                     <div className="flex items-center gap-2">
@@ -184,6 +204,48 @@ const Listings = () => {
                     <SelectItem value="Under Construction">{t("listings.filterOptions.underConstruction")}</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="flex flex-wrap gap-3 items-center justify-between border-t border-white/10 pt-4">
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant={featuredOnly ? "default" : "outline"}
+                    size="sm"
+                    className="border-white/30 bg-white/5 text-white"
+                    onClick={() => setFeaturedOnly((prev) => !prev)}
+                  >
+                    <Sparkles className="h-4 w-4 mr-1" />
+                    {t("listings.quickFilters.featured")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={sortBy === "newest" ? "default" : "outline"}
+                    size="sm"
+                    className="border-white/30 bg-white/5 text-white"
+                    onClick={() => setSortBy("newest")}
+                  >
+                    {t("listings.quickFilters.newest")}
+                  </Button>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white/80 hover:text-white"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setLocationFilter("all");
+                    setTypeFilter("all");
+                    setPriceFilter("all");
+                    setBedsFilter("all");
+                    setBathsFilter("all");
+                    setStatusFilter("all");
+                    setFeaturedOnly(false);
+                    setSortBy("featured");
+                  }}
+                >
+                  {t("common.clearFilters")}
+                </Button>
               </div>
             </div>
           </div>
@@ -209,6 +271,7 @@ const Listings = () => {
                   <SelectItem value="price-high">{t("listings.sortOptions.priceHigh")}</SelectItem>
                   <SelectItem value="beds">{t("listings.sortOptions.beds")}</SelectItem>
                   <SelectItem value="sqft">{t("listings.sortOptions.sqft")}</SelectItem>
+                  <SelectItem value="newest">{t("listings.sortOptions.newest")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

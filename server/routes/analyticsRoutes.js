@@ -8,7 +8,7 @@ const router = express.Router();
 router.get(
   "/summary",
   authenticate,
-  authorize(ROLES.ADMIN, ROLES.EMPLOYEE),
+  authorize(ROLES.ADMIN, ROLES.EMPLOYEE, ROLES.PROPERTY_HANDLER),
   getSummary
 );
 

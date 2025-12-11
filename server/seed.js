@@ -35,6 +35,15 @@ const seed = async () => {
       role: ROLES.ADMIN,
     });
 
+        const handler = process.env.DEFAULT_PROPERTY_HANDLER_EMAIL
+          ? await User.create({
+              name: "Property Handler",
+              email: process.env.DEFAULT_PROPERTY_HANDLER_EMAIL,
+              password: process.env.DEFAULT_PROPERTY_HANDLER_PASSWORD,
+              role: ROLES.PROPERTY_HANDLER,
+            })
+          : null;
+
     const employee = await User.create({
       name: "Crystal Employee",
       email: process.env.DEFAULT_EMPLOYEE_EMAIL,

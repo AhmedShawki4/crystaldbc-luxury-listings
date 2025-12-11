@@ -20,8 +20,8 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 const NAV_ITEMS: Array<{ to: string; label: string; exact?: boolean; roles?: Role[]; icon: LucideIcon }> = [
-  { to: "/admin", label: "Overview", exact: true, roles: ["admin", "employee"], icon: Gauge },
-  { to: "/admin/properties", label: "Properties", roles: ["admin", "employee"], icon: Building2 },
+  { to: "/admin", label: "Overview", exact: true, roles: ["admin", "employee", "property-handler"], icon: Gauge },
+  { to: "/admin/properties", label: "Properties", roles: ["admin", "employee", "property-handler"], icon: Building2 },
   { to: "/admin/projects", label: "Trending Projects", roles: ["admin", "employee"], icon: Sparkles },
   { to: "/admin/cms", label: "CMS", roles: ["admin", "employee"], icon: PenSquare },
   { to: "/admin/leads", label: "Leads", roles: ["admin", "employee"], icon: Users2 },

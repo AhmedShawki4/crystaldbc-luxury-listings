@@ -21,6 +21,9 @@ const buildFilters = (query) => {
   if (query.minBeds) {
     filters.beds = { $gte: Number(query.minBeds) };
   }
+  if (query.minBaths) {
+    filters.baths = { $gte: Number(query.minBaths) };
+  }
   if (query.priceMin || query.priceMax) {
     filters.priceValue = {};
     if (query.priceMin) filters.priceValue.$gte = Number(query.priceMin);

@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import PageHero from "@/components/PageHero";
 import PropertyCard from "@/components/PropertyCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DollarSign, Home, MapPin, Bed, KeyRound, Search } from "lucide-react";
+import { DollarSign, Home, MapPin, Bed, KeyRound, Search, Bath, Sparkles } from "lucide-react";
 import useProperties, { type PropertyFilters } from "@/hooks/useProperties";
 import { useTranslation } from "react-i18next";
 
@@ -16,6 +16,8 @@ const ForRent = () => {
   const [typeFilter, setTypeFilter] = useState("all");
   const [priceFilter, setPriceFilter] = useState("all");
   const [bedsFilter, setBedsFilter] = useState("all");
+  const [bathsFilter, setBathsFilter] = useState("all");
+  const [featuredOnly, setFeaturedOnly] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -27,6 +29,11 @@ const ForRent = () => {
     if (locationFilter !== "all") params.location = locationFilter;
     if (typeFilter !== "all") params.type = typeFilter;
     if (bedsFilter !== "all") params.minBeds = Number(bedsFilter);
+    if (bathsFilter !== "all") params.minBaths = Number(bathsFilter);
+
+    if (featuredOnly) {
+      params.featured = true;
+    }
 
     if (priceFilter !== "all") {
       if (priceFilter === "0-100k") {
@@ -44,7 +51,7 @@ const ForRent = () => {
     }
 
     return params;
-  }, [searchQuery, locationFilter, typeFilter, bedsFilter, priceFilter, sortBy]);
+  }, [searchQuery, locationFilter, typeFilter, bedsFilter, bathsFilter, priceFilter, featuredOnly, sortBy]);
 
   const { data: properties = [], isLoading } = useProperties(filters);
 
@@ -110,7 +117,7 @@ const ForRent = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
                 <Select value={locationFilter} onValueChange={setLocationFilter}>
                   <SelectTrigger className="h-12">
                     <div className="flex items-center gap-2">
@@ -172,6 +179,63 @@ const ForRent = () => {
                     <SelectItem value="5">{t("rentals.filterOptions.fivePlus")}</SelectItem>
                   </SelectContent>
                 </Select>
+
+                <Select value={bathsFilter} onValueChange={setBathsFilter}>
+                  <SelectTrigger className="h-12">
+                    <div className="flex items-center gap-2">
+                      <Bath className="h-4 w-4 text-muted-foreground" />
+                      <SelectValue placeholder={t("rentals.filterOptions.anyBaths")} />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("rentals.filterOptions.anyBaths")}</SelectItem>
+                    <SelectItem value="1">{t("rentals.filterOptions.onePlusBaths")}</SelectItem>
+                    <SelectItem value="2">{t("rentals.filterOptions.twoPlusBaths")}</SelectItem>
+                    <SelectItem value="3">{t("rentals.filterOptions.threePlusBaths")}</SelectItem>
+                    <SelectItem value="4">{t("rentals.filterOptions.fourPlusBaths")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex flex-wrap gap-3 items-center justify-between border-t border-white/10 pt-4">
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant={featuredOnly ? "default" : "outline"}
+                    size="sm"
+                    className="border-white/30 bg-white/5 text-white"
+                    onClick={() => setFeaturedOnly((prev) => !prev)}
+                  >
+                    <Sparkles className="h-4 w-4 mr-1" />
+                    {t("rentals.quickFilters.featured")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={sortBy === "newest" ? "default" : "outline"}
+                    size="sm"
+                    className="border-white/30 bg-white/5 text-white"
+                    onClick={() => setSortBy("newest")}
+                  >
+                    {t("rentals.quickFilters.newest")}
+                  </Button>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white/80 hover:text-white"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setLocationFilter("all");
+                    setTypeFilter("all");
+                    setPriceFilter("all");
+                    setBedsFilter("all");
+                    setBathsFilter("all");
+                    setFeaturedOnly(false);
+                    setSortBy("featured");
+                  }}
+                >
+                  {t("common.clearFilters")}
+                </Button>
               </div>
             </div>
           </div>
@@ -195,6 +259,7 @@ const ForRent = () => {
                   <SelectItem value="price-high">{t("rentals.sortOptions.priceHigh")}</SelectItem>
                   <SelectItem value="beds">{t("rentals.sortOptions.beds")}</SelectItem>
                   <SelectItem value="sqft">{t("rentals.sortOptions.sqft")}</SelectItem>
+                  <SelectItem value="newest">{t("rentals.sortOptions.newest")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
