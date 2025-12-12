@@ -276,11 +276,6 @@ const Home = () => {
       {/* 4. Featured Properties Section */}
       <section className="py-32 relative overflow-hidden reveal-section">
         <div className="absolute inset-0 z-0">
-          <img
-            src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&q=80&w=2000"
-            alt="Properties Background"
-            className="w-full h-full object-cover opacity-10"
-          />
           <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background/50" />
         </div>
         <div className="relative z-10">
