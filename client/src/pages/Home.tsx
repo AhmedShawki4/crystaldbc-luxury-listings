@@ -195,16 +195,19 @@ const Home = () => {
       <section className="py-24 bg-luxury-dark text-white relative overflow-hidden reveal-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="order-2 lg:order-1 h-[400px] md:h-[500px] relative">
+            <div className="order-2 lg:order-1 h-[300px] md:h-[400px] relative">
               {/* @ts-ignore */}
               <model-viewer
                 src="/city_globe3d_model.glb"
                 alt="3D City Model"
+                loading="lazy"
                 auto-rotate
                 disable-zoom
                 disable-pan
                 interaction-prompt="none"
+                camera-orbit="45deg 55deg 2.5m"
                 shadow-intensity="1"
+                shadow-softness="1"
                 style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
               />
             </div>
@@ -333,27 +336,40 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 5. Our Process Section */}
+      {/* 5. Client Success Stories (Replaces How It Works) */}
       <section className="py-24 bg-background reveal-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">How It Works</span>
-            <h2 className="text-4xl md:text-5xl font-display font-medium text-primary">Your Journey to Ownership</h2>
+            <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">Success Stories</span>
+            <h2 className="text-4xl md:text-5xl font-display font-medium text-primary">Real Results, Real Wealth</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative stagger-grid">
-            <div className="hidden md:block absolute top-12 left-[10%] right-[10%] h-[2px] bg-gradient-to-r from-transparent via-luxury-gold/30 to-transparent -z-10" />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 stagger-grid">
             {[
-              { step: "01", title: "Consultation", desc: "We define your investment goals and lifestyle preferences." },
-              { step: "02", title: "Curation", desc: "Our experts select bespoke properties matching your criteria." },
-              { step: "03", title: "Verification", desc: "Comprehensive legal and financial due diligence." },
-              { step: "04", title: "Acquisition", desc: "Seamless purchase process with full legal support." }
-            ].map((item, i) => (
-              <div key={i} className="relative bg-background pt-8 text-center group">
-                <div className="w-16 h-16 mx-auto bg-luxury-gold/10 text-luxury-gold rounded-full flex items-center justify-center font-display font-bold text-xl mb-6 group-hover:scale-110 transition-transform duration-300 border border-luxury-gold/20">
-                  {item.step}
+              {
+                value: "35%",
+                label: "Avg. Annual ROI",
+                desc: "Our clients consistently outperform market averages through strategic off-plan acquisitions."
+              },
+              {
+                value: "$500M+",
+                label: "Assets Managed",
+                desc: "Trusted by global investors to steward significant real estate portfolios across Dubai and Egypt."
+              },
+              {
+                value: "12 Days",
+                label: "Avg. Tenant Placement",
+                desc: "Our premium leasing team ensures your investment properties are generating income immediately."
+              }
+            ].map((stat, i) => (
+              <div key={i} className="relative p-8 rounded-2xl bg-luxury-gold/5 border border-luxury-gold/10 hover:border-luxury-gold/30 transition-all duration-300 group">
+                <div className="text-5xl md:text-6xl font-display font-bold text-luxury-gold mb-4 group-hover:scale-105 transition-transform duration-300">
+                  {stat.value}
                 </div>
-                <h3 className="text-xl font-display font-semibold mb-3">{item.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed px-4">{item.desc}</p>
+                <h3 className="text-xl font-semibold text-primary mb-3">{stat.label}</h3>
+                <p className="text-muted-foreground font-light leading-relaxed">
+                  {stat.desc}
+                </p>
               </div>
             ))}
           </div>
@@ -361,7 +377,9 @@ const Home = () => {
       </section>
 
       {/* Trending Projects */}
-      <TrendingProjects />
+      <div id="trending-projects">
+        <TrendingProjects />
+      </div>
 
       {/* 3D Scroll Experience */}
       <FloatingShapes />

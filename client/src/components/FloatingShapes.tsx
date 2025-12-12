@@ -209,9 +209,13 @@ const FloatingShapes = () => {
 
         const handleResize = () => {
             if (!canvasRef.current) return;
-            camera.aspect = canvasRef.current.offsetWidth / canvasRef.current.offsetHeight;
+            const w = canvasRef.current.offsetWidth;
+            const h = canvasRef.current.offsetHeight;
+            camera.aspect = w / h;
             camera.updateProjectionMatrix();
-            renderer.setSize(canvasRef.current.offsetWidth, canvasRef.current.offsetHeight);
+            renderer.setSize(w, h); // Use explicit width/height
+            // Update pixel ratio on resize just in case (e.g. moving between screens)
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         };
         window.addEventListener("resize", handleResize);
 
@@ -221,22 +225,29 @@ const FloatingShapes = () => {
             pinTrigger.kill();
             ScrollTrigger.getAll().forEach(t => t.kill());
 
+            // Proper Three.js cleanup
+            scene.traverse((object) => {
+                if (object instanceof THREE.Mesh) {
+                    object.geometry.dispose();
+                    if (object.material instanceof THREE.Material) {
+                        object.material.dispose();
+                    }
+                }
+            });
+
+            renderer.dispose();
             if (canvasRef.current && canvasRef.current.contains(renderer.domElement)) {
                 canvasRef.current.removeChild(renderer.domElement);
             }
-            cubeGeometry.dispose();
-            cubeMaterial.dispose();
-            imageGeom.dispose();
-            renderer.dispose();
         };
     }, []);
 
     return (
-        <div ref={containerRef} className="relative min-h-[250vh] bg-gradient-to-b from-luxury-dark via-[#0a0a0a] to-luxury-dark border-t border-white/5">
+        <div ref={containerRef} className="relative min-h-[150vh] md:min-h-[250vh] bg-gradient-to-b from-luxury-dark via-[#0a0a0a] to-luxury-dark border-t border-white/5">
             {/* Sticky Canvas Container */}
             <div
                 ref={canvasRef}
-                className="h-screen w-full overflow-hidden"
+                className="h-[100vh] w-full overflow-hidden sticky top-0"
                 style={{ zIndex: 1 }}
             />
 
@@ -245,19 +256,19 @@ const FloatingShapes = () => {
                 ref={contentRef}
                 className="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none"
             >
-                <div className="max-w-4xl px-8 text-center space-y-32 py-40">
-                    <p className="text-4xl md:text-6xl font-display font-bold leading-tight text-white/20 transition-all duration-300">
+                <div className="max-w-4xl px-8 text-center space-y-24 md:space-y-32 py-20 md:py-40">
+                    <p className="text-3xl md:text-6xl font-display font-bold leading-tight text-white/20 transition-all duration-300">
                         <span className="inline-block transition-all duration-300 text-white">Experience</span> the pinnacle of <span className="inline-block transition-all duration-300 text-white">luxury</span> living.
                     </p>
 
-                    <p className="text-4xl md:text-6xl font-display font-bold leading-tight text-white/20 transition-all duration-300">
+                    <p className="text-3xl md:text-6xl font-display font-bold leading-tight text-white/20 transition-all duration-300">
                         Where <span className="inline-block transition-all duration-300 text-white">vision</span> meets <span className="inline-block transition-all duration-300 text-white">reality</span> in Dubai.
                     </p>
 
-                    <p className="text-4xl md:text-6xl font-display font-bold leading-tight text-white/20 transition-all duration-300">
+                    <p className="text-3xl md:text-6xl font-display font-bold leading-tight text-white/20 transition-all duration-300">
                         Are you <span className="inline-block transition-all duration-300 text-white">ready</span> to <span className="inline-block transition-all duration-300 text-white">elevate</span> your portfolio?
                     </p>
-                    <p className="text-4xl md:text-6xl font-display font-bold leading-tight text-white/20 transition-all duration-300">
+                    <p className="text-3xl md:text-6xl font-display font-bold leading-tight text-white/20 transition-all duration-300">
                         Welcome to <span className="inline-block transition-all duration-300 text-white">CrystalDBC</span>.
                     </p>
                 </div>

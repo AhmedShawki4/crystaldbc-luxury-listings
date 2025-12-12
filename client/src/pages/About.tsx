@@ -1,6 +1,6 @@
 import { Award, Users, Target, Heart, Globe2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useEffect, useMemo, useLayoutEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useCmsSection } from "@/hooks/useCmsSection";
 import type { AboutContent } from "@/types";
 import { getMediaUrl } from "@/lib/media";
@@ -8,10 +8,6 @@ import PageHero from "@/components/PageHero";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import InvestmentBox from "@/components/InvestmentBox";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&q=80&w=2000";
 
@@ -28,32 +24,6 @@ const About = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
-
-  useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      // Animate text containers
-      const textBlocks = gsap.utils.toArray<HTMLElement>(".reveal-text");
-      textBlocks.forEach((block) => {
-        gsap.fromTo(block,
-          { opacity: 0, y: 30 },
-          { opacity: 1, y: 0, duration: 1, scrollTrigger: { trigger: block, start: "top 85%" } }
-        );
-      });
-
-      // Animate cards
-      const cards = gsap.utils.toArray<HTMLElement>(".reveal-card");
-      gsap.fromTo(cards,
-        { opacity: 0, scale: 0.95, y: 20 },
-        {
-          opacity: 1, scale: 1, y: 0,
-          stagger: 0.1, duration: 0.8, ease: "power2.out",
-          scrollTrigger: { trigger: ".cards-container", start: "top 80%" }
-        }
-      );
-
-    }, mainRef);
-    return () => ctx.revert();
   }, []);
 
   const fallbackAbout = useMemo<AboutContent>(() => ({
@@ -76,6 +46,7 @@ const About = () => {
   const storyParagraphs = content.storyParagraphs?.length ? content.storyParagraphs : fallbackAbout.storyParagraphs;
   const values = content.values?.length ? content.values : fallbackAbout.values;
   const stats = content.stats?.length ? content.stats : fallbackAbout.stats;
+  const impactItems = t("about.impact.items", { returnObjects: true }) as string[];
 
   return (
     <div ref={mainRef} className="min-h-screen">
@@ -98,81 +69,81 @@ const About = () => {
         )}
       />
 
-      {/* Our Story */}
-      <section className="py-24 bg-background reveal-text overflow-hidden">
+      {/* Our Legacy */}
+      <section className="py-24 bg-background overflow-hidden relative">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-24 bg-gradient-to-b from-transparent to-luxury-gold/50" />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="relative order-2 lg:order-1 reveal-card">
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
-                <img src="/backgroundphoto.jpg" alt="Our Legacy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+
+            <div className="relative order-2 lg:order-1">
+              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+                <img src="/backgroundphoto.jpg" alt="Our Legacy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
               </div>
-              <div className="absolute -bottom-8 -left-8 bg-white p-6 rounded-xl shadow-xl max-w-xs hidden md:block">
-                <p className="text-3xl font-display font-bold text-luxury-gold mb-1">20+</p>
-                <p className="text-sm text-gray-600">Years of redefining luxury real estate excellence.</p>
+              <div className="absolute -bottom-8 -left-8 bg-white p-8 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] max-w-xs hidden md:block border border-gray-100">
+                <p className="text-4xl font-display font-bold text-luxury-gold mb-2">20+</p>
+                <p className="text-sm text-gray-600 font-medium leading-relaxed">{t("about.heroSubtitle") || "Years of Excellence"}</p>
               </div>
             </div>
-            <div className="order-1 lg:order-2">
-              <p className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3">Our Legacy</p>
-              <h2 className="text-4xl md:text-5xl font-display font-bold text-primary mb-6">{t("about.storyTitle")}</h2>
-              <div className="space-y-4 text-lg text-muted-foreground font-light leading-relaxed">
-                {storyParagraphs.map((paragraph, index) => (
-                  <p key={`${paragraph}-${index}`}>{paragraph}</p>
+
+            <div className="order-1 lg:order-2 space-y-8">
+              <div>
+                <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("about.storyEyebrow")}</span>
+                <h2 className="text-4xl md:text-5xl font-display font-bold text-primary mb-6">{t("about.storyTitle")}</h2>
+                <div className="space-y-6 text-lg text-muted-foreground font-light leading-relaxed">
+                  {storyParagraphs.map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-8 pt-4 border-t border-border/50">
+                {/* Displaying first 2 stats here as per design, though they are also in the hero/banner */}
+                {stats.slice(2, 4).map((stat, i) => (
+                  <div key={i}>
+                    <h4 className="font-display font-bold text-2xl text-primary mb-1">{stat.value}</h4>
+                    <span className="text-sm text-muted-foreground uppercase tracking-wider">{stat.label}</span>
+                  </div>
                 ))}
-                <p>Founded on the principles of integrity and innovation, CrystalDBC has evolved from a boutique agency into a global powerhouse. We don't just sell properties; we curate lifestyles for the world's most discerning clientele.</p>
               </div>
             </div>
+
           </div>
         </div>
       </section>
 
-      {/* Stats / Global Reach */}
-      <section className="py-20 bg-luxury-dark text-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Global Stats Bar */}
+      <section className="py-20 bg-luxury-dark text-white relative">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-white/10">
-            <div className="p-4 reveal-text">
-              <h3 className="text-4xl md:text-5xl font-display font-bold text-luxury-gold mb-2">$5B+</h3>
-              <p className="text-sm text-white/60 uppercase tracking-wider">Property Sold</p>
-            </div>
-            <div className="p-4 reveal-text">
-              <h3 className="text-4xl md:text-5xl font-display font-bold text-luxury-gold mb-2">12</h3>
-              <p className="text-sm text-white/60 uppercase tracking-wider">Global Offices</p>
-            </div>
-            <div className="p-4 reveal-text">
-              <h3 className="text-4xl md:text-5xl font-display font-bold text-luxury-gold mb-2">850+</h3>
-              <p className="text-sm text-white/60 uppercase tracking-wider">Happy Clients</p>
-            </div>
-            <div className="p-4 reveal-text">
-              <h3 className="text-4xl md:text-5xl font-display font-bold text-luxury-gold mb-2">30+</h3>
-              <p className="text-sm text-white/60 uppercase tracking-wider">Industry Awards</p>
-            </div>
+            {stats.map((stat, i) => (
+              <div className="p-4" key={i}>
+                <h3 className="text-4xl md:text-5xl font-display font-bold text-luxury-gold mb-2">{stat.value}</h3>
+                <p className="text-sm text-white/60 uppercase tracking-wider">{stat.label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Our Values (Darkened Cards) */}
-      <section className="py-24 bg-muted/30">
+      {/* Philosophy / Values */}
+      <section className="py-24 bg-muted/30 relative">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 reveal-text">
+          <div className="text-center mb-20">
             <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">Philosophy</span>
-            <h2 className="text-4xl font-display font-bold text-primary">
-              {t("about.valuesTitle")}
-            </h2>
+            <h2 className="text-4xl font-display font-bold text-primary">{t("about.valuesTitle")}</h2>
           </div>
-          <div className="cards-container grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
             {values.map((value) => {
               const Icon = iconMap[value.iconKey?.toLowerCase() as keyof typeof iconMap] ?? Award;
               return (
-                <div
-                  className="group rounded-xl border border-white/10 bg-luxury-dark p-8 text-left shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl reveal-card"
-                  key={`${value.title}-${value.description}`}
-                >
-                  <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-full bg-luxury-gold/10 text-luxury-gold group-hover:bg-luxury-gold group-hover:text-white transition-colors">
+                <div className="group rounded-2xl border border-white/10 bg-white p-8 text-left shadow-lg transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:border-luxury-gold/30" key={value.title}>
+                  <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-full bg-luxury-gold/10 text-luxury-gold group-hover:bg-luxury-gold group-hover:text-white transition-all duration-500">
                     <Icon className="h-6 w-6" />
                   </div>
-                  <h3 className="text-xl font-display font-semibold text-white mb-3">
-                    {value.title}
-                  </h3>
-                  <p className="text-white/70 leading-relaxed text-sm">{value.description}</p>
+                  <h3 className="text-xl font-display font-bold text-gray-900 mb-3">{value.title}</h3>
+                  <p className="text-gray-600 leading-relaxed text-sm">{value.description}</p>
                 </div>
               );
             })}
@@ -180,39 +151,50 @@ const About = () => {
         </div>
       </section>
 
-      {/* Global Impact (Replaces Leadership) */}
-      <section className="py-24 bg-background reveal-text relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-luxury-gold/30 to-transparent"></div>
+      {/* Our Impact */}
+      <section className="py-24 bg-background relative overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
             <div className="order-2 lg:order-1">
-              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">Our Impact</span>
-              <h2 className="text-4xl font-display font-bold text-primary mb-6">Building the Future</h2>
+              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("about.impact.eyebrow")}</span>
+              <h2 className="text-4xl font-display font-bold text-primary mb-6">{t("about.impact.title")}</h2>
               <p className="text-lg text-muted-foreground font-light leading-relaxed mb-6">
-                CrystalDBC isn't just about transactions; it's about transformation. We invest heavily in sustainable development and community growth across the regions we serve.
+                {t("about.impact.description")}
               </p>
-              <ul className="space-y-4">
-                {[
-                  "Sustainable Urban Planning Initiatives",
-                  "Community Heritage Preservation",
-                  "Green Building Standards",
-                  "Local Economic Development"
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-primary">
-                    <div className="w-2 h-2 rounded-full bg-luxury-gold"></div>
-                    {item}
+              <ul className="space-y-4 mt-8">
+                {impactItems.map((item, i) => (
+                  <li key={i} className="flex items-center gap-4 text-primary p-4 rounded-lg bg-muted/20 border border-transparent hover:border-luxury-gold/20 transition-all">
+                    <div className="w-10 h-10 rounded-full bg-luxury-gold/10 flex items-center justify-center text-luxury-gold">
+                      <Globe2 className="w-5 h-5" />
+                    </div>
+                    <span className="font-medium">{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="order-1 lg:order-2 reveal-card">
-              <div className="aspect-video bg-luxury-dark rounded-2xl overflow-hidden relative">
-                <img src="/backgroundphoto.jpg" alt="Impact" className="w-full h-full object-cover opacity-60 hover:scale-105 transition-transform duration-700" />
+
+            <div className="order-1 lg:order-2 relative">
+              <div className="absolute inset-0 bg-luxury-gold/10 blur-3xl transform rotate-12 -z-10"></div>
+              <div className="aspect-square bg-luxury-dark rounded-2xl overflow-hidden relative shadow-2xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-luxury-dark via-[#0a0f1d] to-black opacity-90"></div>
+
+                {/* Decorative Globe Icon */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Globe2 className="w-20 h-20 text-white/20" strokeWidth={1} />
+                  <div className="relative w-64 h-64 border border-white/5 rounded-full animate-spin-slow">
+                    <div className="absolute top-0 left-1/2 w-2 h-2 bg-luxury-gold rounded-full shadow-[0_0_15px_rgba(212,175,55,0.8)]"></div>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Globe2 className="w-32 h-32 text-luxury-gold/20" strokeWidth={0.5} />
+                  </div>
+                </div>
+
+                <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent">
+                  <p className="text-white text-center font-display text-xl">"Creating spaces that inspire."</p>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </section>

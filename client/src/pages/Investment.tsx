@@ -159,23 +159,31 @@ const Investment = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="relative">
-                            <div className="h-[500px] w-full bg-white/5 rounded-2xl overflow-hidden border border-white/10 p-2">
-                                <img
-                                    src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=1200"
-                                    alt="Data Analytics"
-                                    className="w-full h-full object-cover rounded-xl opacity-80 hover:opacity-100 transition-opacity duration-500"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-luxury-dark via-transparent to-transparent pointer-events-none" />
-                            </div>
-                            {/* Floating Card */}
-                            <div className="absolute -bottom-10 -left-10 bg-luxury-gold text-luxury-dark p-6 rounded-xl shadow-xl hidden md:block">
-                                <TrendingUp className="w-8 h-8 mb-2" />
-                                <p className="font-bold text-lg">Market Outperformance</p>
-                                <p className="text-sm text-luxury-dark/80">Consistently beating benchmarks</p>
+                        <div className="order-1 lg:order-2 relative h-[500px] reveal-card">
+                            <div className="absolute inset-0 bg-gradient-to-tr from-luxury-gold/20 to-transparent rounded-2xl transform rotate-3 z-0"></div>
+                            <img
+                                src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1200"
+                                alt="Market Analysis"
+                                className="relative z-10 w-full h-full object-cover rounded-2xl shadow-2xl hover:scale-[1.02] transition-transform duration-700"
+                            />
+                            {/* Floating Stats Card */}
+                            <div className="absolute -bottom-8 -left-8 z-20 bg-white p-6 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 max-w-xs animate-bounce-slow hidden md:block">
+                                <div className="flex items-center gap-4 mb-3">
+                                    <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center text-green-600">
+                                        <TrendingUp className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500 font-medium">Market Outperformance</p>
+                                        <p className="text-2xl font-bold text-gray-900">+12.4%</p>
+                                    </div>
+                                </div>
+                                <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                                    <div className="bg-green-500 h-full rounded-full" style={{ width: '75%' }}></div>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    {/* End 2-col grid */}
 
                     {/* Strategy Section */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

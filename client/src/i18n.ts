@@ -36,6 +36,8 @@ const resources = {
         tryAgain: "Please try again.",
       },
       home: {
+        successStories: "Success Stories",
+        realResults: "Real Results, Real Wealth",
         featuredTitle: "Featured Properties",
         featuredSubtitle: "Explore our handpicked selection of exceptional luxury properties",
         viewAll: "View All Properties",
@@ -80,6 +82,7 @@ const resources = {
           "Founded in 1995, CrystalDBC has established itself as a premier luxury real estate firm, specializing in exceptional properties that define sophisticated living. Our commitment to excellence and personalized service has earned us the trust of discerning clients worldwide.",
           "With decades of combined experience, our team brings unparalleled expertise in the luxury real estate market. We understand that finding the perfect property is about more than just square footage and amenities—it's about discovering a place that truly feels like home.",
           "At CrystalDBC, we pride ourselves on our attention to detail, market knowledge, and dedication to delivering results that exceed expectations. Whether you're buying, selling, or investing, we're here to guide you every step of the way.",
+          "Founded on the principles of integrity and innovation, CrystalDBC has evolved from a boutique agency into a global powerhouse. We don't just sell properties; we curate lifestyles for the world's most discerning clientele.",
         ],
         valuesTitle: "Our Values",
         values: {
@@ -101,11 +104,22 @@ const resources = {
           },
         },
         stats: [
-          { label: "Years Experience", value: "28+" },
-          { label: "Properties Sold", value: "2,500+" },
-          { label: "Total Sales Volume", value: "$5B+" },
-          { label: "Client Satisfaction", value: "98%" },
+          { label: "Property Sold", value: "$5B+" },
+          { label: "Global Offices", value: "12" },
+          { label: "Happy Clients", value: "850+" },
+          { label: "Industry Awards", value: "30+" },
         ],
+        impact: {
+          eyebrow: "Our Impact",
+          title: "Building the Future",
+          description: "CrystalDBC isn't just about transactions; it's about transformation. We invest heavily in sustainable development and community growth across the regions we serve.",
+          items: [
+            "Sustainable Urban Planning Initiatives",
+            "Community Heritage Preservation",
+            "Green Building Standards",
+            "Local Economic Development",
+          ],
+        },
         investmentSection: {
           eyebrow: "Investments",
           title: "Strategic investment opportunities",
@@ -455,6 +469,7 @@ const resources = {
           "تأسست CrystalDBC عام 1995 كإحدى أبرز شركات العقارات الفاخرة المتخصصة في العقارات الاستثنائية التي تعكس أسلوب حياة راقٍ. التزامنا بالتميز والخدمة الشخصية أكسبنا ثقة العملاء المميزين حول العالم.",
           "بخبرة تمتد لعقود، يقدم فريقنا معرفة لا تضاهى في سوق العقارات الفاخرة. ندرك أن العثور على العقار المثالي يتجاوز المساحة والمرافق، إنه عن إيجاد مكان تشعر فيه بالانتماء الحقيقي.",
           "نحن نفخر باهتمامنا بالتفاصيل ومعرفتنا بالسوق وحرصنا على تقديم نتائج تفوق التوقعات. سواء كنت تشتري أو تبيع أو تستثمر، فنحن هنا لإرشادك في كل خطوة.",
+          "تأسست على مبادئ النزاهة والابتكار، تطورت CrystalDBC من وكالة صغيرة إلى قوة عالمية. نحن لا نبيع مجرد عقارات؛ بل نصمم أنماط حياة لعملائنا الأكثر تميزاً في العالم.",
         ],
         valuesTitle: "قيمنا",
         values: {
@@ -476,11 +491,22 @@ const resources = {
           },
         },
         stats: [
-          { label: "سنوات الخبرة", value: "28+" },
-          { label: "العقارات المباعة", value: "2500+" },
           { label: "إجمالي قيمة المبيعات", value: "$5B+" },
-          { label: "رضا العملاء", value: "98%" },
+          { label: "مكتب عالمي", value: "12" },
+          { label: "عميل سعيد", value: "850+" },
+          { label: "جائزة صناعية", value: "30+" },
         ],
+        impact: {
+          eyebrow: "تأثيرنا",
+          title: "بناء المستقبل",
+          description: "CrystalDBC ليست مجرد معاملات؛ إنها تحول. نستثمر بكثافة في التنمية المستدامة ونمو المجتمع عبر المناطق التي نخدمها.",
+          items: [
+            "مبادرات التخطيط الحضري المستدام",
+            "الحفاظ على التراث المجتمعي",
+            "معايير البناء الأخضر",
+            "التنمية الاقتصادية المحلية",
+          ],
+        },
         investmentSection: {
           eyebrow: "استثمار",
           title: "فرص استثمار استراتيجية",
@@ -827,47 +853,45 @@ const resources = {
         storyEyebrow: "Unsere Story",
         storyTitle: "Verwurzelt in Exzellenz",
         storyParagraphs: [
-          "Seit 1995 ist CrystalDBC eine führende Luxusimmobilienfirma, spezialisiert auf herausragende Objekte. Unser Anspruch auf Exzellenz und persönlicher Service haben uns das Vertrauen anspruchsvoller Kunden weltweit eingebracht.",
-          "Mit jahrzehntelanger Erfahrung bringt unser Team unvergleichliches Know-how im Luxusmarkt mit. Wir wissen, dass es beim perfekten Zuhause um mehr geht als Fläche und Ausstattung – es geht um ein echtes Heimatgefühl.",
-          "Wir legen Wert auf Details, Marktkenntnis und Ergebnisse, die Erwartungen übertreffen. Ob Kauf, Verkauf oder Investment – wir begleiten Sie auf jedem Schritt.",
+          "Gegründet im Jahr 1995, hat sich CrystalDBC als führendes Luxusimmobilienunternehmen etabliert. Unser Engagement für Exzellenz hat uns das Vertrauen anspruchsvoller Kunden weltweit eingebracht.",
+          "Mit jahrzehntelanger Erfahrung bietet unser Team unvergleichliche Expertise. Wir wissen, dass es beim perfekten Zuhause um mehr als nur Quadratmeter geht – es geht um das Gefühl von Zugehörigkeit.",
+          "Wir sind stolz auf unsere Liebe zum Detail und unser Engagement, Ergebnisse zu liefern, die Erwartungen übertreffen.",
+          "Gegründet auf den Prinzipien von Integrität und Innovation, hat sich CrystalDBC zu einem globalen Kraftzentrum entwickelt. Wir verkaufen nicht nur Immobilien, wir kuratieren Lebensstile.",
         ],
         valuesTitle: "Unsere Werte",
         values: {
-          excellence: {
-            title: "Exzellenz",
-            description: "Wir streben in jeder Interaktion nach Spitzenleistung.",
-          },
-          expertise: {
-            title: "Expertise",
-            description: "Tiefe Marktkenntnis und nachweislicher Erfolg.",
-          },
-          integrity: {
-            title: "Integrität",
-            description: "Ehrlich, transparent und ethisch in allen Geschäften.",
-          },
-          service: {
-            title: "Service",
-            description: "Persönliche Betreuung und Hingabe für Kundenzufriedenheit.",
-          },
+          excellence: { title: "Exzellenz", description: "Wir streben nach Exzellenz in jeder Interaktion." },
+          expertise: { title: "Expertise", description: "Tiefes Marktwissen und nachgewiesener Erfolg." },
+          integrity: { title: "Integrität", description: "Ehrlich, transparent und ethisch in allem Handeln." },
+          service: { title: "Service", description: "Persönliche Aufmerksamkeit für jeden Kunden." },
         },
         stats: [
-          { label: "Jahre Erfahrung", value: "28+" },
-          { label: "Verkaufte Objekte", value: "2.500+" },
-          { label: "Gesamtumsatz", value: "$5B+" },
-          { label: "Kundenzufriedenheit", value: "98%" },
+          { label: "Verkaufte Immobilien", value: "$5B+" },
+          { label: "Globale Büros", value: "12" },
+          { label: "Glückliche Kunden", value: "850+" },
+          { label: "Branchenpreise", value: "30+" },
         ],
+        impact: {
+          eyebrow: "Unser Einfluss",
+          title: "Die Zukunft bauen",
+          description: "Bei CrystalDBC geht es nicht nur um Transaktionen, sondern um Transformation. Wir investieren stark in nachhaltige Entwicklung und das Wachstum der Gemeinschaft.",
+          items: [
+            "Initiativen für nachhaltige Stadtplanung",
+            "Bewahrung des kulturellen Erbes",
+            "Standards für grünes Bauen",
+            "Lokale Wirtschaftsentwicklung",
+          ],
+        },
         investmentSection: {
           eyebrow: "Investment",
-          title: "Strategische Investment-Chancen",
-          description: "Entdecken Sie kuratierte Assets für langfristige Performance. Erkunden Sie unsere Investment-Suite für anspruchsvolle Anleger.",
+          title: "Strategische Chancen",
+          description: "Entdecken Sie kuratierte Vermögenswerte für langfristige Performance. Erkunden Sie unsere Investment-Suite für anspruchsvolle Anleger.",
         },
       },
       investmentBox: {
         eyebrow: "Investmentchance",
-        title: {
-          prefix: "Vermögen ausbauen mit",
-          highlight: "Premium-Immobilien",
-        },
+        prefix: "Vermögen ausbauen mit",
+        highlight: "Premium-Immobilien",
         description:
           "Entdecken Sie exklusive Gelegenheiten im Luxussegment. Unser kuratiertes Portfolio bietet hohes Renditepotenzial und sichere Sachwerte für anspruchsvolle Anleger.",
         features: {
@@ -1205,6 +1229,7 @@ const resources = {
           "Основанная в 1995 году, CrystalDBC стала ведущей компанией по роскошной недвижимости с портфелем исключительных объектов.",
           "Десятилетия опыта дают нам глубокие знания рынка и понимание, что идеальный дом — это чувство принадлежности.",
           "Мы ценим детали, рыночную экспертизу и результаты, превосходящие ожидания. Покупка, продажа или инвестиции — мы рядом на каждом шаге.",
+          "Основанная на принципах честности и инноваций, CrystalDBC превратилась в глобальную силу. Мы не просто продаем недвижимость, мы создаем образ жизни.",
         ],
         valuesTitle: "Наши ценности",
         values: {
@@ -1214,11 +1239,22 @@ const resources = {
           service: { title: "Сервис", description: "Персональное внимание и забота о клиентах." },
         },
         stats: [
-          { label: "Лет опыта", value: "28+" },
-          { label: "Объектов продано", value: "2500+" },
-          { label: "Суммарный объём", value: "$5B+" },
-          { label: "Удовлетворённость", value: "98%" },
+          { label: "Продано недвижимости", value: "$5B+" },
+          { label: "Офисов по миру", value: "12" },
+          { label: "Довольных клиентов", value: "850+" },
+          { label: "Отраслевых наград", value: "30+" },
         ],
+        impact: {
+          eyebrow: "Наше влияние",
+          title: "Строим будущее",
+          description: "CrystalDBC — это больше, чем сделки; это трансформация. Мы инвестируем в устойчивое развитие и рост сообщества.",
+          items: [
+            "Инициативы устойчивого планирования",
+            "Сохранение культурного наследия",
+            "Стандарты зеленого строительства",
+            "Развитие местной экономики",
+          ],
+        },
         investmentSection: {
           eyebrow: "Инвестиции",
           title: "Стратегические возможности",

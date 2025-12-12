@@ -83,12 +83,30 @@ const MyInvestments = () => {
 
   const portfolioTrend = useMemo(() => {
     if (!investments.length) return [];
+
+    // 1. Sort investments by date
     const sorted = [...investments].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    let running = 0;
+
+    // 2. Identify all unique property titles
+    const propertyTitles = Array.from(new Set(sorted.map(inv => inv.property?.title || 'Unknown Property')));
+
+    // 3. Build cumulative data points
+    // We want a point for each investment event, carrying forward previous totals
+
+    let runningTotals: Record<string, number> = {};
+    propertyTitles.forEach(t => runningTotals[t] = 0);
+
     return sorted.map((inv) => {
-      running += inv.investmentAmount;
+      const title = inv.property?.title || 'Unknown Property';
+      runningTotals[title] = (runningTotals[title] || 0) + inv.investmentAmount;
+
       const label = new Date(inv.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric" });
-      return { month: label, value: running };
+
+      // Return snapshot of all properties at this point in time
+      return {
+        month: label,
+        ...runningTotals
+      };
     });
   }, [investments]);
 
@@ -114,75 +132,6 @@ const MyInvestments = () => {
         backgroundImage="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=2000"
       />
 
-      <section className="py-16 bg-gradient-to-br from-[#0d1323] via-[#0b1020] to-[#0f1a2f] text-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 sm:p-8 shadow-[0_20px_80px_-24px_rgba(0,0,0,0.45)]">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 rounded-3xl bg-white/5 border border-white/10 p-6 sm:p-8 shadow-inner">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.25em] text-white/60">{t("investment.stats.storyBadge")}</p>
-                    <h3 className="text-2xl font-display font-semibold">{t("investment.stats.storyTitle")}</h3>
-                  </div>
-                  <div className="rounded-full bg-white/10 px-3 py-1 text-sm text-white/80">{roiSnapshot.roi}</div>
-                </div>
-                <div className="relative mt-4 h-48 w-full overflow-hidden rounded-2xl bg-gradient-to-b from-white/5 to-transparent">
-                  <svg viewBox="0 0 280 160" className="w-full h-full">
-                    <defs>
-                      <linearGradient id="gradLine" x1="0%" x2="0%" y1="0%" y2="100%">
-                        <stop offset="0%" stopColor="#9f7aea" stopOpacity="0.95" />
-                        <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.35" />
-                      </linearGradient>
-                    </defs>
-                    <path d={sparklinePoints} fill="none" stroke="url(#gradLine)" strokeWidth="4" strokeLinecap="round" />
-                  </svg>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-4 text-sm text-white/80">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1">{t("investment.stats.growthChip1")}</span>
-                  <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1">{t("investment.stats.growthChip2")}</span>
-                  <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1">{t("investment.stats.growthChip3")}</span>
-                </div>
-              </div>
-
-              <div className="rounded-3xl bg-white/5 border border-white/10 p-6 sm:p-8 flex flex-col gap-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-white/70">{t("investment.stats.donutLabel")}</p>
-                    <p className="text-3xl font-bold">{roiSnapshot.roi}</p>
-                    <p className="text-xs text-white/60 mt-1">{t("investment.stats.donutNote")}</p>
-                  </div>
-                  <div className="relative h-24 w-24">
-                    <div
-                      className="absolute inset-0 rounded-full"
-                      style={{ background: `conic-gradient(#9f7aea 0% ${totals.averageRoi}%, #1e293b ${totals.averageRoi}% 100%)` }}
-                    />
-                    <div className="absolute inset-3 rounded-full bg-[#0f1625] border border-white/10" />
-                    <div className="absolute inset-0 flex items-center justify-center text-lg font-semibold">{roiSnapshot.roi}</div>
-                  </div>
-                </div>
-                <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-                  <p className="text-sm text-white/60">{t("investment.stats.profitLabel")}</p>
-                  <p className="text-2xl font-bold">{roiSnapshot.profit}</p>
-                  <p className="text-xs text-white/50">{t("investment.stats.profitNote")}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="rounded-2xl bg-white/5 border border-white/10 p-3">
-                    <p className="text-white/70">{t("investment.stats.cashFlowLabel")}</p>
-                    <p className="text-lg font-semibold text-white">{roiSnapshot.cashFlow}</p>
-                    <p className="text-xs text-white/50">{t("investment.stats.cashFlowNote")}</p>
-                  </div>
-                  <div className="rounded-2xl bg-white/5 border border-white/10 p-3">
-                    <p className="text-white/70">Total Contributed</p>
-                    <p className="text-lg font-semibold text-white">{roiSnapshot.contributions}</p>
-                    <p className="text-xs text-white/50">Sum of all funded amounts</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -203,10 +152,10 @@ const MyInvestments = () => {
           </div>
 
           <Card className="border border-white/10 bg-gradient-to-br from-[#0b1224] via-[#0a0f1d] to-[#0f1627] shadow-[0_25px_80px_-30px_rgba(0,0,0,0.65)] backdrop-blur mb-12">
-            <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between border-b border-white/5 pb-6">
               <div className="space-y-1">
                 <CardTitle className="text-xl font-display text-white">Portfolio Value Trend</CardTitle>
-                <p className="text-sm text-white/60">Cumulative investments over time</p>
+                <p className="text-sm text-white/60">Asset breakdown over time</p>
               </div>
               <div className="flex flex-wrap items-center gap-3 text-sm">
                 <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-white/80">
@@ -214,54 +163,75 @@ const MyInvestments = () => {
                   Value Growth
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/15 text-emerald-200 px-3 py-1 font-semibold">
+                  <TrendingUp className="w-3 h-3" />
                   {totals.averageRoi.toFixed(1)}% Avg ROI
                 </span>
               </div>
             </CardHeader>
-            <CardContent className="h-80">
+            <CardContent className="h-96 pt-6">
               {portfolioTrend.length === 0 ? (
                 <div className="h-full flex items-center justify-center text-white/60">No investments yet.</div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={portfolioTrend} margin={{ left: 0, right: 0, top: 10, bottom: 0 }}>
+                  <AreaChart data={portfolioTrend} margin={{ left: 0, right: 0, top: 20, bottom: 0 }}>
                     <defs>
-                      <linearGradient id="portfolioColor" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#f6c453" stopOpacity={0.9} />
-                        <stop offset="100%" stopColor="#f6c453" stopOpacity={0.08} />
-                      </linearGradient>
-                      <linearGradient id="portfolioSecondary" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#7dd3fc" stopOpacity={0.5} />
-                        <stop offset="100%" stopColor="#38bdf8" stopOpacity={0.05} />
+                      {/* Generically defined gradients if needed, though we use solid colors mostly for stacked */}
+                      <linearGradient id="gradientGeneric" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#f6c453" stopOpacity={0.6} />
+                        <stop offset="100%" stopColor="#f6c453" stopOpacity={0.0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="2 4" stroke="rgba(255,255,255,0.08)" />
-                    <XAxis dataKey="month" stroke="rgba(255,255,255,0.3)" tick={{ fill: "rgba(255,255,255,0.7)" }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                    <XAxis
+                      dataKey="month"
+                      stroke="rgba(255,255,255,0.2)"
+                      tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }}
+                      tickLine={false}
+                      axisLine={false}
+                      dy={10}
+                    />
                     <YAxis
-                      stroke="rgba(255,255,255,0.3)"
-                      tick={{ fill: "rgba(255,255,255,0.7)" }}
+                      stroke="rgba(255,255,255,0.2)"
+                      tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }}
                       tickFormatter={(v) => `${Math.round(v / 1000000)}m`}
+                      tickLine={false}
+                      axisLine={false}
+                      dx={-10}
                     />
                     <Tooltip
+                      cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }}
                       contentStyle={{
                         background: "rgba(12,17,28,0.95)",
                         border: "1px solid rgba(255,255,255,0.1)",
                         borderRadius: 12,
                         color: "white",
-                        boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+                        boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+                        padding: "12px 16px"
                       }}
-                      labelStyle={{ color: "white", fontWeight: 700 }}
-                      formatter={(value: number) => [`EGP ${Math.round(value).toLocaleString()}`, "Portfolio Value"]}
+                      labelStyle={{ color: "rgba(255,255,255,0.7)", fontSize: 12, marginBottom: 4 }}
+                      formatter={(value: number, name: string) => [
+                        <span className="font-bold text-lg">EGP {Math.round(value).toLocaleString()}</span>,
+                        name
+                      ]}
                     />
-                    <Area
-                      type="monotone"
-                      dataKey="value"
-                      stroke="#f6c453"
-                      strokeWidth={3}
-                      fill="url(#portfolioColor)"
-                      fillOpacity={1}
-                      dot={{ r: 4, strokeWidth: 2, stroke: "#0b1224", fill: "#f6c453" }}
-                      activeDot={{ r: 7, stroke: "white", strokeWidth: 2 }}
-                    />
+                    {/* Render Areas dynamically based on available properties */}
+                    {Object.keys(portfolioTrend[0] || {}).filter(k => k !== 'month' && k !== 'total').map((propName, index) => {
+                      const colors = ["#f6c453", "#38bdf8", "#34d399", "#f472b6", "#a78bfa"];
+                      const color = colors[index % colors.length];
+                      return (
+                        <Area
+                          key={propName}
+                          type="monotone"
+                          dataKey={propName}
+                          stackId="1"
+                          stroke={color}
+                          fill={color}
+                          fillOpacity={0.6}
+                          strokeWidth={2}
+                          activeDot={{ r: 6, stroke: "white", strokeWidth: 2 }}
+                        />
+                      );
+                    })}
                   </AreaChart>
                 </ResponsiveContainer>
               )}
