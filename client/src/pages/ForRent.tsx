@@ -80,13 +80,14 @@ const ForRent = () => {
           { label: t("rentals.stats.cities"), value: `${cityCount}`, helper: t("rentals.stats.citiesHelper") },
           { label: t("rentals.stats.types"), value: `${typeCount}`, helper: t("rentals.stats.typesHelper") },
         ]}
-        backgroundImage="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&q=80&w=2000"
+        backgroundImage="/crystalpattern2.png"
+        isPattern={true}
       />
 
       {/* Search and Filters */}
       <section id="filters" className="relative isolate py-12 overflow-hidden">
         <div
-          className="absolute inset-0 opacity-[0.14]"
+          className="absolute inset-0"
           style={{ backgroundImage: "url(/crystalpattern2.png)", backgroundRepeat: "repeat" }}
           aria-hidden
         />

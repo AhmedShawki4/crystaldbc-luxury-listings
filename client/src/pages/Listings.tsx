@@ -84,10 +84,12 @@ const Listings = () => {
       <section className="relative isolate overflow-hidden border-b border-white/10 bg-gradient-to-br from-luxury-dark via-luxury-dark/95 to-[#111] pt-28 pb-16 text-white">
         {/* Background Image */}
         <div className="absolute inset-0 -z-10 h-full w-full">
-          <img
-            src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&q=80&w=2000"
-            alt="Luxury Property Background"
-            className="h-full w-full object-cover opacity-20"
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "url(/crystalpattern2.png)",
+              backgroundRepeat: "repeat"
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-luxury-dark via-luxury-dark/80 to-transparent" />
         </div>
