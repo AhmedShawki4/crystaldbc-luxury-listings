@@ -111,6 +111,7 @@ const MyInvestments = () => {
           { label: "Expected Profit", value: formatCurrency(totals.expectedProfit) },
           { label: "Avg ROI", value: `${totals.averageRoi.toFixed(1)}%` },
         ]}
+        backgroundImage="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=2000"
       />
 
       <section className="py-16 bg-gradient-to-br from-[#0d1323] via-[#0b1020] to-[#0f1a2f] text-white">
@@ -310,11 +311,11 @@ const MyInvestments = () => {
                       <div className="rounded-lg border border-border/70 p-3">
                         <p className="text-muted-foreground">Amount Received</p>
                         <p className="text-lg font-semibold">{formatCurrency(investment.amountReceived)}</p>
-                          <div className="mt-3">
-                            <Button asChild variant="outline" className="w-full border-luxury-gold/60 text-luxury-gold hover:bg-luxury-gold/10">
-                              <Link to="/contact">Request to increase amount</Link>
-                            </Button>
-                          </div>
+                        <div className="mt-3">
+                          <Button asChild variant="outline" className="w-full border-luxury-gold/60 text-luxury-gold hover:bg-luxury-gold/10">
+                            <Link to="/contact">Request to increase amount</Link>
+                          </Button>
+                        </div>
                       </div>
                       <div className="rounded-lg border border-border/70 p-3">
                         <p className="text-muted-foreground">Payment Status</p>

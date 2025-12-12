@@ -70,6 +70,16 @@ const ForRent = () => {
 
   return (
     <div className="min-h-screen">
+      {/* Unified Background */}
+      <div className="fixed inset-0 z-[-1]">
+        <img
+          src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=2000"
+          alt="Background"
+          className="w-full h-full object-cover opacity-[0.03]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/50 to-background" />
+      </div>
+
       <PageHero
         eyebrow={t("rentals.heroEyebrow")}
         title={t("rentals.heroTitle")}
@@ -80,17 +90,13 @@ const ForRent = () => {
           { label: t("rentals.stats.cities"), value: `${cityCount}`, helper: t("rentals.stats.citiesHelper") },
           { label: t("rentals.stats.types"), value: `${typeCount}`, helper: t("rentals.stats.typesHelper") },
         ]}
-        actions={(
-          <Button asChild className="bg-luxury-gold text-luxury-dark hover:bg-luxury-gold/85 shadow-lg shadow-luxury-gold/20">
-            <a href="/auth/login">Pay Your Rent</a>
-          </Button>
-        )}
+        backgroundImage="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&q=80&w=2000"
       />
 
       {/* Search and Filters */}
-      <section id="filters" className="relative isolate py-12 bg-gradient-to-b from-luxury-dark/40 via-background to-background">
+      <section id="filters" className="relative isolate py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-luxury-dark/40 backdrop-blur-xl shadow-2xl shadow-luxury-gold/15">
+          <div className="rounded-3xl border border-white/10 bg-luxury-dark/90 backdrop-blur-xl shadow-2xl shadow-luxury-gold/15 reveal-section">
             <div className="space-y-6 p-6 sm:p-8">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -242,8 +248,9 @@ const ForRent = () => {
         </div>
       </section>
 
-      <section className="py-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-12 relative overflow-hidden reveal-section">
+        {/* Unified background handles visibility */}
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div className="flex items-center gap-2">
               <label htmlFor="sort" className="text-sm text-muted-foreground">

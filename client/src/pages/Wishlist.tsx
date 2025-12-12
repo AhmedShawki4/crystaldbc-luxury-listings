@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import apiClient from "@/lib/apiClient";
 import type { WishlistItem } from "@/types";
-import { Trash2 } from "lucide-react";
+import { Trash2, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { getMediaUrl } from "@/lib/media";
 import { useTranslation } from "react-i18next";
+import PageHero from "@/components/PageHero";
 
 const fetchWishlist = async () => {
   const { data } = await apiClient.get<{ items: WishlistItem[] }>("/wishlist");
@@ -32,13 +33,14 @@ const Wishlist = () => {
   });
 
   return (
-    <div className="min-h-screen pt-20 pb-12">
-      <section className="bg-muted/30 py-16 border-b border-border">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-display font-bold text-primary">{t("wishlist.title")}</h1>
-          <p className="text-muted-foreground mt-3">{t("wishlist.subtitle")}</p>
-        </div>
-      </section>
+    <div className="min-h-screen">
+      <PageHero
+        eyebrow="Your Collection"
+        title={t("wishlist.title")}
+        description={t("wishlist.subtitle")}
+        icon={Heart}
+        backgroundImage="https://images.unsplash.com/photo-1513584685908-2274653dbf29?auto=format&fit=crop&q=80&w=2000"
+      />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {isLoading ? (

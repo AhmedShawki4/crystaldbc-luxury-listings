@@ -71,17 +71,68 @@ const Listings = () => {
 
   return (
     <div className="min-h-screen">
-      <PageHero
-        eyebrow={t("listings.heroEyebrow")}
-        title={t("listings.heroTitle")}
-        description={t("listings.heroDescription")}
-        icon={Building2}
-        stats={[
-          { label: t("listings.stats.active"), value: isLoading ? "..." : `${properties.length}` },
-          { label: t("listings.stats.cities"), value: `${cityCount}`, helper: t("listings.stats.citiesHelper") },
-          { label: t("listings.stats.types"), value: `${typeCount}`, helper: t("listings.stats.typesHelper") },
-        ]}
-      />
+      {/* Unified Background */}
+      <div className="fixed inset-0 z-[-1]">
+        <img
+          src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=2000"
+          alt="Background"
+          className="w-full h-full object-cover opacity-[0.03]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/50 to-background" />
+      </div>
+      {/* Custom Hero Section */}
+      <section className="relative isolate overflow-hidden border-b border-white/10 bg-gradient-to-br from-luxury-dark via-luxury-dark/95 to-[#111] pt-28 pb-16 text-white">
+        {/* Background Image */}
+        <div className="absolute inset-0 -z-10 h-full w-full">
+          <img
+            src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&q=80&w=2000"
+            alt="Luxury Property Background"
+            className="h-full w-full object-cover opacity-20"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-luxury-dark via-luxury-dark/80 to-transparent" />
+        </div>
+
+        <div className="absolute -top-20 left-1/4 h-72 w-72 rounded-full bg-luxury-gold/20 blur-[120px]" aria-hidden="true"></div>
+        <div className="absolute -bottom-24 right-1/3 h-72 w-72 rounded-full bg-accent/20 blur-[120px]" aria-hidden="true"></div>
+
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr),auto] lg:items-center">
+            <div className="space-y-6">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-white/70">
+                Luxury Listings
+              </span>
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10">
+                  <Building2 className="h-7 w-7" />
+                </span>
+                <h1 className="text-4xl font-display font-bold leading-tight md:text-5xl">
+                  {t("listings.heroTitle")}
+                </h1>
+              </div>
+              <p className="text-lg text-white/80 md:text-xl max-w-2xl">
+                {t("listings.heroDescription")}
+              </p>
+            </div>
+
+            <div className="grid min-w-[240px] gap-4 rounded-3xl border border-white/15 bg-white/5 p-6 backdrop-blur-xl">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10">
+                <p className="text-3xl font-display font-bold text-white">{isLoading ? "..." : properties.length}</p>
+                <p className="text-sm uppercase tracking-[0.2em] text-white/60">Active Listings</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10">
+                <p className="text-3xl font-display font-bold text-white">{cityCount}</p>
+                <p className="text-sm uppercase tracking-[0.2em] text-white/60">Cities</p>
+                <p className="text-xs text-white/60 mt-1">Across Egypt</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10">
+                <p className="text-3xl font-display font-bold text-white">{typeCount}</p>
+                <p className="text-sm uppercase tracking-[0.2em] text-white/60">Property Types</p>
+                <p className="text-xs text-white/60 mt-1">Villas, penthouses, more</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Search and Filters */}
       <section id="filters" className="relative isolate py-12 bg-gradient-to-b from-luxury-dark/40 via-background to-background">

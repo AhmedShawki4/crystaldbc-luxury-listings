@@ -258,7 +258,7 @@ const PropertyDetail = () => {
   }
 
   return (
-    <div className="min-h-screen pt-20">
+    <div className="min-h-screen pt-20 bg-muted/10">
       {/* Back Button */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Button asChild variant="ghost" className="group">
@@ -284,11 +284,10 @@ const PropertyDetail = () => {
               <button
                 key={index}
                 onClick={() => setSelectedImage(index)}
-                className={`relative h-32 overflow-hidden rounded-lg border-2 transition-all ${
-                  selectedImage === index
+                className={`relative h-32 overflow-hidden rounded-lg border-2 transition-all ${selectedImage === index
                     ? "border-accent"
                     : "border-transparent hover:border-border"
-                }`}
+                  }`}
               >
                 <img
                   src={getMediaUrl(image)}
@@ -400,11 +399,11 @@ const PropertyDetail = () => {
               <p className="text-muted-foreground mb-6 leading-relaxed">
                 Get exclusive access, floor plans, and personalized consultation with our experts.
               </p>
-              
+
               <div className="space-y-4">
-                <Button 
-                  asChild 
-                  variant="outline" 
+                <Button
+                  asChild
+                  variant="outline"
                   className="w-full border-2 hover:bg-accent/10"
                 >
                   <a href="tel:+971123456789" className="flex items-center justify-center gap-2">
@@ -412,9 +411,9 @@ const PropertyDetail = () => {
                     Call +971 12 345 6789
                   </a>
                 </Button>
-                
+
                 {canUseInterest && (
-                  <Button 
+                  <Button
                     onClick={() => setIsDialogOpen(true)}
                     className="w-full bg-accent hover:bg-accent/90 text-accent-foreground flex items-center justify-center gap-2"
                   >
@@ -448,7 +447,7 @@ const PropertyDetail = () => {
                   <Heart className="h-4 w-4" />
                   {persistedPropertyId ? (isWishlistSaving ? "Saving..." : "Save to Wishlist") : "Link property to enable"}
                 </Button>
-                
+
                 {canUseInterest && (
                   <RegisterInterestDialog
                     open={isDialogOpen}
@@ -504,7 +503,7 @@ const PropertyDetail = () => {
                 </Dialog>
               </div>
             </div>
-            
+
             {/* Project Statistics Card */}
             <div className="bg-card border border-border rounded-lg p-6 mt-6">
               <h3 className="text-xl font-display font-bold text-primary mb-6">

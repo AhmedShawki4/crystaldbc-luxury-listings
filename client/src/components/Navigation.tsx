@@ -19,6 +19,14 @@ const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   const { user, isAuthenticated, logout, loading } = useAuth();
   const { t, i18n } = useTranslation();
   const languages = [
@@ -28,6 +36,11 @@ const Navigation = () => {
     { code: "ru", label: "RU", Flag: RU },
   ];
   const [activeLang, setActiveLang] = useState(i18n.language || "en");
+
+  const handleLanguageChange = (lang: string) => {
+    i18n.changeLanguage(lang);
+    setActiveLang(lang);
+  };
 
   const navLinks: NavLinkItem[] = [
     { name: t("nav.home"), path: "/", icon: Home },
@@ -43,28 +56,9 @@ const Navigation = () => {
   }
 
   const isActive = (path: string) => location.pathname === path;
-  const isHomePage = location.pathname === "/";
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    setActiveLang(i18n.language || "en");
-  }, [i18n.language]);
-
-  const handleLanguageChange = async (code: string) => {
-    setActiveLang(code);
-    await i18n.changeLanguage(code);
-  };
-
-  // Use dark background with backdrop blur when scrolled, not on homepage, or mobile menu is open
-  const useDarkNav = scrolled || !isHomePage || isOpen;
+  const transparentPaths = ["/", "/listings", "/for-rent", "/investment", "/about", "/contact", "/my-investments"];
+  const isTransparentPage = transparentPaths.includes(location.pathname) || location.pathname.startsWith("/property/");
+  const useDarkNav = scrolled || !isTransparentPage || isOpen;
 
   return (
     <nav
@@ -80,7 +74,7 @@ const Navigation = () => {
         <div className="hidden lg:flex items-center justify-between pb-1 text-[9px] font-semibold uppercase tracking-[0.32em] text-white/60">
           <span className="flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5 text-luxury-gold" />
-            {t("layout.tagline")}
+            <span className="font-display font-medium text-white/90">{t("layout.tagline")}</span>
           </span>
           <span className="text-white/40">{t("layout.locations")}</span>
         </div>
@@ -145,11 +139,10 @@ const Navigation = () => {
                       handleLanguageChange(lang.code);
                       document.getElementById('lang-desktop')?.classList.add('hidden');
                     }}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
-                      activeLang === lang.code
-                        ? 'bg-white/15 text-white font-semibold'
-                        : 'text-white/80 hover:bg-white/10 hover:text-white'
-                    }`}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${activeLang === lang.code
+                      ? 'bg-white/15 text-white font-semibold'
+                      : 'text-white/80 hover:bg-white/10 hover:text-white'
+                      }`}
                   >
                     <div className="w-5 h-3.5 flex-shrink-0">
                       <lang.Flag />
@@ -237,11 +230,10 @@ const Navigation = () => {
                       key={lang.code}
                       type="button"
                       onClick={() => handleLanguageChange(lang.code)}
-                      className={`flex items-center gap-3 rounded-lg border px-4 py-2.5 transition-all ${
-                        activeLang === lang.code
-                          ? 'border-white/30 bg-white/15 text-white'
-                          : 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
-                      }`}
+                      className={`flex items-center gap-3 rounded-lg border px-4 py-2.5 transition-all ${activeLang === lang.code
+                        ? 'border-white/30 bg-white/15 text-white'
+                        : 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
+                        }`}
                     >
                       <div className="w-6 h-4 flex-shrink-0">
                         <lang.Flag />
@@ -281,16 +273,16 @@ const Navigation = () => {
                 </div>
               ) : (
                 <div className="flex flex-col gap-3 border-t border-white/10 pt-4">
-                  <Link 
-                    to="/auth/login" 
-                    onClick={() => setIsOpen(false)} 
+                  <Link
+                    to="/auth/login"
+                    onClick={() => setIsOpen(false)}
                     className="flex items-center justify-center rounded-lg border border-white/30 bg-white/10 hover:bg-white/15 px-4 py-3 text-white font-semibold transition-all"
                   >
                     {t("nav.login")}
                   </Link>
-                  <Link 
-                    to="/auth/register" 
-                    onClick={() => setIsOpen(false)} 
+                  <Link
+                    to="/auth/register"
+                    onClick={() => setIsOpen(false)}
                     className="flex items-center justify-center rounded-lg bg-accent hover:bg-accent/90 px-4 py-3 text-accent-foreground font-semibold shadow-lg transition-all"
                   >
                     {t("nav.createAccount")}

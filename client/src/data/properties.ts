@@ -15,6 +15,7 @@ export interface Property {
   type: string;
   status: string;
   isInvestable?: boolean;
+  roiPercentage?: number;
   minInvestmentAmount?: number;
 }
 

@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
-import InitialLoader from "./components/InitialLoader";
+
 import RegisterInterestDialog from "./components/RegisterInterestDialog";
 import Home from "./pages/Home";
 import Listings from "./pages/Listings";
@@ -19,6 +19,7 @@ import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/Auth";
 import Wishlist from "./pages/Wishlist";
 import ProtectedRoute from "./components/ProtectedRoute";
+import EntranceAnimation from "./components/EntranceAnimation";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminOverview from "./pages/admin/AdminOverview";
 import AdminProperties from "./pages/admin/AdminProperties";
@@ -41,10 +42,11 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <EntranceAnimation />
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <InitialLoader />
+
         <BrowserRouter>
           <RegisterInterestDialog />
           <Routes>
@@ -56,7 +58,14 @@ const App = () => {
               <Route path="about" element={<About />} />
               <Route path="contact" element={<Contact />} />
               <Route path="investment" element={<Investment />} />
-              <Route path="my-investments" element={<MyInvestments />} />
+              <Route
+                path="my-investments"
+                element={
+                  <ProtectedRoute roles={["user", "admin", "employee", "property-handler"]}>
+                    <MyInvestments />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="wishlist"
                 element={
