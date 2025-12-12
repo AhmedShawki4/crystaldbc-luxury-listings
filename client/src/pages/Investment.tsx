@@ -46,9 +46,9 @@ const Investment = () => {
             <section className="relative py-20 md:py-32 bg-luxury-dark text-white overflow-hidden">
                 <div className="absolute inset-0 z-0">
                     <img
-                        src="https://images.unsplash.com/photo-1460317442991-0ec2aa24e565?q=80&w=2000&auto=format&fit=crop"
+                        src="/crystalpattern.png"
                         alt="Investment Background"
-                        className="w-full h-full object-cover opacity-40"
+                        className="w-full h-full object-cover opacity-30"
                     />
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-b from-luxury-dark/90 via-luxury-dark/80 to-luxury-dark z-0" />
@@ -71,7 +71,7 @@ const Investment = () => {
                                     <Link to="/contact">{t("investment.ctaStart")}</Link>
                                 </Button>
                                 <Button asChild size="lg" className="bg-white text-luxury-dark hover:bg-white/90 font-semibold text-lg px-8">
-                                    <Link to="/my-investments">Your Investments</Link>
+                                    <Link to="/my-investments">{t("investment.ctaMyInvestments")}</Link>
                                 </Button>
                                 <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white/10 font-semibold text-lg px-8">
                                     {t("investment.ctaBrochure")}
@@ -87,11 +87,11 @@ const Investment = () => {
                                 alt="A 3D model of a luxury property"
                                 shadow-intensity="1"
                                 auto-rotate
+                                camera-controls
                                 camera-orbit="45deg 55deg 2.5m"
                                 rotation-per-second="30deg"
                                 interaction-prompt="none"
                                 disable-zoom
-                                disable-tap
                                 style={{ width: '100%', height: '100%' }}
                             />
                         </div>
@@ -141,21 +141,21 @@ const Investment = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-24">
                         <div className="space-y-8">
                             <div className="inline-block border-l-4 border-luxury-gold pl-4">
-                                <h3 className="text-luxury-gold uppercase tracking-widest text-sm font-semibold mb-2">Market Insights</h3>
-                                <h2 className="text-3xl md:text-5xl font-display font-bold leading-tight">Data-Driven <br />Decision Making</h2>
+                                <h3 className="text-luxury-gold uppercase tracking-widest text-sm font-semibold mb-2">{t("investment.marketInsightsEyebrow")}</h3>
+                                <h2 className="text-3xl md:text-5xl font-display font-bold leading-tight">{t("investment.marketInsightsTitle")}</h2>
                             </div>
                             <p className="text-lg text-white/80 leading-relaxed">
-                                We leverage proprietary data analytics and real-time market intelligence to identify high-potential opportunities before they hit the open market. Our analysis covers macroeconomic trends, neighborhood development plans, and historical appreciation rates.
+                                {t("investment.marketInsightsDescription")}
                             </p>
 
                             <div className="grid grid-cols-2 gap-8 pt-4">
                                 <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
                                     <p className="text-4xl font-display font-bold text-luxury-gold mb-2">12.5%</p>
-                                    <p className="text-sm text-white/70">Avg. Annual Appreciation</p>
+                                    <p className="text-sm text-white/70">{t("investment.marketStats.appreciation")}</p>
                                 </div>
                                 <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
                                     <p className="text-4xl font-display font-bold text-luxury-gold mb-2">94%</p>
-                                    <p className="text-sm text-white/70">Occupancy Rate</p>
+                                    <p className="text-sm text-white/70">{t("investment.marketStats.occupancy")}</p>
                                 </div>
                             </div>
                         </div>
@@ -173,7 +173,7 @@ const Investment = () => {
                                         <TrendingUp className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500 font-medium">Market Outperformance</p>
+                                        <p className="text-sm text-gray-500 font-medium">{t("investment.marketStats.outperformance")}</p>
                                         <p className="text-2xl font-bold text-gray-900">+12.4%</p>
                                     </div>
                                 </div>
@@ -191,27 +191,27 @@ const Investment = () => {
                             <div className="w-14 h-14 rounded-full bg-luxury-gold/20 flex items-center justify-center mb-6 text-luxury-gold group-hover:scale-110 transition-transform">
                                 <PieChart className="w-7 h-7" />
                             </div>
-                            <h3 className="text-2xl font-display font-bold mb-4">Asset Allocation</h3>
+                            <h3 className="text-2xl font-display font-bold mb-4">{t("investment.marketCards.allocation")}</h3>
                             <p className="text-white/70 leading-relaxed">
-                                Balanced portfolios across residential luxury, commercial high-yield, and emerging development projects to optimize risk-adjusted returns.
+                                {t("investment.marketCardsDescriptions.allocation")}
                             </p>
                         </div>
                         <div className="p-8 rounded-3xl bg-gradient-to-br from-white/10 to-transparent border border-white/10 hover:border-luxury-gold/50 transition-colors group">
                             <div className="w-14 h-14 rounded-full bg-luxury-gold/20 flex items-center justify-center mb-6 text-luxury-gold group-hover:scale-110 transition-transform">
                                 <Building2 className="w-7 h-7" />
                             </div>
-                            <h3 className="text-2xl font-display font-bold mb-4">Value Add</h3>
+                            <h3 className="text-2xl font-display font-bold mb-4">{t("investment.marketCards.valueAdd")}</h3>
                             <p className="text-white/70 leading-relaxed">
-                                Identifying underutilized assets and implementing strategic renovations or repositioning to forcefully unlock significant equity value.
+                                {t("investment.marketCardsDescriptions.valueAdd")}
                             </p>
                         </div>
                         <div className="p-8 rounded-3xl bg-gradient-to-br from-white/10 to-transparent border border-white/10 hover:border-luxury-gold/50 transition-colors group">
                             <div className="w-14 h-14 rounded-full bg-luxury-gold/20 flex items-center justify-center mb-6 text-luxury-gold group-hover:scale-110 transition-transform">
                                 <BarChart3 className="w-7 h-7" />
                             </div>
-                            <h3 className="text-2xl font-display font-bold mb-4">Exit Strategy</h3>
+                            <h3 className="text-2xl font-display font-bold mb-4">{t("investment.marketCards.exitStrategy")}</h3>
                             <p className="text-white/70 leading-relaxed">
-                                Clear, predefined exit milestones for each asset class, ensuring liquidity and capital recycling for continuous portfolio growth.
+                                {t("investment.marketCardsDescriptions.exitStrategy")}
                             </p>
                         </div>
                     </div>

@@ -29,8 +29,8 @@ const fetchMyInvestments = async () => {
 };
 
 const formatCurrency = (value: number) => `EGP ${Math.round(value).toLocaleString()}`;
-const formatDate = (value?: string) => {
-  if (!value) return "Not scheduled";
+const formatDate = (value: string | undefined, notScheduledLabel: string) => {
+  if (!value) return notScheduledLabel;
   const date = new Date(value);
   return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 };
@@ -39,6 +39,9 @@ const MyInvestments = () => {
   const { t } = useTranslation();
   const { data, isLoading } = useQuery({ queryKey: ["my-investments"], queryFn: fetchMyInvestments });
   const investments = data ?? [];
+
+  const unknownPropertyLabel = t("myInvestments.unknownProperty");
+  const notScheduledLabel = t("myInvestments.notScheduled");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -59,7 +62,7 @@ const MyInvestments = () => {
 
     const averageRoi = investments.length ? aggregate.avgRoi / investments.length : 0;
     return { ...aggregate, averageRoi };
-  }, [investments]);
+  }, [investments, unknownPropertyLabel]);
 
   const roiSnapshot = {
     roi: `${totals.averageRoi.toFixed(1)}%`,
@@ -88,7 +91,7 @@ const MyInvestments = () => {
     const sorted = [...investments].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
     // 2. Identify all unique property titles
-    const propertyTitles = Array.from(new Set(sorted.map(inv => inv.property?.title || 'Unknown Property')));
+    const propertyTitles = Array.from(new Set(sorted.map(inv => inv.property?.title || unknownPropertyLabel)));
 
     // 3. Build cumulative data points
     // We want a point for each investment event, carrying forward previous totals
@@ -97,7 +100,7 @@ const MyInvestments = () => {
     propertyTitles.forEach(t => runningTotals[t] = 0);
 
     return sorted.map((inv) => {
-      const title = inv.property?.title || 'Unknown Property';
+      const title = inv.property?.title || unknownPropertyLabel;
       runningTotals[title] = (runningTotals[title] || 0) + inv.investmentAmount;
 
       const label = new Date(inv.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric" });
@@ -111,23 +114,23 @@ const MyInvestments = () => {
   }, [investments]);
 
   const overviewStats = [
-    { label: "Total Invested", value: formatCurrency(totals.totalInvested), icon: DollarSign },
-    { label: "Expected Profit", value: formatCurrency(totals.expectedProfit), icon: CircleDollarSign },
-    { label: "Received", value: formatCurrency(totals.amountReceived), icon: Wallet },
-    { label: "Avg ROI", value: `${totals.averageRoi.toFixed(1)}%`, icon: TrendingUp },
+    { label: t("myInvestments.stats.totalInvested"), value: formatCurrency(totals.totalInvested), icon: DollarSign },
+    { label: t("myInvestments.stats.expectedProfit"), value: formatCurrency(totals.expectedProfit), icon: CircleDollarSign },
+    { label: t("myInvestments.stats.received"), value: formatCurrency(totals.amountReceived), icon: Wallet },
+    { label: t("myInvestments.stats.avgRoi"), value: `${totals.averageRoi.toFixed(1)}%`, icon: TrendingUp },
   ];
 
   return (
     <div className="min-h-screen">
       <PageHero
-        eyebrow="Portfolio Overview"
-        title="Your Investments"
-        description="Track your real estate investment portfolio performance and returns in real-time."
+        eyebrow={t("myInvestments.heroEyebrow")}
+        title={t("myInvestments.heroTitle")}
+        description={t("myInvestments.heroDescription")}
         icon={TrendingUp}
         stats={[
-          { label: "Total Invested", value: formatCurrency(totals.totalInvested) },
-          { label: "Expected Profit", value: formatCurrency(totals.expectedProfit) },
-          { label: "Avg ROI", value: `${totals.averageRoi.toFixed(1)}%` },
+          { label: t("myInvestments.stats.totalInvested"), value: formatCurrency(totals.totalInvested) },
+          { label: t("myInvestments.stats.expectedProfit"), value: formatCurrency(totals.expectedProfit) },
+          { label: t("myInvestments.stats.avgRoi"), value: `${totals.averageRoi.toFixed(1)}%` },
         ]}
         backgroundImage="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=2000"
       />
@@ -154,23 +157,23 @@ const MyInvestments = () => {
           <Card className="border border-white/10 bg-gradient-to-br from-[#0b1224] via-[#0a0f1d] to-[#0f1627] shadow-[0_25px_80px_-30px_rgba(0,0,0,0.65)] backdrop-blur mb-12">
             <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between border-b border-white/5 pb-6">
               <div className="space-y-1">
-                <CardTitle className="text-xl font-display text-white">Portfolio Value Trend</CardTitle>
-                <p className="text-sm text-white/60">Asset breakdown over time</p>
+                <CardTitle className="text-xl font-display text-white">{t("myInvestments.portfolioValueTrend")}</CardTitle>
+                <p className="text-sm text-white/60">{t("myInvestments.assetBreakdownOverTime")}</p>
               </div>
               <div className="flex flex-wrap items-center gap-3 text-sm">
                 <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-white/80">
                   <span className="h-2 w-2 rounded-full bg-luxury-gold" />
-                  Value Growth
+                  {t("myInvestments.valueGrowth")}
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/15 text-emerald-200 px-3 py-1 font-semibold">
                   <TrendingUp className="w-3 h-3" />
-                  {totals.averageRoi.toFixed(1)}% Avg ROI
+                  {totals.averageRoi.toFixed(1)}% {t("myInvestments.stats.avgRoi")}
                 </span>
               </div>
             </CardHeader>
             <CardContent className="h-96 pt-6">
               {portfolioTrend.length === 0 ? (
-                <div className="h-full flex items-center justify-center text-white/60">No investments yet.</div>
+                <div className="h-full flex items-center justify-center text-white/60">{t("myInvestments.empty")}</div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={portfolioTrend} margin={{ left: 0, right: 0, top: 20, bottom: 0 }}>
@@ -239,15 +242,15 @@ const MyInvestments = () => {
           </Card>
 
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-display font-bold">Active Investments</h2>
+            <h2 className="text-2xl font-display font-bold">{t("myInvestments.activeInvestments")}</h2>
             <Button variant="outline" asChild>
-              <Link to="/investment">Explore More Opportunities</Link>
+              <Link to="/investment">{t("myInvestments.exploreMore")}</Link>
             </Button>
           </div>
 
           <div className="grid grid-cols-1 gap-6">
-            {isLoading && <p className="text-muted-foreground">Loading your investments...</p>}
-            {!isLoading && investments.length === 0 && <p className="text-muted-foreground">No investments yet.</p>}
+            {isLoading && <p className="text-muted-foreground">{t("myInvestments.loading")}</p>}
+            {!isLoading && investments.length === 0 && <p className="text-muted-foreground">{t("myInvestments.empty")}</p>}
             {investments.map((investment) => {
               const expected = investment.expectedProfit || investment.investmentAmount * (investment.roiPercentage / 100);
               return (
@@ -267,48 +270,48 @@ const MyInvestments = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm">
                       <div className="rounded-lg border border-border/70 p-3">
-                        <p className="text-muted-foreground">Investment Amount</p>
+                        <p className="text-muted-foreground">{t("myInvestments.labels.investmentAmount")}</p>
                         <p className="text-lg font-semibold">{formatCurrency(investment.investmentAmount)}</p>
                       </div>
                       <div className="rounded-lg border border-border/70 p-3">
-                        <p className="text-muted-foreground">ROI %</p>
+                        <p className="text-muted-foreground">{t("myInvestments.labels.roiPercent")}</p>
                         <p className="text-lg font-semibold">{investment.roiPercentage}%</p>
                       </div>
                       <div className="rounded-lg border border-border/70 p-3">
-                        <p className="text-muted-foreground">Expected Profit</p>
+                        <p className="text-muted-foreground">{t("myInvestments.labels.expectedProfit")}</p>
                         <p className="text-lg font-semibold">{formatCurrency(expected)}</p>
                       </div>
                       <div className="rounded-lg border border-border/70 p-3">
-                        <p className="text-muted-foreground">Amount Received</p>
+                        <p className="text-muted-foreground">{t("myInvestments.labels.amountReceived")}</p>
                         <p className="text-lg font-semibold">{formatCurrency(investment.amountReceived)}</p>
                         <div className="mt-3">
                           <Button asChild variant="outline" className="w-full border-luxury-gold/60 text-luxury-gold hover:bg-luxury-gold/10">
-                            <Link to="/contact">Request to increase amount</Link>
+                            <Link to="/contact">{t("myInvestments.labels.requestIncrease")}</Link>
                           </Button>
                         </div>
                       </div>
                       <div className="rounded-lg border border-border/70 p-3">
-                        <p className="text-muted-foreground">Payment Status</p>
+                        <p className="text-muted-foreground">{t("myInvestments.labels.paymentStatus")}</p>
                         <p className="text-lg font-semibold">{investment.paymentStatus}</p>
                       </div>
                       <div className="rounded-lg border border-border/70 p-3">
-                        <p className="text-muted-foreground">Status</p>
+                        <p className="text-muted-foreground">{t("myInvestments.labels.status")}</p>
                         <p className="text-lg font-semibold">{investment.status}</p>
                       </div>
                       <div className="rounded-lg border border-border/70 p-3">
-                        <p className="text-muted-foreground">Monthly Payout Date</p>
-                        <p className="text-lg font-semibold">{formatDate(investment.payoutDate)}</p>
-                        <p className="text-xs text-muted-foreground">Scheduled deposit date</p>
+                        <p className="text-muted-foreground">{t("myInvestments.labels.monthlyPayoutDate")}</p>
+                        <p className="text-lg font-semibold">{formatDate(investment.payoutDate, notScheduledLabel)}</p>
+                        <p className="text-xs text-muted-foreground">{t("myInvestments.labels.scheduledDepositDate")}</p>
                       </div>
                       <div className="rounded-lg border border-border/70 p-3">
-                        <p className="text-muted-foreground">Notes</p>
-                        <p className="text-sm text-foreground leading-relaxed min-h-[40px]">{investment.notes || "No notes provided."}</p>
+                        <p className="text-muted-foreground">{t("myInvestments.labels.notes")}</p>
+                        <p className="text-sm text-foreground leading-relaxed min-h-[40px]">{investment.notes || t("myInvestments.noNotes")}</p>
                       </div>
                     </div>
 
                     <div className="flex flex-wrap gap-3 text-xs font-medium uppercase tracking-wide">
                       <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-500">{investment.property.priceLabel}</span>
-                      <span className="rounded-full bg-slate-500/10 px-3 py-1 text-slate-400">ID: {investment.property._id}</span>
+                      <span className="rounded-full bg-slate-500/10 px-3 py-1 text-slate-400">{t("myInvestments.labels.id")}: {investment.property._id}</span>
                     </div>
                   </CardContent>
                 </Card>

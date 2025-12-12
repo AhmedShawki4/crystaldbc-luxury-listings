@@ -79,6 +79,7 @@ const Contact = () => {
         title={contactContent?.title ?? t("contact.heroTitle")}
         description={contactContent?.subtitle ?? t("contact.heroDescription")}
         icon={Phone}
+        backgroundImage="/crystalpattern.png"
         stats={[
           { label: t("contact.stats.phone"), value: contactContent?.phone ?? "+1 (888) 555-1234" },
           { label: t("contact.stats.email"), value: contactContent?.email ?? "info@crystaldbc.com" },
@@ -252,88 +253,6 @@ const Contact = () => {
                 </div>
               </form>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Global Offices Section (NEW) */}
-      <section className="py-20 relative overflow-hidden bg-luxury-dark text-white">
-        <div className="absolute inset-0 z-0">
-          <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2000&auto=format&fit=crop" alt="World Map" className="w-full h-full object-cover opacity-10" />
-          <div className="absolute inset-0 bg-gradient-to-t from-luxury-dark via-transparent to-transparent" />
-        </div>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-16">
-            <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">Global Presence</span>
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Visit Our Offices</h2>
-            <p className="text-lg text-white/70 max-w-2xl mx-auto">
-              Strategically located in the world's most dynamic real estate markets to serve our international clientele.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Dubai Office */}
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-colors">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 rounded-full bg-luxury-gold/20 flex items-center justify-center">
-                  <span className="text-2xl">🇦🇪</span>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-display font-semibold">Dubai, UAE</h3>
-                  <p className="text-luxury-gold text-sm uppercase tracking-wider">Headquarters</p>
-                </div>
-              </div>
-              <div className="space-y-3 text-white/80">
-                <p className="flex items-start gap-3"><MapPin className="w-5 h-5 text-luxury-gold mt-1" /> <span>Downtown Dubai, Boulevard Plaza<br />Tower 1, Level 15</span></p>
-                <p className="flex items-center gap-3"><Phone className="w-5 h-5 text-luxury-gold" /> +971 4 123 4567</p>
-                <p className="flex items-center gap-3"><Mail className="w-5 h-5 text-luxury-gold" /> dubai@crystaldbc.com</p>
-              </div>
-            </div>
-
-            {/* Cairo Office */}
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-colors">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 rounded-full bg-luxury-gold/20 flex items-center justify-center">
-                  <span className="text-2xl">🇪🇬</span>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-display font-semibold">Cairo, Egypt</h3>
-                  <p className="text-luxury-gold text-sm uppercase tracking-wider">Regional Hub</p>
-                </div>
-              </div>
-              <div className="space-y-3 text-white/80">
-                <p className="flex items-start gap-3"><MapPin className="w-5 h-5 text-luxury-gold mt-1" /> <span>New Cairo, 5th Settlement<br />Trivium Business Complex</span></p>
-                <p className="flex items-center gap-3"><Phone className="w-5 h-5 text-luxury-gold" /> +20 2 1234 5678</p>
-                <p className="flex items-center gap-3"><Mail className="w-5 h-5 text-luxury-gold" /> cairo@crystaldbc.com</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section (NEW) */}
-      <section className="py-20 bg-muted/30 reveal-section">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-display font-bold text-primary">Frequently Asked Questions</h2>
-            <p className="text-muted-foreground mt-2">Common questions from our global clientele.</p>
-          </div>
-          <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              { q: "Do you handle international transactions?", a: "Yes, we specialize in cross-border real estate transactions and can assist with legal frameworks, currency exchange, and compliance in multiple jurisdictions including UAE and Egypt." },
-              { q: "What is your commission structure?", a: "Our fees are transparent and competitive, tailored to the specific nature of the property and transaction services required. We provide a detailed breakdown upfront." },
-              { q: "Can you manage my property after purchase?", a: "Absolutely. We offer comprehensive property management and concierge services, including tenant screening, maintenance, and rental collection for our investment clients." },
-              { q: "Do you offer virtual viewings?", a: "Yes, we provide immersive 3D walkthroughs (like the one on our homepage) and live video tours for international clients who cannot travel immediately." },
-              { q: "What is the minimum investment for residency?", a: "Investment thresholds for Golden Visas vary by country. In Dubai it starts from AED 2M, and in Egypt recent laws allow for citizenship through investment. We can guide you through this." },
-              { q: "How do you value luxury properties?", a: "We use a combination of comparative market analysis, historical data, and unique attribute adjustments to ensure accurate valuations for high-end assets." },
-              { q: "Is financing available for foreign investors?", a: "Yes, we have partnerships with major international banks that offer mortgage products specifically designed for non-resident investors." },
-              { q: "What distinguishes CrystalDBC from others?", a: "Our exclusive access to off-market listings, data-driven investment approach, and end-to-end white-glove service set us apart in the luxury sector." }
-            ].map((faq, i) => (
-              <div key={i} className="bg-background border border-border/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:border-luxury-gold/30">
-                <h3 className="font-semibold text-lg mb-3 text-primary">{faq.q}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>

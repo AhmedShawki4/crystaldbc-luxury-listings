@@ -70,16 +70,6 @@ const ForRent = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Unified Background */}
-      <div className="fixed inset-0 z-[-1]">
-        <img
-          src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=2000"
-          alt="Background"
-          className="w-full h-full object-cover opacity-[0.03]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/50 to-background" />
-      </div>
-
       <PageHero
         eyebrow={t("rentals.heroEyebrow")}
         title={t("rentals.heroTitle")}
@@ -94,7 +84,13 @@ const ForRent = () => {
       />
 
       {/* Search and Filters */}
-      <section id="filters" className="relative isolate py-12">
+      <section id="filters" className="relative isolate py-12 overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-[0.14]"
+          style={{ backgroundImage: "url(/crystalpattern2.png)", backgroundRepeat: "repeat" }}
+          aria-hidden
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/85 to-background" aria-hidden />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-3xl border border-white/10 bg-luxury-dark/90 backdrop-blur-xl shadow-2xl shadow-luxury-gold/15 reveal-section">
             <div className="space-y-6 p-6 sm:p-8">

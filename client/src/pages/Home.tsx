@@ -167,24 +167,22 @@ const Home = () => {
     }));
   };
 
-  const faqs = [
-    {
-      question: "How do I start investing with CrystalDBC?",
-      answer: "Starting is simple. Schedule a consultation with our investment advisors. We'll assess your goals and present curated opportunities that match your portfolio strategy.",
-    },
-    {
-      question: "What markets do you currently cover?",
-      answer: "We specialize in premium real estate across major global capitals, including Dubai, London, New York, and emerging luxury markets in the MENA region.",
-    },
-    {
-      question: "Are there property management services available?",
-      answer: "Yes, we offer comprehensive property management for all our investment properties, ensuring a completely hands-off experience for our investors.",
-    },
-    {
-      question: "Can I view properties remotely?",
-      answer: "Absolutely. We provide immersive 3D tours, live video walkthroughs, and detailed digital brochures for international clients.",
-    },
-  ];
+  type HomeFaq = { question: string; answer: string };
+  type HomeSuccessStat = { value: string; label: string; desc: string };
+  type HomeTestimonial = { name: string; role: string; text: string };
+
+  const faqItems = t("home.faqItems", { returnObjects: true });
+  const faqs = Array.isArray(faqItems) ? (faqItems as HomeFaq[]) : [];
+
+  const successStatItems = t("home.successStats", { returnObjects: true });
+  const successStats = Array.isArray(successStatItems)
+    ? (successStatItems as HomeSuccessStat[])
+    : [];
+
+  const testimonialItems = t("home.testimonialsItems", { returnObjects: true });
+  const testimonials = Array.isArray(testimonialItems)
+    ? (testimonialItems as HomeTestimonial[])
+    : [];
 
   return (
     <div ref={mainRef} className="min-h-screen">
@@ -202,8 +200,8 @@ const Home = () => {
                 alt="3D City Model"
                 loading="lazy"
                 auto-rotate
+                camera-controls
                 disable-zoom
-                disable-pan
                 interaction-prompt="none"
                 camera-orbit="45deg 55deg 2.5m"
                 shadow-intensity="1"
@@ -212,13 +210,13 @@ const Home = () => {
               />
             </div>
             <div className="order-1 lg:order-2">
-              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">Global Vision</span>
-              <h2 className="text-4xl md:text-5xl font-display font-medium mb-6">A World of Opportunity</h2>
+              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("home.globalVisionEyebrow")}</span>
+              <h2 className="text-4xl md:text-5xl font-display font-medium mb-6">{t("home.globalVisionTitle")}</h2>
               <p className="text-lg text-white/80 font-light leading-relaxed mb-6">
-                Our reach spans continents, connecting you with the most exclusive real estate markets in the world. Experience the future of property investment with our immersive global network.
+                {t("home.globalVisionDescription")}
               </p>
               <Button asChild className="bg-luxury-gold text-luxury-dark hover:bg-luxury-gold-light">
-                <Link to="/investment">Explore Investments</Link>
+                <Link to="/investment">{t("home.globalVisionCta")}</Link>
               </Button>
             </div>
           </div>
@@ -229,7 +227,7 @@ const Home = () => {
       <section className="py-24 bg-background reveal-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">Why Choose Us</span>
+            <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("home.whyEyebrow")}</span>
             <h2 className="text-4xl md:text-5xl font-display font-medium text-primary mb-4">
               {t("home.whyTitle")}
             </h2>
@@ -288,7 +286,7 @@ const Home = () => {
         <div className="relative z-10">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-20">
-              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">Exquisite Selection</span>
+              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("home.exquisiteEyebrow")}</span>
               <h2 className="text-4xl md:text-5xl font-display font-medium text-primary mb-6">
                 {t("home.featuredTitle")}
               </h2>
@@ -340,28 +338,12 @@ const Home = () => {
       <section className="py-24 bg-background reveal-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">Success Stories</span>
-            <h2 className="text-4xl md:text-5xl font-display font-medium text-primary">Real Results, Real Wealth</h2>
+            <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("home.successStories")}</span>
+            <h2 className="text-4xl md:text-5xl font-display font-medium text-primary">{t("home.realResults")}</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 stagger-grid">
-            {[
-              {
-                value: "35%",
-                label: "Avg. Annual ROI",
-                desc: "Our clients consistently outperform market averages through strategic off-plan acquisitions."
-              },
-              {
-                value: "$500M+",
-                label: "Assets Managed",
-                desc: "Trusted by global investors to steward significant real estate portfolios across Dubai and Egypt."
-              },
-              {
-                value: "12 Days",
-                label: "Avg. Tenant Placement",
-                desc: "Our premium leasing team ensures your investment properties are generating income immediately."
-              }
-            ].map((stat, i) => (
+            {successStats.map((stat, i) => (
               <div key={i} className="relative p-8 rounded-2xl bg-luxury-gold/5 border border-luxury-gold/10 hover:border-luxury-gold/30 transition-all duration-300 group">
                 <div className="text-5xl md:text-6xl font-display font-bold text-luxury-gold mb-4 group-hover:scale-105 transition-transform duration-300">
                   {stat.value}
@@ -388,15 +370,11 @@ const Home = () => {
       <section className="py-24 bg-muted/20 reveal-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">Testimonials</span>
-            <h2 className="text-4xl md:text-5xl font-display font-medium text-primary">Trusted by the Best</h2>
+            <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("home.testimonialsEyebrow")}</span>
+            <h2 className="text-4xl md:text-5xl font-display font-medium text-primary">{t("home.testimonialsTitle")}</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 stagger-grid">
-            {[
-              { name: "James Anderson", role: "International Investor", text: "CrystalDBC identified a high-yield opportunity in Cairo that has outperformed my entire European portfolio. Their due diligence is unmatched.", delay: 0 },
-              { name: "Aliyah Hassan", role: "Luxury Homeowner", text: "Finding a penthouse that met my specific privacy requirements was impossible until I met the team. Professional, discreet, and efficient.", delay: 0.2 },
-              { name: "Robert Fox", role: "Property Developer", text: "A strategic partner in every sense. Their market insights helped us position our latest development for maximum ROI.", delay: 0.4 }
-            ].map((testimonial, i) => (
+            {testimonials.map((testimonial, i) => (
               <div key={i} className="bg-background p-8 rounded-2xl shadow-sm hover:shadow-md transition-all border border-border/50">
                 <Quote className="h-8 w-8 text-luxury-gold/30 mb-6" />
                 <p className="text-muted-foreground italic mb-6 leading-relaxed">"{testimonial.text}"</p>
@@ -420,16 +398,16 @@ const Home = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 faq-container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             <div className="space-y-6">
-              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">Common Questions</span>
-              <h2 className="text-4xl md:text-5xl font-display font-medium text-primary mb-6">Expert Advice & Insights</h2>
+              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("home.faqEyebrow")}</span>
+              <h2 className="text-4xl md:text-5xl font-display font-medium text-primary mb-6">{t("home.faqTitle")}</h2>
               <p className="text-lg text-muted-foreground font-light leading-relaxed">
-                Navigating the luxury real estate market requires expertise. Here are some of the most common questions our clients ask.
+                {t("home.faqDescription")}
               </p>
               <div className="p-8 bg-luxury-gold/5 border border-luxury-gold/20 rounded-lg">
-                <h4 className="text-xl font-display font-semibold mb-2 text-primary">Need more specific details?</h4>
-                <p className="text-muted-foreground mb-4">Our advisory team is available 24/7 to discuss your specific investment criteria.</p>
+                <h4 className="text-xl font-display font-semibold mb-2 text-primary">{t("home.faqCtaTitle")}</h4>
+                <p className="text-muted-foreground mb-4">{t("home.faqCtaSubtitle")}</p>
                 <Button asChild variant="outline" className="border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-white">
-                  <Link to="/contact">Contact Support</Link>
+                  <Link to="/contact">{t("home.faqCtaButton")}</Link>
                 </Button>
               </div>
             </div>
@@ -604,13 +582,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Global & Lifestyle (Preserved below contact or removed? User asked for logical flow. 
-         "About / Lifestyle" could go after "Why Choose Us"? 
-         Let's add back the Lifestyle/About section but better placed or modified. 
-         Wait, user said "Our Story button in homepage". I missed this in my list above. 
-         I will place "Lifestyle/About" section BEFORE "Process".
-      */}
-
       {/* 4b. Lifestyle / About Section (Re-inserted) */}
       <section className="py-32 bg-secondary/30 relative reveal-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -625,25 +596,23 @@ const Home = () => {
             </div>
 
             <div className="space-y-8">
-              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold">The Lifestyle</span>
-              <h2 className="text-4xl md:text-5xl font-display font-medium text-primary leading-tight">
-                Elevating Real Estate <br /> to an Art Form
-              </h2>
+              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold">{t("home.lifestyleEyebrow")}</span>
+              <h2 className="text-4xl md:text-5xl font-display font-medium text-primary leading-tight">{t("home.lifestyleTitle")}</h2>
               <p className="text-lg text-muted-foreground font-light leading-relaxed">
-                We believe that a home is more than just a place to live; it is a sanctuary, a statement, and a legacy. Our curated collection of properties represents the pinnacle of luxury living, designed for those who seek the exceptional.
+                {t("home.lifestyleDescription")}
               </p>
               <div className="grid grid-cols-2 gap-8 pt-6">
                 <div>
                   <h4 className="text-3xl font-display text-primary mb-2">150+</h4>
-                  <p className="text-sm text-muted-foreground uppercase tracking-wider">Premium Listings</p>
+                  <p className="text-sm text-muted-foreground uppercase tracking-wider">{t("home.lifestylePremiumListings")}</p>
                 </div>
                 <div>
                   <h4 className="text-3xl font-display text-primary mb-2">$2B+</h4>
-                  <p className="text-sm text-muted-foreground uppercase tracking-wider">Value Sold</p>
+                  <p className="text-sm text-muted-foreground uppercase tracking-wider">{t("home.lifestyleValueSold")}</p>
                 </div>
               </div>
               <Button asChild className="bg-luxury-gold text-luxury-dark rounded-none px-10 py-6 mt-4 hover:bg-luxury-gold-light focus:ring-2 focus:ring-luxury-gold focus:ring-offset-2 transition-all shadow-lg">
-                <Link to="/about">Our Story</Link>
+                <Link to="/about">{t("home.lifestyleOurStory")}</Link>
               </Button>
             </div>
           </div>

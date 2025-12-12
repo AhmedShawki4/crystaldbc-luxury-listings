@@ -55,7 +55,7 @@ const About = () => {
         title={content.heroTitle || t("about.heroTitle")}
         description={content.heroSubtitle || t("about.heroSubtitle")}
         icon={Award}
-        backgroundImage={heroImage}
+        backgroundImage="/crystalpattern.png"
         stats={stats.map((stat) => ({ label: stat.label, value: stat.value }))}
         actions={(
           <>
@@ -127,23 +127,55 @@ const About = () => {
       </section>
 
       {/* Philosophy / Values */}
-      <section className="py-24 bg-muted/30 relative">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-24 bg-luxury-dark text-white relative overflow-hidden">
+        <div
+          className="absolute inset-0 z-0 opacity-[0.22]"
+          style={{ backgroundImage: "url(/crystalpattern.png)", backgroundRepeat: "repeat" }}
+          aria-hidden
+        />
+        <div className="absolute inset-0 z-0 bg-gradient-to-b from-luxury-dark/35 via-luxury-dark/55 to-luxury-dark/75" aria-hidden />
+        <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
             <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">Philosophy</span>
-            <h2 className="text-4xl font-display font-bold text-primary">{t("about.valuesTitle")}</h2>
+            <h2 className="text-4xl font-display font-bold text-white">{t("about.valuesTitle")}</h2>
           </div>
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-            {values.map((value) => {
+            {values.map((value, index) => {
               const Icon = iconMap[value.iconKey?.toLowerCase() as keyof typeof iconMap] ?? Award;
+              const palette = [
+                {
+                  card: "bg-luxury-dark/35 backdrop-blur-xl",
+                  border: "border-luxury-gold/25 hover:border-luxury-gold/60 hover:bg-luxury-dark/45",
+                  iconWrap: "bg-luxury-gold/15 text-luxury-gold group-hover:bg-luxury-gold group-hover:text-luxury-dark",
+                },
+                {
+                  card: "bg-luxury-dark/35 backdrop-blur-xl",
+                  border: "border-accent/20 hover:border-accent/60 hover:bg-luxury-dark/45",
+                  iconWrap: "bg-accent/15 text-accent group-hover:bg-accent group-hover:text-accent-foreground",
+                },
+                {
+                  card: "bg-luxury-dark/35 backdrop-blur-xl",
+                  border: "border-luxury-gold/25 hover:border-luxury-gold/60 hover:bg-luxury-dark/45",
+                  iconWrap: "bg-luxury-gold/15 text-luxury-gold group-hover:bg-luxury-gold group-hover:text-luxury-dark",
+                },
+                {
+                  card: "bg-luxury-dark/35 backdrop-blur-xl",
+                  border: "border-accent/20 hover:border-accent/60 hover:bg-luxury-dark/45",
+                  iconWrap: "bg-accent/15 text-accent group-hover:bg-accent group-hover:text-accent-foreground",
+                },
+              ];
+              const theme = palette[index % palette.length];
               return (
-                <div className="group rounded-2xl border border-white/10 bg-white p-8 text-left shadow-lg transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:border-luxury-gold/30" key={value.title}>
-                  <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-full bg-luxury-gold/10 text-luxury-gold group-hover:bg-luxury-gold group-hover:text-white transition-all duration-500">
+                <div
+                  className={`group rounded-2xl border ${theme.border} ${theme.card} p-8 text-left shadow-lg shadow-black/25 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl`}
+                  key={value.title}
+                >
+                  <div className={`mb-6 inline-flex h-14 w-14 items-center justify-center rounded-full transition-all duration-500 ${theme.iconWrap}`}>
                     <Icon className="h-6 w-6" />
                   </div>
-                  <h3 className="text-xl font-display font-bold text-gray-900 mb-3">{value.title}</h3>
-                  <p className="text-gray-600 leading-relaxed text-sm">{value.description}</p>
+                  <h3 className="text-xl font-display font-bold text-white mb-3">{value.title}</h3>
+                  <p className="text-white/70 leading-relaxed text-sm">{value.description}</p>
                 </div>
               );
             })}

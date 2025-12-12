@@ -39,7 +39,7 @@ const EntranceAnimation = () => {
             // Initial scale for movement effect
             gsap.set(lobbyRef.current, { scale: 1 });
             gsap.set(hallway2Ref.current, { scale: 1.2 });
-            gsap.set(hallway1Ref.current, { scale: 1.4 });
+            gsap.set(hallway1Ref.current, { scale: 1.2 });
         }, containerRef);
 
         return () => ctx.revert();
@@ -74,7 +74,6 @@ const EntranceAnimation = () => {
 
         // Step 2: Zoom into Opened Door -> Reveal Hallway 1
         tl.to(openedDoorRef.current, {
-            scale: 2,
             opacity: 0,
             duration: 2.5,
             ease: "power1.inOut"
@@ -87,7 +86,6 @@ const EntranceAnimation = () => {
 
         // Step 3: Zoom Hallway 1 -> Reveal Hallway 2
         tl.to(hallway1Ref.current, {
-            scale: 3,
             opacity: 0,
             duration: 2.5,
             ease: "power1.inOut"
@@ -100,7 +98,6 @@ const EntranceAnimation = () => {
 
         // Step 4: Zoom Hallway 2 -> Reveal Lobby
         tl.to(hallway2Ref.current, {
-            scale: 2.5,
             opacity: 0,
             duration: 2.5,
             ease: "power1.inOut"
