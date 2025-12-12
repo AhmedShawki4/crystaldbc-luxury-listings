@@ -14,6 +14,9 @@ export interface Property {
   features: string[];
   type: string;
   status: string;
+  isInvestable?: boolean;
+  roiPercentage?: number;
+  minInvestmentAmount?: number;
 }
 
 export const properties: Property[] = [

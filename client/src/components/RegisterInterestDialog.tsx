@@ -45,7 +45,7 @@ const RegisterInterestDialog = ({
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const isStaff = user?.role === "admin" || user?.role === "employee";
+  const isStandardUser = user?.role === "user";
   const hideOnAuth = location.pathname.startsWith("/auth");
 
   const promptStorageKey = useMemo(() => `crystaldbc:lastInterestPrompt:${user?.id ?? "guest"}`, [user?.id]);
@@ -119,7 +119,7 @@ const RegisterInterestDialog = ({
     setIsOpen(false);
   };
 
-  if (isStaff || hideOnAuth) {
+  if (!isStandardUser || hideOnAuth) {
     return null;
   }
 

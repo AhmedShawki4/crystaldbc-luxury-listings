@@ -8,9 +8,11 @@ export interface PropertyFilters {
   location?: string;
   status?: string;
   minBeds?: number;
+  minBaths?: number;
   priceMin?: number;
   priceMax?: number;
   featured?: boolean;
+  investable?: boolean;
   limit?: number;
   sort?: string;
   exclude?: string;

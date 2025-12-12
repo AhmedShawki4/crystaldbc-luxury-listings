@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,97 +10,85 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 40 20% 97%;
-    --foreground: 220 20% 15%;
+    --background: 40 20% 98%;
+    /* Slightly lighter cream */
+    --foreground: 220 20% 12%;
+    /* Deeper charcoal */
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 15%;
+    --card-foreground: 220 20% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 15%;
+    --popover-foreground: 220 20% 12%;
 
-    --primary: 220 25% 20%;
-    --primary-foreground: 40 20% 97%;
+    --primary: 220 25% 18%;
+    /* Refined Navy */
+    --primary-foreground: 40 20% 98%;
 
-    --secondary: 40 30% 92%;
-    --secondary-foreground: 220 25% 20%;
+    --secondary: 40 20% 94%;
+    /* Softer secondary */
+    --secondary-foreground: 220 25% 18%;
 
-    --muted: 40 25% 90%;
-    --muted-foreground: 220 15% 45%;
+    --muted: 40 20% 94%;
+    --muted-foreground: 220 10% 40%;
+    /* More neutral muted text */
 
-    --accent: 42 88% 58%;
-    --accent-foreground: 220 25% 20%;
+    --accent: 42 68% 52%;
+    /* More muted, elegant gold */
+    --accent-foreground: 220 25% 18%;
 
-    --destructive: 0 70% 50%;
-    --destructive-foreground: 40 20% 97%;
+    --destructive: 0 60% 50%;
+    --destructive-foreground: 40 20% 98%;
 
-    --border: 40 20% 85%;
-    --input: 40 20% 85%;
-    --ring: 42 88% 58%;
+    --border: 40 15% 90%;
+    --input: 40 15% 90%;
+    --ring: 42 68% 52%;
 
-    --radius: 0.5rem;
-    
-    --luxury-gold: 42 88% 58%;
-    --luxury-gold-light: 45 95% 68%;
-    --luxury-gold-dark: 38 85% 48%;
-    --luxury-dark: 220 25% 20%;
-    --luxury-cream: 40 30% 92%;
-    
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --shadow-elegant: 0 10px 40px -10px hsl(220 25% 20% / 0.15);
-    --shadow-hover: 0 20px 50px -15px hsl(220 25% 20% / 0.25);
+    --radius: 0.25rem;
+    /* Sharper corners for minimalism */
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --luxury-gold: 42 68% 52%;
+    --luxury-gold-light: 42 68% 65%;
+    --luxury-gold-dark: 42 68% 40%;
+    --luxury-dark: 220 25% 15%;
+    --luxury-cream: 40 20% 98%;
   }
 
   .dark {
-    --background: 220 25% 12%;
-    --foreground: 40 20% 97%;
+    --background: 220 25% 10%;
+    /* Deeper dark bg */
+    --foreground: 40 20% 95%;
 
-    --card: 220 25% 15%;
-    --card-foreground: 40 20% 97%;
+    --card: 220 25% 13%;
+    --card-foreground: 40 20% 95%;
 
-    --popover: 220 25% 15%;
-    --popover-foreground: 40 20% 97%;
+    --popover: 220 25% 13%;
+    --popover-foreground: 40 20% 95%;
 
-    --primary: 40 20% 97%;
-    --primary-foreground: 220 25% 20%;
+    --primary: 40 20% 95%;
+    --primary-foreground: 220 25% 10%;
 
-    --secondary: 220 20% 25%;
-    --secondary-foreground: 40 20% 97%;
+    --secondary: 220 20% 20%;
+    --secondary-foreground: 40 20% 95%;
 
-    --muted: 220 20% 25%;
-    --muted-foreground: 40 15% 65%;
+    --muted: 220 20% 20%;
+    --muted-foreground: 40 15% 60%;
 
-    --accent: 42 88% 58%;
-    --accent-foreground: 220 25% 20%;
+    --accent: 42 68% 52%;
+    --accent-foreground: 220 25% 10%;
 
-    --destructive: 0 70% 50%;
-    --destructive-foreground: 40 20% 97%;
+    --destructive: 0 60% 50%;
+    --destructive-foreground: 40 20% 95%;
 
-    --border: 220 20% 25%;
-    --input: 220 20% 25%;
-    --ring: 42 88% 58%;
-    
-    --luxury-gold: 42 88% 58%;
-    --luxury-gold-light: 45 95% 68%;
-    --luxury-gold-dark: 38 85% 48%;
-    --luxury-dark: 220 25% 20%;
-    --luxury-cream: 40 30% 92%;
+    --border: 220 20% 20%;
+    --input: 220 20% 20%;
+    --ring: 42 68% 52%;
+
+    --luxury-gold: 42 68% 52%;
+    --luxury-gold-light: 42 68% 65%;
+    --luxury-gold-dark: 42 68% 40%;
+    --luxury-dark: 220 25% 10%;
+    --luxury-cream: 40 20% 95%;
   }
 }
 
@@ -113,14 +103,44 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-body antialiased;
+    font-feature-settings: "ss01" on, "ss02" on, "liga" on;
     background-image:
       radial-gradient(1400px circle at 10% 20%, hsl(42 88% 58% / 0.08), transparent 45%),
       radial-gradient(900px circle at 80% 0%, hsl(205 75% 65% / 0.08), transparent 40%),
       linear-gradient(135deg, hsl(220 20% 12% / 0.12), hsl(220 20% 6% / 0));
     background-color: hsl(var(--background));
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--luxury-gold)) hsl(var(--luxury-dark));
   }
-  
-  h1, h2, h3, h4, h5, h6 {
+
+  /* Premium subtle scrollbar */
+  *::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: linear-gradient(180deg, hsl(var(--luxury-dark)) 0%, hsl(var(--luxury-dark) / 0.7) 100%);
+    border-radius: 9999px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, hsl(var(--luxury-gold)) 0%, hsl(var(--luxury-gold-light)) 100%);
+    border-radius: 9999px;
+    border: 3px solid hsl(var(--luxury-dark));
+    box-shadow: inset 0 1px 4px hsl(0 0% 100% / 0.12);
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, hsl(var(--luxury-gold-light)) 0%, hsl(var(--luxury-gold)) 100%);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-display;
   }
 }
@@ -129,7 +149,7 @@ All colors MUST be HSL.
   .luxury-gradient {
     background: linear-gradient(135deg, hsl(var(--luxury-gold)), hsl(var(--luxury-gold-light)));
   }
-  
+
   .text-gradient {
     background: linear-gradient(135deg, hsl(var(--luxury-gold-light)), hsl(var(--luxury-gold)), hsl(var(--luxury-gold-dark)));
     -webkit-background-clip: text;
@@ -137,11 +157,11 @@ All colors MUST be HSL.
     -webkit-text-fill-color: transparent;
     text-shadow: 0 0 30px hsl(var(--luxury-gold) / 0.3);
   }
-  
+
   .hover-lift {
     @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_50px_-15px_hsl(220_25%_20%_/_0.25)];
   }
-  
+
   .fade-in {
     animation: fadeIn 0.6s ease-out;
   }
@@ -151,6 +171,7 @@ All colors MUST be HSL.
     background-size: 320% 320%;
     animation: chat-pan 7s linear infinite;
   }
+
   .chat-gradient:hover {
     animation-duration: 5s;
   }
@@ -159,23 +180,34 @@ All colors MUST be HSL.
     0% {
       background-position: 0% 50%;
     }
+
     50% {
       background-position: 100% 50%;
     }
+
     100% {
       background-position: 0% 50%;
     }
   }
-  
+
   @keyframes fadeIn {
     from {
       opacity: 0;
       transform: translateY(20px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  .reveal-section {
+    animation: fadeIn 1s ease-out forwards;
+    opacity: 0;
+    /* Star invisible */
+    animation-delay: 0.2s;
+    animation-fill-mode: forwards;
   }
 
   /* Custom scrollbar for dialogs */

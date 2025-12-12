@@ -21,6 +21,9 @@ const buildFilters = (query) => {
   if (query.minBeds) {
     filters.beds = { $gte: Number(query.minBeds) };
   }
+  if (query.minBaths) {
+    filters.baths = { $gte: Number(query.minBaths) };
+  }
   if (query.priceMin || query.priceMax) {
     filters.priceValue = {};
     if (query.priceMin) filters.priceValue.$gte = Number(query.priceMin);
@@ -28,6 +31,9 @@ const buildFilters = (query) => {
   }
   if (query.featured === "true") {
     filters.isFeatured = true;
+  }
+  if (query.investable === "true") {
+    filters.isInvestable = true;
   }
   if (query.exclude) {
     filters._id = { $ne: query.exclude };
@@ -77,6 +83,23 @@ exports.getProperty = async (req, res) => {
 
 exports.createProperty = async (req, res) => {
   try {
+    const isAdmin = req.user.role === "admin";
+    if (!isAdmin) {
+      delete req.body.isInvestable;
+      delete req.body.roiPercentage;
+      delete req.body.minInvestmentAmount;
+    }
+
+    if (!req.body.isInvestable) {
+      req.body.roiPercentage = 0;
+      req.body.minInvestmentAmount = 0;
+    } else {
+      const minAmount = Number(req.body.minInvestmentAmount);
+      if (Number.isNaN(minAmount) || minAmount <= 0) {
+        return res.status(400).json({ message: "Minimum investment amount is required for investable properties" });
+      }
+      req.body.minInvestmentAmount = minAmount;
+    }
     const property = await Property.create({
       ...req.body,
       createdBy: req.user._id,
@@ -99,6 +122,25 @@ exports.createProperty = async (req, res) => {
 
 exports.updateProperty = async (req, res) => {
   try {
+    const isAdmin = req.user.role === "admin";
+    if (!isAdmin) {
+      delete req.body.isInvestable;
+      delete req.body.roiPercentage;
+      delete req.body.minInvestmentAmount;
+    }
+
+    if (req.body.isInvestable === false) {
+      req.body.roiPercentage = 0;
+      req.body.minInvestmentAmount = 0;
+    }
+
+    if (req.body.isInvestable === true || req.body.minInvestmentAmount !== undefined) {
+      const minAmount = Number(req.body.minInvestmentAmount ?? 0);
+      if (req.body.isInvestable && (Number.isNaN(minAmount) || minAmount <= 0)) {
+        return res.status(400).json({ message: "Minimum investment amount is required for investable properties" });
+      }
+      req.body.minInvestmentAmount = minAmount;
+    }
     const property = await Property.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,

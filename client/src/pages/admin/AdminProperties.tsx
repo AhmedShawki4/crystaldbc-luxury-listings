@@ -35,6 +35,9 @@ const initialFormState = {
   type: "",
   status: "For Sale",
   isFeatured: false,
+  isInvestable: false,
+  minInvestmentAmount: 0,
+  roiPercentage: 0,
 };
 
 const STATUS_OPTIONS = ["For Sale", "For Rent", "Under Construction"] as const;
@@ -66,6 +69,10 @@ const AdminProperties = () => {
         gallery: formState.gallery.split(",").map((item) => item.trim()).filter(Boolean),
         features: formState.features.split(",").map((item) => item.trim()).filter(Boolean),
       };
+      if (!payload.isInvestable) {
+        payload.minInvestmentAmount = 0;
+        payload.roiPercentage = 0;
+      }
       if (editingId) {
         return apiClient.put(`/properties/${editingId}`, payload);
       }
@@ -109,6 +116,9 @@ const AdminProperties = () => {
       type: property.type,
       status: property.status,
       isFeatured: property.isFeatured,
+      isInvestable: Boolean(property.isInvestable),
+      minInvestmentAmount: property.minInvestmentAmount ?? 0,
+      roiPercentage: property.roiPercentage ?? 0,
     });
   };
 
@@ -311,6 +321,43 @@ const AdminProperties = () => {
                 <span className="text-sm text-muted-foreground">Show on homepage</span>
               </div>
             </div>
+            {user?.role === "admin" && (
+              <div>
+                <label className="text-sm font-medium">Available for Investment</label>
+                <div className="flex items-center space-x-3 mt-2">
+                  <input type="checkbox" name="isInvestable" checked={formState.isInvestable} onChange={handleChange} />
+                  <span className="text-sm text-muted-foreground">Allow users to invest</span>
+                </div>
+              </div>
+            )}
+            {user?.role === "admin" && formState.isInvestable && (
+              <>
+                <div>
+                  <label className="text-sm font-medium">Min Investment (EGP)</label>
+                  <Input
+                    type="number"
+                    min={0}
+                    step={1000}
+                    name="minInvestmentAmount"
+                    value={formState.minInvestmentAmount}
+                    onChange={handleChange}
+                    placeholder="e.g. 250000"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">ROI %</label>
+                  <Input
+                    type="number"
+                    min={0}
+                    step={0.1}
+                    name="roiPercentage"
+                    value={formState.roiPercentage}
+                    onChange={handleChange}
+                    placeholder="e.g. 12"
+                  />
+                </div>
+              </>
+            )}
             <div className="md:col-span-2 flex gap-3 justify-end">
               {editingId && (
                 <Button type="button" variant="outline" onClick={() => {
@@ -354,6 +401,14 @@ const AdminProperties = () => {
                 <span className="px-2 py-1 rounded-full bg-muted text-foreground">{property.status}</span>
                 {property.isFeatured ? (
                   <span className="px-2 py-1 rounded-full bg-accent/10 text-accent">Featured</span>
+                ) : null}
+                {property.isInvestable ? (
+                  <>
+                    <span className="px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500">ROI {property.roiPercentage ?? 0}%</span>
+                    {property.minInvestmentAmount ? (
+                      <span className="px-2 py-1 rounded-full bg-luxury-gold/10 text-luxury-gold">Min EGP {Math.round(property.minInvestmentAmount).toLocaleString()}</span>
+                    ) : null}
+                  </>
                 ) : null}
               </div>
               <p className="text-sm">{property.description.slice(0, 120)}...</p>

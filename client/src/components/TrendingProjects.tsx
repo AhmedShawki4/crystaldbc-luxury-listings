@@ -35,7 +35,7 @@ const TrendingProjects = () => {
   }, [api]);
 
   return (
-    <section className="py-20 bg-gradient-to-br from-luxury-dark via-luxury-dark/95 to-primary/10 text-white relative overflow-hidden">
+    <section className="py-20 bg-luxury-dark text-white relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0" style={{
@@ -73,138 +73,138 @@ const TrendingProjects = () => {
                   const propertyLink = project.property?._id ? `/property/${project.property._id}` : "/listings";
                   return (
                     <CarouselItem key={project._id}>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                    {/* Image Section */}
-                        <Link 
-                      to={propertyLink}
-                      className="relative group cursor-pointer"
-                    >
-                      <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
-                        <img
-                          src={getMediaUrl(project.image)}
-                          alt={project.name}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
-                        
-                        {/* Badges on Image */}
-                        <div className="absolute top-6 left-6">
-                          <Badge className="bg-accent/90 text-accent-foreground backdrop-blur-sm border-0 text-sm px-4 py-2">
-                            {project.status}
-                          </Badge>
-                        </div>
-
-                        {/* Price & Developer Badge */}
-                        <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
-                          <div className="bg-white/95 backdrop-blur-sm rounded-xl px-4 py-3">
-                            <p className="text-xs text-muted-foreground font-medium">Starting from</p>
-                            <p className="text-2xl font-bold text-primary">{project.startingPrice}</p>
-                          </div>
-                          <div className="bg-white/95 backdrop-blur-sm rounded-xl px-4 py-3 text-right">
-                            <p className="text-xs text-muted-foreground font-medium">Developer</p>
-                            <p className="text-lg font-bold text-primary">{project.developer}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-
-                    {/* Info Section */}
-                    <div className="space-y-6">
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <MapPin className="h-5 w-5 text-accent" />
-                          <span className="text-accent font-medium">{project.location}</span>
-                        </div>
-                        <h3 className="text-4xl md:text-5xl font-display font-bold mb-4">
-                          {project.name}
-                        </h3>
-                        <p className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-4">
-                          Project general facts
-                        </p>
-                        <p className="text-white/80 leading-relaxed line-clamp-4">
-                          {project.description}
-                        </p>
-                      </div>
-
-                      {/* Amenities Grid */}
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        {project.amenities.map((amenity, index) => (
-                          <div
-                            key={index}
-                            className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg px-3 py-2 text-center text-sm text-white/90 hover:bg-white/10 transition-colors"
-                          >
-                            {amenity.name}
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Completion Date */}
-                      <div className="flex items-center gap-2 text-accent">
-                        <Calendar className="h-5 w-5" />
-                        <span className="font-medium">Completion: {project.completion}</span>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex flex-wrap gap-4 pt-4">
-                        <Button
-                          asChild
-                          size="lg"
-                          className="bg-accent hover:bg-accent/90 text-accent-foreground flex-1 sm:flex-none"
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        {/* Image Section */}
+                        <Link
+                          to={propertyLink}
+                          className="relative group cursor-pointer"
                         >
-                          <Link to={propertyLink}>
-                            Explore Project
-                          </Link>
-                        </Button>
-                        <Button
-                          asChild
-                          size="lg"
-                          variant="outline"
-                          className="border-white/30 bg-white/5 text-white hover:bg-white/15 hover:border-white/40 flex-1 sm:flex-none"
-                        >
-                          <Link to="/contact">
-                            Request Info
-                          </Link>
-                        </Button>
-                        <Button
-                          type="button"
-                          size="lg"
-                          variant="ghost"
-                          className="border border-white/20 bg-white/5 text-white hover:bg-white/15 flex-1 sm:flex-none"
-                          onClick={() => addToWishlist(project.property?._id)}
-                          disabled={
-                            !project.property?._id ||
-                            (isAdding && activeId === project.property?._id)
-                          }
-                        >
-                          {isAdding && activeId === project.property?._id
-                            ? "Saving..."
-                            : project.property?._id
-                              ? "Save to Wishlist"
-                              : "Link property to enable"}
-                        </Button>
+                          <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
+                            <img
+                              src={getMediaUrl(project.image)}
+                              alt={project.name}
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            />
+
+                            {/* Badges on Image */}
+                            <div className="absolute top-6 left-6">
+                              <Badge className="bg-accent/90 text-accent-foreground backdrop-blur-sm border-0 text-sm px-4 py-2">
+                                {project.status}
+                              </Badge>
+                            </div>
+
+                            {/* Price & Developer Badge */}
+                            <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
+                              <div className="bg-white/95 backdrop-blur-sm rounded-xl px-4 py-3">
+                                <p className="text-xs text-muted-foreground font-medium">Starting from</p>
+                                <p className="text-2xl font-bold text-black">{project.startingPrice}</p>
+                              </div>
+                              <div className="bg-white/95 backdrop-blur-sm rounded-xl px-4 py-3 text-right">
+                                <p className="text-xs text-muted-foreground font-medium">Developer</p>
+                                <p className="text-lg font-bold text-black">{project.developer}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+
+                        {/* Info Section */}
+                        <div className="space-y-6">
+                          <div>
+                            <div className="flex items-center gap-2 mb-3">
+                              <MapPin className="h-5 w-5 text-accent" />
+                              <span className="text-accent font-medium">{project.location}</span>
+                            </div>
+                            <h3 className="text-4xl md:text-5xl font-display font-bold mb-4">
+                              {project.name}
+                            </h3>
+                            <p className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-4">
+                              Project general facts
+                            </p>
+                            <p className="text-white/80 leading-relaxed line-clamp-4">
+                              {project.description}
+                            </p>
+                          </div>
+
+                          {/* Amenities Grid */}
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            {project.amenities.map((amenity, index) => (
+                              <div
+                                key={index}
+                                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg px-3 py-2 text-center text-sm text-white/90 hover:bg-white/10 transition-colors"
+                              >
+                                {amenity.name}
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Completion Date */}
+                          <div className="flex items-center gap-2 text-accent">
+                            <Calendar className="h-5 w-5" />
+                            <span className="font-medium">Completion: {project.completion}</span>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex flex-wrap gap-4 pt-4">
+                            <Button
+                              asChild
+                              size="lg"
+                              className="bg-accent hover:bg-accent/90 text-accent-foreground flex-1 sm:flex-none"
+                            >
+                              <Link to={propertyLink}>
+                                Explore Project
+                              </Link>
+                            </Button>
+                            <Button
+                              asChild
+                              size="lg"
+                              variant="outline"
+                              className="border-white/30 bg-white/5 text-white hover:bg-white/15 hover:border-white/40 flex-1 sm:flex-none"
+                            >
+                              <Link to="/contact">
+                                Request Info
+                              </Link>
+                            </Button>
+                            <Button
+                              type="button"
+                              size="lg"
+                              variant="ghost"
+                              className="border border-white/20 bg-white/5 text-white hover:bg-white/15 flex-1 sm:flex-none"
+                              onClick={() => addToWishlist(project.property?._id)}
+                              disabled={
+                                !project.property?._id ||
+                                (isAdding && activeId === project.property?._id)
+                              }
+                            >
+                              {isAdding && activeId === project.property?._id
+                                ? "Saving..."
+                                : project.property?._id
+                                  ? "Save to Wishlist"
+                                  : "Link property to enable"}
+                            </Button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
                     </CarouselItem>
                   );
                 })}
               </CarouselContent>
 
-            {/* Custom Navigation Buttons */}
-            <button
-              onClick={() => api?.scrollPrev()}
-              className="absolute -left-4 md:-left-12 lg:-left-16 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed group z-10"
-              aria-label="Previous project"
-            >
-              <ChevronLeft className="h-6 w-6 text-white group-hover:scale-110 transition-transform" />
-            </button>
-            <button
-              onClick={() => api?.scrollNext()}
-              className="absolute -right-4 md:-right-12 lg:-right-16 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed group z-10"
-              aria-label="Next project"
-            >
-              <ChevronRight className="h-6 w-6 text-white group-hover:scale-110 transition-transform" />
-            </button>
-          </Carousel>
+              {/* Custom Navigation Buttons */}
+              <button
+                onClick={() => api?.scrollPrev()}
+                className="absolute -left-4 md:-left-12 lg:-left-16 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed group z-10"
+                aria-label="Previous project"
+              >
+                <ChevronLeft className="h-6 w-6 text-white group-hover:scale-110 transition-transform" />
+              </button>
+              <button
+                onClick={() => api?.scrollNext()}
+                className="absolute -right-4 md:-right-12 lg:-right-16 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed group z-10"
+                aria-label="Next project"
+              >
+                <ChevronRight className="h-6 w-6 text-white group-hover:scale-110 transition-transform" />
+              </button>
+            </Carousel>
           )}
 
           {/* Carousel Indicators */}

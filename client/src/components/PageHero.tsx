@@ -13,6 +13,7 @@ interface PageHeroProps {
   title: string;
   description: string;
   icon: LucideIcon;
+  isPattern?: boolean;
   backgroundImage?: string;
   actions?: ReactNode;
   stats?: PageHeroStat[];
@@ -24,6 +25,7 @@ const PageHero = ({
   title,
   description,
   icon: Icon,
+  isPattern,
   backgroundImage,
   actions,
   stats,
@@ -37,7 +39,17 @@ const PageHero = ({
   >
     {backgroundImage ? (
       <div className="absolute inset-0">
-        <img src={backgroundImage} alt="Section background" className="h-full w-full object-cover" />
+        {isPattern ? (
+          <div
+            className="absolute inset-0 opacity-[0.15]"
+            style={{
+              backgroundImage: `url(${backgroundImage})`,
+              backgroundRepeat: "repeat"
+            }}
+          />
+        ) : (
+          <img src={backgroundImage} alt="Section background" className="h-full w-full object-cover" />
+        )}
         <div className="absolute inset-0 bg-luxury-dark/90" />
       </div>
     ) : null}

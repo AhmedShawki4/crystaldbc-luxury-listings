@@ -1,4 +1,4 @@
-export type Role = "admin" | "employee" | "user" | "guest";
+export type Role = "admin" | "employee" | "property-handler" | "user" | "guest";
 
 export interface User {
   id: string;
@@ -27,6 +27,24 @@ export interface Property {
   type: string;
   status: string;
   isFeatured: boolean;
+  isInvestable?: boolean;
+  minInvestmentAmount?: number;
+  roiPercentage?: number;
+  createdAt: string;
+}
+
+export interface Investment {
+  _id: string;
+  user?: { _id: string; name: string; email: string; role: Role; phone?: string };
+  property: Pick<Property, "_id" | "title" | "location" | "coverImage" | "priceLabel">;
+  investmentAmount: number;
+  amountReceived: number;
+  expectedProfit: number;
+  status: "Pending" | "Approved" | "Rejected";
+  paymentStatus: "Not Paid" | "Partially Paid" | "Paid";
+  roiPercentage: number;
+  notes?: string;
+  payoutDate?: string;
   createdAt: string;
 }
 
@@ -124,7 +142,11 @@ export interface AnalyticsSummary {
     messages: number;
     users: number;
     wishlistItems: number;
+    investedProperties?: number;
+    totalInvested?: number;
+    actualProfit?: number;
   };
+  investmentTimeline: { label: string; invested: number; received: number; outstanding: number }[];
   recentLeads: Lead[];
 }
 

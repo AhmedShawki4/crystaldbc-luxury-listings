@@ -79,6 +79,7 @@ const Contact = () => {
         title={contactContent?.title ?? t("contact.heroTitle")}
         description={contactContent?.subtitle ?? t("contact.heroDescription")}
         icon={Phone}
+        backgroundImage="/crystalpattern.png"
         stats={[
           { label: t("contact.stats.phone"), value: contactContent?.phone ?? "+1 (888) 555-1234" },
           { label: t("contact.stats.email"), value: contactContent?.email ?? "info@crystaldbc.com" },
@@ -116,7 +117,9 @@ const Contact = () => {
                 {contactContent?.subtitle ?? t("contact.infoSubtitle")}
               </p>
 
-              <div className="space-y-6">
+              <div className="w-20 h-[1px] bg-luxury-gold/50 mb-10" />
+
+              <div className="space-y-8">
                 <div className="flex items-start gap-4">
                   <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center flex-shrink-0">
                     <Phone className="h-6 w-6 text-accent" />

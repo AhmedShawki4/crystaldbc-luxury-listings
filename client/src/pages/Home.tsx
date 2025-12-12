@@ -1,27 +1,115 @@
+import gsap from "gsap";
+import "@google/model-viewer";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useLayoutEffect, useRef, useEffect, useState } from "react";
+import FloatingShapes from "@/components/FloatingShapes";
 import { Link } from "react-router-dom";
-import type { LucideIcon } from "lucide-react";
-import { ArrowRight, Award, Users, Home as HomeIcon, Mail, Phone, MapPin, Building2, ShieldCheck, Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import {
+  ArrowRight,
+  Award,
+  Users,
+  Home as HomeIcon,
+  Mail,
+  Phone,
+  MapPin,
+  Sparkles,
+  Globe2,
+  Shield,
+  Clock,
+  Quote,
+  CheckCircle2
+} from "lucide-react";
 import Hero from "@/components/Hero";
 import PropertyCard from "@/components/PropertyCard";
 import TrendingProjects from "@/components/TrendingProjects";
 import RealEstateChatBot from "@/components/RealEstateChatBot";
 import InvestmentBox from "@/components/InvestmentBox";
-import CurvedLoop from "@/components/CurvedLoop";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
 import useProperties from "@/hooks/useProperties";
 import apiClient from "@/lib/apiClient";
 import { useCmsSection } from "@/hooks/useCmsSection";
 import type { ContactContent } from "@/types";
-import { useTranslation } from "react-i18next";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const Home = () => {
   const { t } = useTranslation();
+  const mainRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
+  }, []);
+
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      // Animate sections on scroll
+      const sections = gsap.utils.toArray<HTMLElement>(".reveal-section");
+      sections.forEach((section) => {
+        gsap.fromTo(
+          section,
+          { opacity: 0, y: 50 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: section,
+              start: "top 80%",
+            },
+          }
+        );
+      });
+
+      // Animate cards staggering
+      const cardGrids = gsap.utils.toArray<HTMLElement>(".stagger-grid");
+      cardGrids.forEach((grid) => {
+        gsap.fromTo(
+          grid.children,
+          { opacity: 0, y: 30 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.2,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: grid,
+              start: "top 85%",
+            },
+          }
+        );
+      });
+
+      // FAQ Animation
+      const faqItems = gsap.utils.toArray<HTMLElement>(".faq-item");
+      gsap.fromTo(
+        faqItems,
+        { opacity: 0, x: -20 },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          scrollTrigger: {
+            trigger: ".faq-container",
+            start: "top 80%",
+          },
+        }
+      );
+
+    }, mainRef);
+    return () => ctx.revert();
   }, []);
 
   const { data: featuredProperties = [], isLoading: isLoadingFeatured } = useProperties({ featured: true, limit: 3 });
@@ -79,116 +167,105 @@ const Home = () => {
     }));
   };
 
+  type HomeFaq = { question: string; answer: string };
+  type HomeSuccessStat = { value: string; label: string; desc: string };
+  type HomeTestimonial = { name: string; role: string; text: string };
+
+  const faqItems = t("home.faqItems", { returnObjects: true });
+  const faqs = Array.isArray(faqItems) ? (faqItems as HomeFaq[]) : [];
+
+  const successStatItems = t("home.successStats", { returnObjects: true });
+  const successStats = Array.isArray(successStatItems)
+    ? (successStatItems as HomeSuccessStat[])
+    : [];
+
+  const testimonialItems = t("home.testimonialsItems", { returnObjects: true });
+  const testimonials = Array.isArray(testimonialItems)
+    ? (testimonialItems as HomeTestimonial[])
+    : [];
+
   return (
-    <div className="min-h-screen">
+    <div ref={mainRef} className="min-h-screen">
+      {/* 1. Hero Section */}
       <Hero />
 
-      {/* Trending Projects Section */}
-      <TrendingProjects />
-
-      {/* Real Estate ChatBot */}
-      <RealEstateChatBot />
-
-      {/* Featured Properties Section */}
-      <section className="py-20 bg-background">
+      {/* 2. Global Vision (3D Globe) */}
+      <section className="py-24 bg-luxury-dark text-white relative overflow-hidden reveal-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 fade-in">
-            <h2 className="text-4xl md:text-5xl font-display font-bold text-primary mb-4">
-              {t("home.featuredTitle")}
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {t("home.featuredSubtitle")}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {isLoadingFeatured && <p className="text-muted-foreground">{t("common.loadingListings")}</p>}
-            {!isLoadingFeatured && featuredProperties.length === 0 && (
-              <p className="text-muted-foreground">{t("listings.emptyTitle")}</p>
-            )}
-            {featuredProperties.map((property) => (
-              <PropertyCard
-                key={property._id}
-                id={property._id}
-                image={property.coverImage}
-                title={property.title}
-                location={property.location}
-                price={property.priceLabel}
-                beds={property.beds}
-                baths={property.baths}
-                sqft={property.sqftLabel}
-                status={property.status}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="order-2 lg:order-1 h-[300px] md:h-[400px] relative">
+              {/* @ts-ignore */}
+              <model-viewer
+                src="/city_globe3d_model.glb"
+                alt="3D City Model"
+                loading="lazy"
+                auto-rotate
+                camera-controls
+                disable-zoom
+                interaction-prompt="none"
+                camera-orbit="45deg 55deg 2.5m"
+                shadow-intensity="1"
+                shadow-softness="1"
+                style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
               />
-            ))}
-          </div>
-
-          <div className="text-center">
-            <Button
-              asChild
-              size="lg"
-              className="bg-accent hover:bg-accent/90 text-accent-foreground"
-            >
-              <Link to="/listings">
-                {t("home.viewAll")}
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
+            </div>
+            <div className="order-1 lg:order-2">
+              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("home.globalVisionEyebrow")}</span>
+              <h2 className="text-4xl md:text-5xl font-display font-medium mb-6">{t("home.globalVisionTitle")}</h2>
+              <p className="text-lg text-white/80 font-light leading-relaxed mb-6">
+                {t("home.globalVisionDescription")}
+              </p>
+              <Button asChild className="bg-luxury-gold text-luxury-dark hover:bg-luxury-gold-light">
+                <Link to="/investment">{t("home.globalVisionCta")}</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Investment Opportunity Section */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <InvestmentBox />
-        </div>
-      </section>
-
-      {/* Why Choose Us Section */}
-      <section className="py-20 bg-muted/30">
+      {/* 3. Why Choose Us / Trust Section (Moved Up) */}
+      <section className="py-24 bg-background reveal-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-display font-bold text-primary mb-4">
+            <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("home.whyEyebrow")}</span>
+            <h2 className="text-4xl md:text-5xl font-display font-medium text-primary mb-4">
               {t("home.whyTitle")}
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {t("home.whySubtitle")}
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="text-center group">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                <Award className="h-10 w-10 text-accent" />
+            <div className="text-center group p-8 border border-transparent hover:border-luxury-gold/20 transition-all duration-300">
+              <div className="w-16 h-16 mx-auto mb-8 rounded-full bg-luxury-gold/10 flex items-center justify-center text-luxury-gold group-hover:bg-luxury-gold group-hover:text-white transition-all duration-300">
+                <Award className="h-8 w-8" />
               </div>
-              <h3 className="text-2xl font-display font-semibold text-primary mb-3">
+              <h3 className="text-xl font-display font-semibold text-primary mb-4">
                 {t("home.whyItems.award.title")}
               </h3>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground font-light leading-relaxed">
                 {t("home.whyItems.award.description")}
               </p>
             </div>
 
-            <div className="text-center group">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                <Users className="h-10 w-10 text-accent" />
+            <div className="text-center group p-8 border border-transparent hover:border-luxury-gold/20 transition-all duration-300">
+              <div className="w-16 h-16 mx-auto mb-8 rounded-full bg-luxury-gold/10 flex items-center justify-center text-luxury-gold group-hover:bg-luxury-gold group-hover:text-white transition-all duration-300">
+                <Users className="h-8 w-8" />
               </div>
-              <h3 className="text-2xl font-display font-semibold text-primary mb-3">
+              <h3 className="text-xl font-display font-semibold text-primary mb-4">
                 {t("home.whyItems.team.title")}
               </h3>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground font-light leading-relaxed">
                 {t("home.whyItems.team.description")}
               </p>
             </div>
 
-            <div className="text-center group">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                <HomeIcon className="h-10 w-10 text-accent" />
+            <div className="text-center group p-8 border border-transparent hover:border-luxury-gold/20 transition-all duration-300">
+              <div className="w-16 h-16 mx-auto mb-8 rounded-full bg-luxury-gold/10 flex items-center justify-center text-luxury-gold group-hover:bg-luxury-gold group-hover:text-white transition-all duration-300">
+                <HomeIcon className="h-8 w-8" />
               </div>
-              <h3 className="text-2xl font-display font-semibold text-primary mb-3">
+              <h3 className="text-xl font-display font-semibold text-primary mb-4">
                 {t("home.whyItems.listings.title")}
               </h3>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground font-light leading-relaxed">
                 {t("home.whyItems.listings.description")}
               </p>
             </div>
@@ -196,7 +273,159 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Contact Section */}
+      {/* 4. Featured Properties Section */}
+      <section className="py-32 relative overflow-hidden reveal-section">
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background/50" />
+        </div>
+        <div className="relative z-10">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-20">
+              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("home.exquisiteEyebrow")}</span>
+              <h2 className="text-4xl md:text-5xl font-display font-medium text-primary mb-6">
+                {t("home.featuredTitle")}
+              </h2>
+              <div className="w-24 h-[1px] bg-primary/20 mx-auto mb-6"></div>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed">
+                {t("home.featuredSubtitle")}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-16 stagger-grid">
+              {isLoadingFeatured && <p className="text-muted-foreground text-center col-span-3">{t("common.loadingListings")}</p>}
+              {!isLoadingFeatured && featuredProperties.length === 0 && (
+                <p className="text-muted-foreground text-center col-span-3">{t("listings.emptyTitle")}</p>
+              )}
+              {featuredProperties.map((property) => (
+                <div key={property._id} className="group cursor-pointer">
+                  <PropertyCard
+                    id={property._id}
+                    image={property.coverImage}
+                    title={property.title}
+                    location={property.location}
+                    price={property.priceLabel}
+                    beds={property.beds}
+                    baths={property.baths}
+                    sqft={property.sqftLabel}
+                    status={property.status}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="text-center">
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="border-primary/20 hover:bg-primary text-primary hover:text-white rounded-none px-12 py-6 text-lg transition-all duration-300"
+              >
+                <Link to="/listings">
+                  {t("home.viewAll")}
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Client Success Stories (Replaces How It Works) */}
+      <section className="py-24 bg-background reveal-section">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("home.successStories")}</span>
+            <h2 className="text-4xl md:text-5xl font-display font-medium text-primary">{t("home.realResults")}</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 stagger-grid">
+            {successStats.map((stat, i) => (
+              <div key={i} className="relative p-8 rounded-2xl bg-luxury-gold/5 border border-luxury-gold/10 hover:border-luxury-gold/30 transition-all duration-300 group">
+                <div className="text-5xl md:text-6xl font-display font-bold text-luxury-gold mb-4 group-hover:scale-105 transition-transform duration-300">
+                  {stat.value}
+                </div>
+                <h3 className="text-xl font-semibold text-primary mb-3">{stat.label}</h3>
+                <p className="text-muted-foreground font-light leading-relaxed">
+                  {stat.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Trending Projects */}
+      <div id="trending-projects">
+        <TrendingProjects />
+      </div>
+
+      {/* 3D Scroll Experience */}
+      <FloatingShapes />
+
+      {/* 6. Testimonials Section */}
+      <section className="py-24 bg-muted/20 reveal-section">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("home.testimonialsEyebrow")}</span>
+            <h2 className="text-4xl md:text-5xl font-display font-medium text-primary">{t("home.testimonialsTitle")}</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 stagger-grid">
+            {testimonials.map((testimonial, i) => (
+              <div key={i} className="bg-background p-8 rounded-2xl shadow-sm hover:shadow-md transition-all border border-border/50">
+                <Quote className="h-8 w-8 text-luxury-gold/30 mb-6" />
+                <p className="text-muted-foreground italic mb-6 leading-relaxed">"{testimonial.text}"</p>
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-luxury-gold/10 flex items-center justify-center text-luxury-gold font-bold">
+                    {testimonial.name[0]}
+                  </div>
+                  <div>
+                    <h4 className="font-display font-semibold text-primary">{testimonial.name}</h4>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">{testimonial.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 7. FAQ Section (NEW) */}
+      <section className="py-24 bg-background reveal-section">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 faq-container">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            <div className="space-y-6">
+              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("home.faqEyebrow")}</span>
+              <h2 className="text-4xl md:text-5xl font-display font-medium text-primary mb-6">{t("home.faqTitle")}</h2>
+              <p className="text-lg text-muted-foreground font-light leading-relaxed">
+                {t("home.faqDescription")}
+              </p>
+              <div className="p-8 bg-luxury-gold/5 border border-luxury-gold/20 rounded-lg">
+                <h4 className="text-xl font-display font-semibold mb-2 text-primary">{t("home.faqCtaTitle")}</h4>
+                <p className="text-muted-foreground mb-4">{t("home.faqCtaSubtitle")}</p>
+                <Button asChild variant="outline" className="border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-white">
+                  <Link to="/contact">{t("home.faqCtaButton")}</Link>
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <Accordion type="single" collapsible className="w-full">
+                {faqs.map((faq, index) => (
+                  <AccordionItem key={index} value={`item-${index}`} className="faq-item border-b border-border/60">
+                    <AccordionTrigger className="text-left text-lg font-medium hover:text-luxury-gold transition-colors py-6">
+                      {faq.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground leading-relaxed text-base pb-6">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 8. Contact Section */}
       <section className="py-20 bg-luxury-dark text-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -347,6 +576,47 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* 4b. Lifestyle / About Section (Re-inserted) */}
+      <section className="py-32 bg-secondary/30 relative reveal-section">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div className="relative">
+              <div className="aspect-[4/5] bg-gray-200 overflow-hidden relative z-10">
+                <img src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1600&auto=format&fit=crop" alt="Luxury Interior" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+              </div>
+              <div className="absolute -bottom-10 -right-10 w-2/3 aspect-square bg-white p-2 z-20 shadow-xl hidden md:block">
+                <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=800&auto=format&fit=crop" alt="Detail" className="w-full h-full object-cover" />
+              </div>
+            </div>
+
+            <div className="space-y-8">
+              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold">{t("home.lifestyleEyebrow")}</span>
+              <h2 className="text-4xl md:text-5xl font-display font-medium text-primary leading-tight">{t("home.lifestyleTitle")}</h2>
+              <p className="text-lg text-muted-foreground font-light leading-relaxed">
+                {t("home.lifestyleDescription")}
+              </p>
+              <div className="grid grid-cols-2 gap-8 pt-6">
+                <div>
+                  <h4 className="text-3xl font-display text-primary mb-2">150+</h4>
+                  <p className="text-sm text-muted-foreground uppercase tracking-wider">{t("home.lifestylePremiumListings")}</p>
+                </div>
+                <div>
+                  <h4 className="text-3xl font-display text-primary mb-2">$2B+</h4>
+                  <p className="text-sm text-muted-foreground uppercase tracking-wider">{t("home.lifestyleValueSold")}</p>
+                </div>
+              </div>
+              <Button asChild className="bg-luxury-gold text-luxury-dark rounded-none px-10 py-6 mt-4 hover:bg-luxury-gold-light focus:ring-2 focus:ring-luxury-gold focus:ring-offset-2 transition-all shadow-lg">
+                <Link to="/about">{t("home.lifestyleOurStory")}</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Real Estate ChatBot (Floating or Section? Section) */}
+      <RealEstateChatBot />
+
     </div>
   );
 };

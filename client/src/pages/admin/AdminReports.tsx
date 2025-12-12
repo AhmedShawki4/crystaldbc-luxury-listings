@@ -3,7 +3,7 @@ import apiClient from "@/lib/apiClient";
 import type { AnalyticsSummary } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, X, BarChart3, Download, Building2, Users2, Mail, ClipboardList, Heart } from "lucide-react";
+import { Check, X, BarChart3, Download, Building2, Users2, Mail, ClipboardList, Heart, CircleDollarSign, TrendingUp } from "lucide-react";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 
 const fetchSummary = async () => {
@@ -48,12 +48,15 @@ const AdminReports = () => {
     { label: "View activity logs", admin: true, employee: false },
   ];
 
-  const STAT_CONFIG: Record<keyof AnalyticsSummary["stats"], { label: string; icon: typeof Building2; accent: string }> = {
+  const STAT_CONFIG: Partial<Record<keyof AnalyticsSummary["stats"], { label: string; icon: typeof Building2; accent: string }>> = {
     properties: { label: "Properties", icon: Building2, accent: "text-emerald-400 bg-emerald-400/10" },
     leads: { label: "Leads", icon: Users2, accent: "text-sky-400 bg-sky-400/10" },
     messages: { label: "Messages", icon: Mail, accent: "text-amber-400 bg-amber-400/10" },
     users: { label: "Users", icon: Heart, accent: "text-pink-400 bg-pink-400/10" },
     wishlistItems: { label: "Wishlist", icon: ClipboardList, accent: "text-purple-400 bg-purple-400/10" },
+    totalInvested: { label: "Total Invested", icon: CircleDollarSign, accent: "text-luxury-gold bg-luxury-gold/10" },
+    actualProfit: { label: "Total Received", icon: CircleDollarSign, accent: "text-emerald-300 bg-emerald-400/10" },
+    investedProperties: { label: "Invested Properties", icon: Building2, accent: "text-emerald-400 bg-emerald-400/10" },
   };
 
   return (
@@ -70,27 +73,29 @@ const AdminReports = () => {
         }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {Object.entries(stats).map(([key, value]) => {
-          const typedKey = key as keyof AnalyticsSummary["stats"];
-          const config = STAT_CONFIG[typedKey];
-          const Icon = config.icon;
-          return (
-            <Card key={key} className="border-border/70">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{config.label}</p>
-                    <p className="text-3xl font-display font-semibold mt-2">{value}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {Object.entries(stats)
+          .map(([key, value]) => {
+            const typedKey = key as keyof AnalyticsSummary["stats"];
+            const config = STAT_CONFIG[typedKey];
+            if (!config) return null;
+            const Icon = config.icon;
+            return (
+              <Card key={key} className="border-border/70">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">{config.label}</p>
+                      <p className="text-3xl font-display font-semibold mt-2">{value}</p>
+                    </div>
+                    <span className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl ${config.accent}`}>
+                      <Icon className="h-5 w-5" />
+                    </span>
                   </div>
-                  <span className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl ${config.accent}`}>
-                    <Icon className="h-5 w-5" />
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+                </CardContent>
+              </Card>
+            );
+          })}
       </div>
 
       <Card>

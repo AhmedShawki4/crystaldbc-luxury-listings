@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
+
 import RegisterInterestDialog from "./components/RegisterInterestDialog";
 import Home from "./pages/Home";
 import Listings from "./pages/Listings";
@@ -18,6 +19,7 @@ import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/Auth";
 import Wishlist from "./pages/Wishlist";
 import ProtectedRoute from "./components/ProtectedRoute";
+import EntranceAnimation from "./components/EntranceAnimation";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminOverview from "./pages/admin/AdminOverview";
 import AdminProperties from "./pages/admin/AdminProperties";
@@ -28,6 +30,7 @@ import AdminMessages from "./pages/admin/AdminMessages";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminActivityLogs from "./pages/admin/AdminActivityLogs";
+import AdminInvestments from "./pages/admin/AdminInvestments";
 
 const queryClient = new QueryClient();
 
@@ -39,9 +42,11 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <EntranceAnimation />
       <TooltipProvider>
         <Toaster />
         <Sonner />
+
         <BrowserRouter>
           <RegisterInterestDialog />
           <Routes>
@@ -53,11 +58,18 @@ const App = () => {
               <Route path="about" element={<About />} />
               <Route path="contact" element={<Contact />} />
               <Route path="investment" element={<Investment />} />
-              <Route path="my-investments" element={<MyInvestments />} />
+              <Route
+                path="my-investments"
+                element={
+                  <ProtectedRoute roles={["user", "admin", "employee", "property-handler"]}>
+                    <MyInvestments />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="wishlist"
                 element={
-                  <ProtectedRoute roles={["user", "admin", "employee"]}>
+                  <ProtectedRoute roles={["user", "admin", "employee", "property-handler"]}>
                     <Wishlist />
                   </ProtectedRoute>
                 }
@@ -72,7 +84,7 @@ const App = () => {
             <Route
               path="admin"
               element={
-                <ProtectedRoute roles={["admin", "employee"]}>
+                <ProtectedRoute roles={["admin", "employee", "property-handler"]}>
                   <AdminLayout />
                 </ProtectedRoute>
               }
@@ -95,8 +107,22 @@ const App = () => {
                   </ProtectedRoute>
                 }
               />
-              <Route path="leads" element={<AdminLeads />} />
-              <Route path="messages" element={<AdminMessages />} />
+              <Route
+                path="leads"
+                element={
+                  <ProtectedRoute roles={["admin", "employee"]}>
+                    <AdminLeads />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="messages"
+                element={
+                  <ProtectedRoute roles={["admin", "employee"]}>
+                    <AdminMessages />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="reports"
                 element={
@@ -110,6 +136,14 @@ const App = () => {
                 element={
                   <ProtectedRoute roles={["admin"]}>
                     <AdminActivityLogs />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="investments"
+                element={
+                  <ProtectedRoute roles={["admin"]}>
+                    <AdminInvestments />
                   </ProtectedRoute>
                 }
               />

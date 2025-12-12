@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Menu, X, Home, Building2, Info, PhoneCall, Heart, Sparkles, TrendingUp, KeyRound, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { US, EG, DE } from 'country-flag-icons/react/3x2';
+import { US, EG, DE, RU } from 'country-flag-icons/react/3x2';
 import { cn } from "@/lib/utils";
 import useAuth from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
@@ -19,14 +19,28 @@ const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   const { user, isAuthenticated, logout, loading } = useAuth();
   const { t, i18n } = useTranslation();
   const languages = [
     { code: "en", label: "EN", Flag: US },
     { code: "ar", label: "AR", Flag: EG },
     { code: "de", label: "DE", Flag: DE },
+    { code: "ru", label: "RU", Flag: RU },
   ];
   const [activeLang, setActiveLang] = useState(i18n.language || "en");
+
+  const handleLanguageChange = (lang: string) => {
+    i18n.changeLanguage(lang);
+    setActiveLang(lang);
+  };
 
   const navLinks: NavLinkItem[] = [
     { name: t("nav.home"), path: "/", icon: Home },
@@ -42,28 +56,9 @@ const Navigation = () => {
   }
 
   const isActive = (path: string) => location.pathname === path;
-  const isHomePage = location.pathname === "/";
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    setActiveLang(i18n.language || "en");
-  }, [i18n.language]);
-
-  const handleLanguageChange = async (code: string) => {
-    setActiveLang(code);
-    await i18n.changeLanguage(code);
-  };
-
-  // Use dark background with backdrop blur when scrolled, not on homepage, or mobile menu is open
-  const useDarkNav = scrolled || !isHomePage || isOpen;
+  const transparentPaths = ["/", "/listings", "/for-rent", "/investment", "/about", "/contact", "/my-investments"];
+  const isTransparentPage = transparentPaths.includes(location.pathname) || location.pathname.startsWith("/property/");
+  const useDarkNav = scrolled || !isTransparentPage || isOpen;
 
   return (
     <nav
@@ -79,7 +74,7 @@ const Navigation = () => {
         <div className="hidden lg:flex items-center justify-between pb-1 text-[9px] font-semibold uppercase tracking-[0.32em] text-white/60">
           <span className="flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5 text-luxury-gold" />
-            {t("layout.tagline")}
+            <span className="font-display font-medium text-white/90">{t("layout.tagline")}</span>
           </span>
           <span className="text-white/40">{t("layout.locations")}</span>
         </div>
@@ -144,11 +139,10 @@ const Navigation = () => {
                       handleLanguageChange(lang.code);
                       document.getElementById('lang-desktop')?.classList.add('hidden');
                     }}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
-                      activeLang === lang.code
-                        ? 'bg-white/15 text-white font-semibold'
-                        : 'text-white/80 hover:bg-white/10 hover:text-white'
-                    }`}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${activeLang === lang.code
+                      ? 'bg-white/15 text-white font-semibold'
+                      : 'text-white/80 hover:bg-white/10 hover:text-white'
+                      }`}
                   >
                     <div className="w-5 h-3.5 flex-shrink-0">
                       <lang.Flag />
@@ -166,12 +160,20 @@ const Navigation = () => {
                   <p className="text-sm font-semibold leading-none">{user?.name}</p>
                   <p className="text-[11px] text-white/70 capitalize">{user?.role}</p>
                 </div>
-                {(user?.role === "admin" || user?.role === "employee") && (
-                  <Button asChild variant="outline" className="h-9 border-white/30 text-white bg-transparent hover:bg-white/10 px-3">
+                {(user?.role === "admin" || user?.role === "employee" || user?.role === "property-handler") && (
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="h-9 border-white/30 text-white bg-transparent px-3 transition-colors hover:border-luxury-gold hover:text-luxury-gold hover:bg-luxury-gold/10"
+                  >
                     <Link to="/admin">{t("nav.dashboard")}</Link>
                   </Button>
                 )}
-                <Button variant="outline" className="h-9 border-white/30 text-white bg-transparent hover:bg-white/10 px-3" onClick={logout}>
+                <Button
+                  variant="outline"
+                  className="h-9 border-white/30 text-white bg-transparent px-3 transition-colors hover:border-luxury-gold hover:text-luxury-gold hover:bg-luxury-gold/10"
+                  onClick={logout}
+                >
                   {t("nav.logout")}
                 </Button>
               </div>
@@ -228,11 +230,10 @@ const Navigation = () => {
                       key={lang.code}
                       type="button"
                       onClick={() => handleLanguageChange(lang.code)}
-                      className={`flex items-center gap-3 rounded-lg border px-4 py-2.5 transition-all ${
-                        activeLang === lang.code
-                          ? 'border-white/30 bg-white/15 text-white'
-                          : 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
-                      }`}
+                      className={`flex items-center gap-3 rounded-lg border px-4 py-2.5 transition-all ${activeLang === lang.code
+                        ? 'border-white/30 bg-white/15 text-white'
+                        : 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
+                        }`}
                     >
                       <div className="w-6 h-4 flex-shrink-0">
                         <lang.Flag />
@@ -246,12 +247,12 @@ const Navigation = () => {
                 <span className="text-white/80 text-sm">Checking session...</span>
               ) : isAuthenticated ? (
                 <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
-                  {(user?.role === "admin" || user?.role === "employee") && (
+                  {(user?.role === "admin" || user?.role === "employee" || user?.role === "property-handler") && (
                     <Link
                       to="/admin"
                       onClick={() => setIsOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 rounded-2xl border px-3 py-2.5 min-h-[44px] border-white/30 bg-white/10 text-white font-semibold hover:bg-white/20 transition-all"
+                        "flex items-center gap-3 rounded-2xl border px-3 py-2.5 min-h-[44px] border-white/30 bg-white/10 text-white font-semibold transition-all hover:border-luxury-gold hover:text-luxury-gold hover:bg-luxury-gold/10"
                       )}
                     >
                       <Sparkles className="h-5 w-5" />
@@ -264,7 +265,7 @@ const Navigation = () => {
                       logout();
                       setIsOpen(false);
                     }}
-                    className="flex items-center gap-3 rounded-2xl border px-3 py-2.5 min-h-[44px] border-red-400/40 bg-red-500/10 text-red-300 font-semibold hover:bg-red-500/20 transition-all"
+                    className="flex items-center gap-3 rounded-2xl border px-3 py-2.5 min-h-[44px] border-red-400/40 bg-red-500/10 text-red-300 font-semibold transition-all hover:border-luxury-gold hover:text-luxury-gold hover:bg-luxury-gold/10"
                   >
                     <X className="h-5 w-5" />
                     <span className="text-base">{t("nav.logout")}</span>
@@ -272,16 +273,16 @@ const Navigation = () => {
                 </div>
               ) : (
                 <div className="flex flex-col gap-3 border-t border-white/10 pt-4">
-                  <Link 
-                    to="/auth/login" 
-                    onClick={() => setIsOpen(false)} 
+                  <Link
+                    to="/auth/login"
+                    onClick={() => setIsOpen(false)}
                     className="flex items-center justify-center rounded-lg border border-white/30 bg-white/10 hover:bg-white/15 px-4 py-3 text-white font-semibold transition-all"
                   >
                     {t("nav.login")}
                   </Link>
-                  <Link 
-                    to="/auth/register" 
-                    onClick={() => setIsOpen(false)} 
+                  <Link
+                    to="/auth/register"
+                    onClick={() => setIsOpen(false)}
                     className="flex items-center justify-center rounded-lg bg-accent hover:bg-accent/90 px-4 py-3 text-accent-foreground font-semibold shadow-lg transition-all"
                   >
                     {t("nav.createAccount")}

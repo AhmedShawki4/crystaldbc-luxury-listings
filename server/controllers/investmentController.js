@@ -1,0 +1,229 @@
+const Investment = require("../models/Investment");
+const Property = require("../models/Property");
+
+const computeExpectedProfit = (investment) => {
+  if (investment.status === "Approved" && investment.paymentStatus === "Paid" && investment.roiPercentage > 0) {
+    investment.expectedProfit = investment.investmentAmount * (investment.roiPercentage / 100);
+  }
+};
+
+const advancePayoutDate = (investment) => {
+  const base = investment.payoutDate ? new Date(investment.payoutDate) : new Date();
+  base.setMonth(base.getMonth() + 1);
+  investment.payoutDate = base;
+};
+
+const canManageInvestment = (user, investment) => {
+  if (!user || !investment) return false;
+  if (user.role === "admin") return true;
+  return investment.user?.toString() === user._id.toString();
+};
+
+exports.createInvestment = async (req, res) => {
+  try {
+    const { propertyId, investmentAmount, notes } = req.body;
+    const parsedAmount = Number(investmentAmount);
+
+    if (!propertyId || !Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ message: "Property and investment amount are required" });
+    }
+
+    const property = await Property.findById(propertyId);
+    if (!property) {
+      return res.status(404).json({ message: "Property not found" });
+    }
+    if (!property.isInvestable) {
+      return res.status(400).json({ message: "This property is not open for investments" });
+    }
+
+    const minAmount = property.minInvestmentAmount || 0;
+    if (minAmount > 0 && parsedAmount < minAmount) {
+      return res.status(400).json({ message: `Minimum investment for this property is EGP ${minAmount.toLocaleString()}` });
+    }
+
+    const existing = await Investment.findOne({ user: req.user._id, property: propertyId });
+    if (existing) {
+      return res.status(400).json({ message: "You already have an investment for this property" });
+    }
+
+    const investment = await Investment.create({
+      user: req.user._id,
+      property: property._id,
+      investmentAmount: parsedAmount,
+      notes,
+    });
+
+    await investment.populate([
+      { path: "property", select: "title location coverImage priceLabel" },
+      { path: "user", select: "name email role phone" },
+    ]);
+
+    res.status(201).json({ investment });
+  } catch (error) {
+    console.error("Failed to create investment", error.message);
+    res.status(500).json({ message: "Failed to create investment" });
+  }
+};
+
+exports.getMyInvestments = async (req, res) => {
+  try {
+    const investments = await Investment.find({ user: req.user._id })
+      .sort({ createdAt: -1 })
+      .populate([{ path: "property", select: "title location coverImage priceLabel" }]);
+
+    res.json({ investments });
+  } catch (error) {
+    console.error("Failed to load investments", error.message);
+    res.status(500).json({ message: "Failed to load investments" });
+  }
+};
+
+exports.getInvestments = async (req, res) => {
+  try {
+    const { status, paymentStatus, search } = req.query;
+
+    const filters = {};
+    if (status) filters.status = status;
+    if (paymentStatus) filters.paymentStatus = paymentStatus;
+
+    const investments = await Investment.find(filters)
+      .sort({ createdAt: -1 })
+      .populate([
+        { path: "user", select: "name email role phone" },
+        { path: "property", select: "title location coverImage priceLabel" },
+      ]);
+
+    const filtered = search
+      ? investments.filter((inv) => {
+          const term = search.toLowerCase();
+          return (
+            inv.property?.title?.toLowerCase().includes(term) ||
+            inv.user?.name?.toLowerCase().includes(term) ||
+            inv.user?.email?.toLowerCase().includes(term) ||
+            inv.notes?.toLowerCase().includes(term)
+          );
+        })
+      : investments;
+
+    res.json({ investments: filtered });
+  } catch (error) {
+    console.error("Failed to fetch investments", error.message);
+    res.status(500).json({ message: "Failed to fetch investments" });
+  }
+};
+
+exports.getInvestment = async (req, res) => {
+  try {
+    const investment = await Investment.findById(req.params.id).populate([
+      { path: "user", select: "name email role phone" },
+      { path: "property", select: "title location coverImage priceLabel" },
+    ]);
+
+    if (!investment) {
+      return res.status(404).json({ message: "Investment not found" });
+    }
+
+    res.json({ investment });
+  } catch (error) {
+    console.error("Failed to fetch investment", error.message);
+    res.status(500).json({ message: "Failed to fetch investment" });
+  }
+};
+
+exports.updateInvestment = async (req, res) => {
+  try {
+    const allowedFields = [
+      "investmentAmount",
+      "status",
+      "paymentStatus",
+      "roiPercentage",
+      "notes",
+      "amountReceived",
+      "payoutDate",
+    ];
+    const update = {};
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        update[field] = req.body[field];
+      }
+    });
+
+    const investment = await Investment.findById(req.params.id);
+    if (!investment) {
+      return res.status(404).json({ message: "Investment not found" });
+    }
+
+    const becamePaid = update.paymentStatus === "Paid" && investment.paymentStatus !== "Paid";
+
+    Object.assign(investment, update);
+    if (becamePaid) {
+      advancePayoutDate(investment);
+    }
+    computeExpectedProfit(investment);
+    await investment.save();
+    await investment.populate([
+      { path: "user", select: "name email role phone" },
+      { path: "property", select: "title location coverImage priceLabel" },
+    ]);
+
+    res.json({ investment });
+  } catch (error) {
+    console.error("Failed to update investment", error.message);
+    res.status(500).json({ message: "Failed to update investment" });
+  }
+};
+
+exports.addPayment = async (req, res) => {
+  try {
+    const { amount } = req.body;
+    if (typeof amount !== "number" || amount <= 0) {
+      return res.status(400).json({ message: "Payment amount must be greater than zero" });
+    }
+
+    const investment = await Investment.findById(req.params.id);
+    if (!investment) {
+      return res.status(404).json({ message: "Investment not found" });
+    }
+
+    if (!canManageInvestment(req.user, investment)) {
+      return res.status(403).json({ message: "You cannot update this investment" });
+    }
+
+    investment.amountReceived += amount;
+
+    if (investment.amountReceived <= 0) {
+      investment.paymentStatus = "Not Paid";
+    } else if (investment.amountReceived < investment.investmentAmount) {
+      investment.paymentStatus = "Partially Paid";
+    } else {
+      investment.paymentStatus = "Paid";
+      advancePayoutDate(investment);
+    }
+
+    computeExpectedProfit(investment);
+    await investment.save();
+    await investment.populate([
+      { path: "user", select: "name email role phone" },
+      { path: "property", select: "title location coverImage priceLabel" },
+    ]);
+
+    res.json({ investment });
+  } catch (error) {
+    console.error("Failed to add payment", error.message);
+    res.status(500).json({ message: "Failed to add payment" });
+  }
+};
+
+exports.deleteInvestment = async (req, res) => {
+  try {
+    const investment = await Investment.findByIdAndDelete(req.params.id);
+    if (!investment) {
+      return res.status(404).json({ message: "Investment not found" });
+    }
+
+    res.json({ message: "Investment deleted" });
+  } catch (error) {
+    console.error("Failed to delete investment", error.message);
+    res.status(500).json({ message: "Failed to delete investment" });
+  }
+};

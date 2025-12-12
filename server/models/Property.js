@@ -17,6 +17,9 @@ const propertySchema = new mongoose.Schema(
     type: { type: String, required: true },
     status: { type: String, required: true, default: "For Sale" },
     isFeatured: { type: Boolean, default: false },
+    isInvestable: { type: Boolean, default: false },
+    minInvestmentAmount: { type: Number, default: 0 },
+    roiPercentage: { type: Number, default: 0 },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
