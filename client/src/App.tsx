@@ -16,7 +16,7 @@ import Contact from "./pages/Contact";
 import Investment from "./pages/Investment";
 import MyInvestments from "./pages/MyInvestments";
 import NotFound from "./pages/NotFound";
-import AuthPage from "./pages/Auth";
+import AboutAuth from "./pages/AboutAuth";
 import Wishlist from "./pages/Wishlist";
 import ProtectedRoute from "./components/ProtectedRoute";
 import EntranceAnimation from "./components/EntranceAnimation";
@@ -31,6 +31,8 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminActivityLogs from "./pages/admin/AdminActivityLogs";
 import AdminInvestments from "./pages/admin/AdminInvestments";
+import AdminRentals from "./pages/admin/AdminRentals";
+import AdminInvestmentBoxes from "./pages/admin/AdminInvestmentBoxes";
 
 const queryClient = new QueryClient();
 
@@ -77,8 +79,7 @@ const App = () => {
             </Route>
 
             <Route path="auth">
-              <Route path="login" element={<AuthPage mode="login" />} />
-              <Route path="register" element={<AuthPage mode="register" />} />
+              <Route path=":mode" element={<AboutAuth />} />
             </Route>
 
             <Route
@@ -144,6 +145,22 @@ const App = () => {
                 element={
                   <ProtectedRoute roles={["admin"]}>
                     <AdminInvestments />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="investment-boxes"
+                element={
+                  <ProtectedRoute roles={["admin"]}>
+                    <AdminInvestmentBoxes />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="rentals"
+                element={
+                  <ProtectedRoute roles={["admin", "employee", "property-handler"]}>
+                    <AdminRentals />
                   </ProtectedRoute>
                 }
               />

@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useState } from "react";
+import { useEffect, useRef, useLayoutEffect, useState } from "react";
 import gsap from "gsap";
 
 const EntranceAnimation = () => {
@@ -13,6 +13,26 @@ const EntranceAnimation = () => {
     const hallway1Ref = useRef<HTMLDivElement>(null);   // Layer 3
     const openedDoorRef = useRef<HTMLDivElement>(null); // Layer 4
     const entranceRef = useRef<HTMLDivElement>(null);   // Layer 5 (Front)
+
+    const [hasStarted, setHasStarted] = useState(false);
+
+    useEffect(() => {
+        if (!isVisible) return;
+
+        const prevOverflow = document.body.style.overflow;
+        const prevOverscroll = (document.body.style as any).overscrollBehavior;
+        const prevTouchAction = document.body.style.touchAction;
+
+        document.body.style.overflow = "hidden";
+        (document.body.style as any).overscrollBehavior = "none";
+        document.body.style.touchAction = "none";
+
+        return () => {
+            document.body.style.overflow = prevOverflow;
+            (document.body.style as any).overscrollBehavior = prevOverscroll;
+            document.body.style.touchAction = prevTouchAction;
+        };
+    }, [isVisible]);
 
     useLayoutEffect(() => {
         if (!isVisible || !containerRef.current) return;
@@ -46,7 +66,9 @@ const EntranceAnimation = () => {
     }, [isVisible]);
 
     const handleEnter = () => {
-        if (!containerRef.current) return;
+        if (!containerRef.current || hasStarted) return;
+
+        setHasStarted(true);
 
         const tl = gsap.timeline({
             onComplete: () => {
@@ -112,7 +134,14 @@ const EntranceAnimation = () => {
     if (!isVisible) return null;
 
     return (
-        <div ref={containerRef} className="fixed inset-0 z-[100] bg-black overflow-hidden cursor-pointer" onClick={handleEnter}>
+        <div
+            ref={containerRef}
+            className={
+                "fixed inset-0 z-[100] bg-black overflow-hidden" +
+                (hasStarted ? " cursor-default pointer-events-none" : " cursor-pointer")
+            }
+            onClick={handleEnter}
+        >
             {/* Layer 1: Lobby (Final Destination) */}
             <div ref={lobbyRef}>
                 <img src="/lobby.jpeg" alt="Lobby" className="w-full h-full object-cover" />

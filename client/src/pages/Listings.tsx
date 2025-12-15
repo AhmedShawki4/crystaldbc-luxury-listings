@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import PropertyCard from "@/components/PropertyCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Search, MapPin, Home, DollarSign, Bed, Building2, Hammer, Bath, Sparkles, TrendingUp } from "lucide-react";
+import { Search, MapPin, Home, DollarSign, Bed, Building2, Hammer, Bath, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import useProperties, { type PropertyFilters } from "@/hooks/useProperties";
 import PageHero from "@/components/PageHero";
@@ -23,7 +23,6 @@ const Listings = () => {
   const [bathsFilter, setBathsFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [featuredOnly, setFeaturedOnly] = useState(false);
-  const [investableOnly, setInvestableOnly] = useState(false);
 
   const filters = useMemo<PropertyFilters>(() => {
     const params: PropertyFilters = {};
@@ -34,7 +33,6 @@ const Listings = () => {
     if (bedsFilter !== "all") params.minBeds = Number(bedsFilter);
     if (bathsFilter !== "all") params.minBaths = Number(bathsFilter);
     if (featuredOnly) params.featured = true;
-    if (investableOnly) params.investable = true;
 
     if (priceFilter !== "all") {
       if (priceFilter === "0-5m") {
@@ -52,7 +50,7 @@ const Listings = () => {
     }
 
     return params;
-  }, [searchQuery, locationFilter, typeFilter, statusFilter, bedsFilter, bathsFilter, priceFilter, featuredOnly, investableOnly, sortBy]);
+  }, [searchQuery, locationFilter, typeFilter, statusFilter, bedsFilter, bathsFilter, priceFilter, featuredOnly, sortBy]);
 
   const { data: properties = [], isLoading } = useProperties(filters);
 
@@ -256,7 +254,6 @@ const Listings = () => {
                     <SelectItem value="all">{t("listings.filterOptions.anyStatus")}</SelectItem>
                     <SelectItem value="For Sale">{t("listings.filterOptions.forSale")}</SelectItem>
                     <SelectItem value="For Rent">{t("listings.filterOptions.forRent")}</SelectItem>
-                    <SelectItem value="Under Construction">{t("listings.filterOptions.underConstruction")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -272,16 +269,6 @@ const Listings = () => {
                   >
                     <Sparkles className="h-4 w-4 mr-1" />
                     {t("listings.quickFilters.featured")}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={investableOnly ? "default" : "outline"}
-                    size="sm"
-                    className="border-white/30 bg-white/5 text-white"
-                    onClick={() => setInvestableOnly((prev) => !prev)}
-                  >
-                    <TrendingUp className="h-4 w-4 mr-1" />
-                    Investable only
                   </Button>
                   <Button
                     type="button"
@@ -306,7 +293,6 @@ const Listings = () => {
                     setBathsFilter("all");
                     setStatusFilter("all");
                     setFeaturedOnly(false);
-                    setInvestableOnly(false);
                     setSortBy("featured");
                   }}
                 >

@@ -17,12 +17,15 @@ import {
   LogOut,
   Home,
   CircleDollarSign,
+  HandCoins,
+  Package,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 const NAV_ITEMS: Array<{ to: string; label: string; exact?: boolean; roles?: Role[]; icon: LucideIcon }> = [
   { to: "/admin", label: "Overview", exact: true, roles: ["admin", "employee", "property-handler"], icon: Gauge },
   { to: "/admin/properties", label: "Properties", roles: ["admin", "employee", "property-handler"], icon: Building2 },
+  { to: "/admin/rentals", label: "Rent Requests", roles: ["admin", "employee", "property-handler"], icon: HandCoins },
   { to: "/admin/projects", label: "Trending Projects", roles: ["admin", "employee"], icon: Sparkles },
   { to: "/admin/cms", label: "CMS", roles: ["admin", "employee"], icon: PenSquare },
   { to: "/admin/leads", label: "Leads", roles: ["admin", "employee"], icon: Users2 },
@@ -31,6 +34,7 @@ const NAV_ITEMS: Array<{ to: string; label: string; exact?: boolean; roles?: Rol
   { to: "/admin/activity", label: "Activity Logs", roles: ["admin"], icon: ClipboardList },
   { to: "/admin/users", label: "Users", roles: ["admin"], icon: ShieldCheck },
   { to: "/admin/investments", label: "Investments", roles: ["admin"], icon: CircleDollarSign },
+  { to: "/admin/investment-boxes", label: "Investment Boxes", roles: ["admin"], icon: Package },
 ];
 
 const AdminLayout = () => {

@@ -217,7 +217,14 @@ const AdminProjects = () => {
                   <Button size="sm" variant="secondary" onClick={() => handleEdit(project)}>
                     Edit
                   </Button>
-                  <Button size="sm" variant="destructive" onClick={() => deleteMutation.mutate(project._id)}>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => {
+                      if (!window.confirm(`Delete project "${project.name}"? This cannot be undone.`)) return;
+                      deleteMutation.mutate(project._id);
+                    }}
+                  >
                     Delete
                   </Button>
                 </div>

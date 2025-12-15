@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -10,6 +10,9 @@ import {
 } from "lucide-react";
 import PageHero from "@/components/PageHero";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Area,
   AreaChart,
@@ -20,12 +23,18 @@ import {
   YAxis,
 } from "recharts";
 import apiClient from "@/lib/apiClient";
-import type { Investment } from "@/types";
+import type { Investment, InvestmentBox } from "@/types";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const fetchMyInvestments = async () => {
   const { data } = await apiClient.get<{ investments: Investment[] }>("/investments/my");
   return data.investments;
+};
+
+const fetchInvestmentBoxes = async () => {
+  const { data } = await apiClient.get<{ boxes: InvestmentBox[] }>("/investment-boxes");
+  return data.boxes;
 };
 
 const formatCurrency = (value: number) => `EGP ${Math.round(value).toLocaleString()}`;
@@ -37,8 +46,17 @@ const formatDate = (value: string | undefined, notScheduledLabel: string) => {
 
 const MyInvestments = () => {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const { data, isLoading } = useQuery({ queryKey: ["my-investments"], queryFn: fetchMyInvestments });
+  const { data: boxesData, isLoading: boxesLoading } = useQuery({ queryKey: ["investment-boxes"], queryFn: fetchInvestmentBoxes });
   const investments = data ?? [];
+  const boxes = boxesData ?? [];
+
+  const [selectedBox, setSelectedBox] = useState<InvestmentBox | null>(null);
+  const [isInvestDialogOpen, setIsInvestDialogOpen] = useState(false);
+  const [investmentAmount, setInvestmentAmount] = useState("");
+  const [investmentNotes, setInvestmentNotes] = useState("");
+  const [submittingInvestment, setSubmittingInvestment] = useState(false);
 
   const unknownPropertyLabel = t("myInvestments.unknownProperty");
   const notScheduledLabel = t("myInvestments.notScheduled");
@@ -90,28 +108,87 @@ const MyInvestments = () => {
     // 1. Sort investments by date
     const sorted = [...investments].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
-    // 2. Identify all unique property titles
-    const propertyTitles = Array.from(new Set(sorted.map(inv => inv.property?.title || unknownPropertyLabel)));
+    // 2. Identify all unique investment labels (box name preferred, fallback to legacy property)
+    const labels = Array.from(
+      new Set(sorted.map((inv) => inv.investmentBox?.name || inv.property?.title || unknownPropertyLabel))
+    );
 
     // 3. Build cumulative data points
     // We want a point for each investment event, carrying forward previous totals
 
     let runningTotals: Record<string, number> = {};
-    propertyTitles.forEach(t => runningTotals[t] = 0);
+    labels.forEach((label) => (runningTotals[label] = 0));
 
     return sorted.map((inv) => {
-      const title = inv.property?.title || unknownPropertyLabel;
-      runningTotals[title] = (runningTotals[title] || 0) + inv.investmentAmount;
+      const seriesKey = inv.investmentBox?.name || inv.property?.title || unknownPropertyLabel;
+      runningTotals[seriesKey] = (runningTotals[seriesKey] || 0) + inv.investmentAmount;
 
-      const label = new Date(inv.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      const dateLabel = new Date(inv.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 
       // Return snapshot of all properties at this point in time
       return {
-        month: label,
-        ...runningTotals
+        month: dateLabel,
+        ...runningTotals,
       };
     });
+  }, [investments, unknownPropertyLabel]);
+
+  const investedBoxIds = useMemo(() => {
+    return new Set(investments.map((inv) => inv.investmentBox?._id).filter(Boolean) as string[]);
   }, [investments]);
+
+  const openInvestDialog = (box: InvestmentBox) => {
+    setSelectedBox(box);
+    setInvestmentAmount("");
+    setInvestmentNotes("");
+    setIsInvestDialogOpen(true);
+  };
+
+  const handleInvestSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!selectedBox) return;
+
+    const amountNumber = Number(investmentAmount);
+    if (Number.isNaN(amountNumber) || amountNumber <= 0) {
+      toast({ title: t("myInvestments.boxes.toasts.enterValidAmount"), variant: "destructive" });
+      return;
+    }
+
+    if (selectedBox.minInvestmentAmount > 0 && amountNumber < selectedBox.minInvestmentAmount) {
+      toast({
+        title: t("myInvestments.boxes.toasts.amountBelowMinimumTitle"),
+        description: t("myInvestments.boxes.toasts.amountBelowMinimumDescription", {
+          amount: Math.round(selectedBox.minInvestmentAmount).toLocaleString(),
+        }),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSubmittingInvestment(true);
+    try {
+      await apiClient.post("/investments", {
+        investmentBoxId: selectedBox._id,
+        investmentAmount: amountNumber,
+        notes: investmentNotes.trim() || undefined,
+      });
+
+      toast({
+        title: t("myInvestments.boxes.toasts.requestSubmittedTitle"),
+        description: t("myInvestments.boxes.toasts.requestSubmittedDescription"),
+      });
+      setIsInvestDialogOpen(false);
+    } catch (err) {
+      console.error("Investment request failed", err);
+      toast({
+        title: t("myInvestments.boxes.toasts.unableToSubmitTitle"),
+        description: t("myInvestments.boxes.toasts.unableToSubmitDescription"),
+        variant: "destructive",
+      });
+    } finally {
+      setSubmittingInvestment(false);
+    }
+  };
 
   const overviewStats = [
     { label: t("myInvestments.stats.totalInvested"), value: formatCurrency(totals.totalInvested), icon: DollarSign },
@@ -241,83 +318,98 @@ const MyInvestments = () => {
             </CardContent>
           </Card>
 
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-display font-bold">{t("myInvestments.activeInvestments")}</h2>
-            <Button variant="outline" asChild>
-              <Link to="/investment">{t("myInvestments.exploreMore")}</Link>
-            </Button>
-          </div>
+          <div className="mb-10">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+              <div>
+                <h2 className="text-2xl font-display font-bold">{t("myInvestments.boxes.title")}</h2>
+                <p className="text-muted-foreground">{t("myInvestments.boxes.subtitle")}</p>
+              </div>
+              <Button variant="outline" asChild>
+                <Link to="/investment">{t("myInvestments.exploreMore")}</Link>
+              </Button>
+            </div>
 
-          <div className="grid grid-cols-1 gap-6">
-            {isLoading && <p className="text-muted-foreground">{t("myInvestments.loading")}</p>}
-            {!isLoading && investments.length === 0 && <p className="text-muted-foreground">{t("myInvestments.empty")}</p>}
-            {investments.map((investment) => {
-              const expected = investment.expectedProfit || investment.investmentAmount * (investment.roiPercentage / 100);
-              return (
-                <Card key={investment._id} className="border-border/50 hover:border-luxury-gold/50 transition-all">
-                  <CardContent className="p-6 space-y-4">
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                      <div>
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground">{new Date(investment.createdAt).toLocaleDateString()}</p>
-                        <h3 className="text-lg font-semibold mb-1">{investment.property.title}</h3>
-                        <p className="text-sm text-muted-foreground">{investment.property.location}</p>
-                      </div>
-                      <div className="flex flex-wrap gap-3">
-                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-muted text-foreground">{investment.status}</span>
-                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-luxury-gold/15 text-luxury-gold">{investment.paymentStatus}</span>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm">
-                      <div className="rounded-lg border border-border/70 p-3">
-                        <p className="text-muted-foreground">{t("myInvestments.labels.investmentAmount")}</p>
-                        <p className="text-lg font-semibold">{formatCurrency(investment.investmentAmount)}</p>
-                      </div>
-                      <div className="rounded-lg border border-border/70 p-3">
-                        <p className="text-muted-foreground">{t("myInvestments.labels.roiPercent")}</p>
-                        <p className="text-lg font-semibold">{investment.roiPercentage}%</p>
-                      </div>
-                      <div className="rounded-lg border border-border/70 p-3">
-                        <p className="text-muted-foreground">{t("myInvestments.labels.expectedProfit")}</p>
-                        <p className="text-lg font-semibold">{formatCurrency(expected)}</p>
-                      </div>
-                      <div className="rounded-lg border border-border/70 p-3">
-                        <p className="text-muted-foreground">{t("myInvestments.labels.amountReceived")}</p>
-                        <p className="text-lg font-semibold">{formatCurrency(investment.amountReceived)}</p>
-                        <div className="mt-3">
-                          <Button asChild variant="outline" className="w-full border-luxury-gold/60 text-luxury-gold hover:bg-luxury-gold/10">
-                            <Link to="/contact">{t("myInvestments.labels.requestIncrease")}</Link>
-                          </Button>
+            {boxesLoading ? (
+              <p className="text-muted-foreground">{t("common.loading")}</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {boxes.map((box) => {
+                  const alreadyInvested = investedBoxIds.has(box._id);
+                  return (
+                    <Card key={box._id} className="border-border/50">
+                      <CardHeader>
+                        <CardTitle className="text-lg font-display">{box.name}</CardTitle>
+                        {box.description && <p className="text-sm text-muted-foreground">{box.description}</p>}
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex flex-wrap gap-2 text-xs font-semibold">
+                          <span className="px-3 py-1 rounded-full bg-luxury-gold/15 text-luxury-gold">
+                            {t("myInvestments.boxes.roiBadge", { value: box.roiPercentage })}
+                          </span>
+                          <span className="px-3 py-1 rounded-full bg-muted text-foreground">
+                            {t("myInvestments.boxes.minInvestment", { amount: Math.round(box.minInvestmentAmount).toLocaleString() })}
+                          </span>
                         </div>
-                      </div>
-                      <div className="rounded-lg border border-border/70 p-3">
-                        <p className="text-muted-foreground">{t("myInvestments.labels.paymentStatus")}</p>
-                        <p className="text-lg font-semibold">{investment.paymentStatus}</p>
-                      </div>
-                      <div className="rounded-lg border border-border/70 p-3">
-                        <p className="text-muted-foreground">{t("myInvestments.labels.status")}</p>
-                        <p className="text-lg font-semibold">{investment.status}</p>
-                      </div>
-                      <div className="rounded-lg border border-border/70 p-3">
-                        <p className="text-muted-foreground">{t("myInvestments.labels.monthlyPayoutDate")}</p>
-                        <p className="text-lg font-semibold">{formatDate(investment.payoutDate, notScheduledLabel)}</p>
-                        <p className="text-xs text-muted-foreground">{t("myInvestments.labels.scheduledDepositDate")}</p>
-                      </div>
-                      <div className="rounded-lg border border-border/70 p-3">
-                        <p className="text-muted-foreground">{t("myInvestments.labels.notes")}</p>
-                        <p className="text-sm text-foreground leading-relaxed min-h-[40px]">{investment.notes || t("myInvestments.noNotes")}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-3 text-xs font-medium uppercase tracking-wide">
-                      <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-500">{investment.property.priceLabel}</span>
-                      <span className="rounded-full bg-slate-500/10 px-3 py-1 text-slate-400">{t("myInvestments.labels.id")}: {investment.property._id}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                        <Button
+                          className="w-full"
+                          onClick={() => openInvestDialog(box)}
+                          disabled={alreadyInvested}
+                        >
+                          {alreadyInvested ? t("myInvestments.boxes.alreadyInvested") : t("myInvestments.boxes.investCta")}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </div>
+
+          <Dialog open={isInvestDialogOpen} onOpenChange={setIsInvestDialogOpen}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-display">
+                  {t("myInvestments.boxes.dialogTitle", { title: selectedBox?.name ?? "" })}
+                </DialogTitle>
+                <DialogDescription>{t("myInvestments.boxes.dialogDescription")}</DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleInvestSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t("myInvestments.labels.investmentAmount")}</label>
+                  <Input
+                    type="number"
+                    min={selectedBox?.minInvestmentAmount ?? 0}
+                    value={investmentAmount}
+                    onChange={(e) => setInvestmentAmount(e.target.value)}
+                    required
+                  />
+                  {selectedBox?.minInvestmentAmount ? (
+                    <p className="text-xs text-muted-foreground">
+                      {t("myInvestments.boxes.minimumAllowed", {
+                        amount: Math.round(selectedBox.minInvestmentAmount).toLocaleString(),
+                      })}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t("propertyDetail.rent.notesOptional")}</label>
+                  <Textarea
+                    value={investmentNotes}
+                    onChange={(e) => setInvestmentNotes(e.target.value)}
+                    placeholder={t("propertyDetail.rent.notesPlaceholder")}
+                  />
+                </div>
+                <div className="flex items-center justify-end gap-3">
+                  <Button type="button" variant="ghost" onClick={() => setIsInvestDialogOpen(false)}>
+                    {t("propertyDetail.cancel")}
+                  </Button>
+                  <Button type="submit" disabled={submittingInvestment}>
+                    {submittingInvestment ? t("propertyDetail.submitting") : t("myInvestments.boxes.submitRequest")}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </section>
     </div>

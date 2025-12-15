@@ -178,7 +178,13 @@ const AdminUsers = () => {
                   <Activity className="mr-2 h-4 w-4" />
                   View Logs
                 </Button>
-                <Button variant="destructive" onClick={() => deleteMutation.mutate(user.id)}>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    if (!window.confirm(`Delete user "${user.name || user.email}"? This cannot be undone.`)) return;
+                    deleteMutation.mutate(user.id);
+                  }}
+                >
                   Remove
                 </Button>
               </div>

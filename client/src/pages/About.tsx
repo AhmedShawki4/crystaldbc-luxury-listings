@@ -22,6 +22,22 @@ const About = () => {
   const { t } = useTranslation();
   const mainRef = useRef<HTMLDivElement>(null);
 
+  const toStringArray = (value: unknown, fallback: string[] = []) => {
+    const arrayValue = Array.isArray(value) ? value : Array.isArray(fallback) ? fallback : [];
+    return arrayValue.map((item) => String(item));
+  };
+
+  const toStatsArray = (value: unknown, fallback: { label: string; value: string }[] = []) => {
+    const arrayValue = Array.isArray(value) ? value : Array.isArray(fallback) ? fallback : [];
+    return arrayValue
+      .filter((item): item is { label: unknown; value: unknown } => Boolean(item) && typeof item === "object")
+      .map((item) => ({
+        label: String((item as { label?: unknown }).label ?? ""),
+        value: String((item as { value?: unknown }).value ?? ""),
+      }))
+      .filter((item) => item.label || item.value);
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -43,10 +59,10 @@ const About = () => {
   const { data: aboutContent } = useCmsSection<AboutContent>("about", fallbackAbout);
   const content = aboutContent ?? fallbackAbout;
   const heroImage = content.heroImage ? getMediaUrl(content.heroImage) : fallbackAbout.heroImage;
-  const storyParagraphs = content.storyParagraphs?.length ? content.storyParagraphs : fallbackAbout.storyParagraphs;
-  const values = content.values?.length ? content.values : fallbackAbout.values;
-  const stats = content.stats?.length ? content.stats : fallbackAbout.stats;
-  const impactItems = t("about.impact.items", { returnObjects: true }) as string[];
+  const storyParagraphs = toStringArray(content.storyParagraphs, fallbackAbout.storyParagraphs);
+  const values = Array.isArray(content.values) && content.values.length ? content.values : fallbackAbout.values;
+  const stats = toStatsArray(content.stats, fallbackAbout.stats);
+  const impactItems = toStringArray(t("about.impact.items", { returnObjects: true }));
 
   return (
     <div ref={mainRef} className="min-h-screen">
@@ -77,7 +93,7 @@ const About = () => {
 
             <div className="relative order-2 lg:order-1">
               <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-                <img src="/backgroundphoto.jpg" alt="Our Legacy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
+                <img src={heroImage || "/backgroundphoto.jpg"} alt="Our Legacy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
               </div>
               <div className="absolute -bottom-8 -left-8 bg-white p-8 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] max-w-xs hidden md:block border border-gray-100">
                 <p className="text-4xl font-display font-bold text-luxury-gold mb-2">20+</p>

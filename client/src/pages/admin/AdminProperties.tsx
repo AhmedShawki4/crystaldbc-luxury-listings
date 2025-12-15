@@ -22,7 +22,8 @@ const fetchProperties = async () => {
 const initialFormState = {
   title: "",
   location: "",
-  priceLabel: "",
+  currencyCode: "EGP",
+  priceLabel: "EGP 0",
   priceValue: 0,
   beds: 0,
   baths: 0,
@@ -34,13 +35,28 @@ const initialFormState = {
   features: "",
   type: "",
   status: "For Sale",
+  rentPayPeriod: "month",
   isFeatured: false,
-  isInvestable: false,
-  minInvestmentAmount: 0,
-  roiPercentage: 0,
 };
 
-const STATUS_OPTIONS = ["For Sale", "For Rent", "Under Construction"] as const;
+const STATUS_OPTIONS = ["For Sale", "For Rent"] as const;
+const CURRENCY_OPTIONS = [
+  { value: "EGP", label: "EGP (Egypt)" },
+  { value: "SAR", label: "SAR (Saudi Arabia)" },
+  { value: "EUR", label: "EUR (Germany)" },
+  { value: "AED", label: "AED (UAE)" },
+  { value: "RUB", label: "RUB (Russia)" },
+] as const;
+const RENT_PAY_PERIOD_OPTIONS = [
+  { value: "day", label: "Day" },
+  { value: "month", label: "Month" },
+  { value: "year", label: "Year" },
+] as const;
+
+const formatPriceLabel = (currencyCode: string, priceValue: number) => {
+  const rounded = Number.isFinite(priceValue) ? Math.round(priceValue) : 0;
+  return `${currencyCode} ${rounded.toLocaleString()}`;
+};
 
 const AdminProperties = () => {
   const { data, isLoading } = useQuery({ queryKey: ["properties"], queryFn: fetchProperties });
@@ -69,10 +85,6 @@ const AdminProperties = () => {
         gallery: formState.gallery.split(",").map((item) => item.trim()).filter(Boolean),
         features: formState.features.split(",").map((item) => item.trim()).filter(Boolean),
       };
-      if (!payload.isInvestable) {
-        payload.minInvestmentAmount = 0;
-        payload.roiPercentage = 0;
-      }
       if (editingId) {
         return apiClient.put(`/properties/${editingId}`, payload);
       }
@@ -100,9 +112,11 @@ const AdminProperties = () => {
 
   const handleEdit = (property: Property) => {
     setEditingId(property._id);
+    const currencyCode = property.currencyCode ?? "EGP";
     setFormState({
       title: property.title,
       location: property.location,
+      currencyCode,
       priceLabel: property.priceLabel,
       priceValue: property.priceValue,
       beds: property.beds,
@@ -115,21 +129,30 @@ const AdminProperties = () => {
       features: property.features.join(", "),
       type: property.type,
       status: property.status,
+      rentPayPeriod: property.rentPayPeriod ?? "month",
       isFeatured: property.isFeatured,
-      isInvestable: Boolean(property.isInvestable),
-      minInvestmentAmount: property.minInvestmentAmount ?? 0,
-      roiPercentage: property.roiPercentage ?? 0,
     });
   };
 
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value, type, checked } = event.target;
-    setFormState((prev) => ({
-      ...prev,
-      [name]: type === "number" ? Number(value) : type === "checkbox" ? checked : value,
-    }));
+    const { name, value } = event.target;
+    const type = event.target instanceof HTMLInputElement ? event.target.type : "text";
+    const checked = event.target instanceof HTMLInputElement ? event.target.checked : false;
+    setFormState((prev) => {
+      const nextValue = type === "number" ? Number(value) : type === "checkbox" ? checked : value;
+      const nextState: typeof prev = {
+        ...prev,
+        [name]: nextValue,
+      };
+
+      if (name === "priceValue") {
+        nextState.priceLabel = formatPriceLabel(String(prev.currencyCode || "EGP"), Number(nextValue));
+      }
+
+      return nextState;
+    });
   };
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -202,12 +225,37 @@ const AdminProperties = () => {
               <Input name="location" value={formState.location} onChange={handleChange} required />
             </div>
             <div>
-              <label className="text-sm font-medium">Price Label</label>
-              <Input name="priceLabel" value={formState.priceLabel} onChange={handleChange} required />
+              <label className="text-sm font-medium">Currency</label>
+              <Select
+                value={formState.currencyCode}
+                onValueChange={(value) =>
+                  setFormState((prev) => ({
+                    ...prev,
+                    currencyCode: value,
+                    priceLabel: formatPriceLabel(value, prev.priceValue),
+                  }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CURRENCY_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <label className="text-sm font-medium">Price Value</label>
               <Input type="number" name="priceValue" value={formState.priceValue} onChange={handleChange} required />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Price Label</label>
+              <Input name="priceLabel" value={formState.priceLabel} readOnly required />
+              <p className="text-xs text-muted-foreground mt-1">Auto-generated from currency and price value.</p>
             </div>
             <div>
               <label className="text-sm font-medium">Beds</label>
@@ -314,6 +362,27 @@ const AdminProperties = () => {
                 </SelectContent>
               </Select>
             </div>
+
+            {formState.status === "For Rent" && (
+              <div>
+                <label className="text-sm font-medium">Rent paid by</label>
+                <Select
+                  value={formState.rentPayPeriod}
+                  onValueChange={(value) => setFormState((prev) => ({ ...prev, rentPayPeriod: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select period" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RENT_PAY_PERIOD_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div>
               <label className="text-sm font-medium">Featured</label>
               <div className="flex items-center space-x-3 mt-2">
@@ -321,43 +390,6 @@ const AdminProperties = () => {
                 <span className="text-sm text-muted-foreground">Show on homepage</span>
               </div>
             </div>
-            {user?.role === "admin" && (
-              <div>
-                <label className="text-sm font-medium">Available for Investment</label>
-                <div className="flex items-center space-x-3 mt-2">
-                  <input type="checkbox" name="isInvestable" checked={formState.isInvestable} onChange={handleChange} />
-                  <span className="text-sm text-muted-foreground">Allow users to invest</span>
-                </div>
-              </div>
-            )}
-            {user?.role === "admin" && formState.isInvestable && (
-              <>
-                <div>
-                  <label className="text-sm font-medium">Min Investment (EGP)</label>
-                  <Input
-                    type="number"
-                    min={0}
-                    step={1000}
-                    name="minInvestmentAmount"
-                    value={formState.minInvestmentAmount}
-                    onChange={handleChange}
-                    placeholder="e.g. 250000"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">ROI %</label>
-                  <Input
-                    type="number"
-                    min={0}
-                    step={0.1}
-                    name="roiPercentage"
-                    value={formState.roiPercentage}
-                    onChange={handleChange}
-                    placeholder="e.g. 12"
-                  />
-                </div>
-              </>
-            )}
             <div className="md:col-span-2 flex gap-3 justify-end">
               {editingId && (
                 <Button type="button" variant="outline" onClick={() => {
@@ -380,6 +412,13 @@ const AdminProperties = () => {
         {data?.map((property) => (
           <Card key={property._id}>
             <CardContent className="p-5 space-y-3">
+              {property.coverImage ? (
+                <img
+                  src={getMediaUrl(property.coverImage)}
+                  alt={property.title}
+                  className="h-48 w-full object-cover rounded-md border border-border"
+                />
+              ) : null}
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-xl font-display font-semibold">{property.title}</h3>
@@ -402,13 +441,10 @@ const AdminProperties = () => {
                 {property.isFeatured ? (
                   <span className="px-2 py-1 rounded-full bg-accent/10 text-accent">Featured</span>
                 ) : null}
-                {property.isInvestable ? (
-                  <>
-                    <span className="px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500">ROI {property.roiPercentage ?? 0}%</span>
-                    {property.minInvestmentAmount ? (
-                      <span className="px-2 py-1 rounded-full bg-luxury-gold/10 text-luxury-gold">Min EGP {Math.round(property.minInvestmentAmount).toLocaleString()}</span>
-                    ) : null}
-                  </>
+                {property.status === "For Rent" ? (
+                  <span className="px-2 py-1 rounded-full bg-luxury-gold/10 text-luxury-gold">
+                    Paid by {property.rentPayPeriod ?? "month"}
+                  </span>
                 ) : null}
               </div>
               <p className="text-sm">{property.description.slice(0, 120)}...</p>

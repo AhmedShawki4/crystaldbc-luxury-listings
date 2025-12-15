@@ -10,7 +10,13 @@ import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-const AuthPage = ({ mode }: { mode: "login" | "register" }) => {
+export const AuthCard = ({
+  mode,
+  onSuccess,
+}: {
+  mode: "login" | "register";
+  onSuccess?: () => void;
+}) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -52,25 +58,25 @@ const AuthPage = ({ mode }: { mode: "login" | "register" }) => {
         const newErrors: Record<string, string> = {};
 
         if (!formState.name.trim()) {
-          newErrors.name = "Name is required.";
+          newErrors.name = t("auth.validation.nameRequired");
         }
 
         if (!formState.email.trim()) {
-          newErrors.email = "Email is required.";
+          newErrors.email = t("auth.validation.emailRequired");
         }
 
         if (!formState.phone.trim()) {
-          newErrors.phone = "Phone is required.";
+          newErrors.phone = t("auth.validation.phoneRequired");
         }
 
         if (formState.password.length < 6) {
-          newErrors.password = "Password must be at least 6 characters.";
+          newErrors.password = t("auth.validation.passwordMin");
         } else if (!/\d/.test(formState.password)) {
-          newErrors.password = "Password must include at least one number.";
+          newErrors.password = t("auth.validation.passwordNumber");
         }
 
         if (formState.password !== formState.confirmPassword) {
-          newErrors.confirmPassword = "Passwords do not match.";
+          newErrors.confirmPassword = t("auth.validation.passwordMismatch");
         }
 
         if (Object.keys(newErrors).length) {
@@ -90,9 +96,12 @@ const AuthPage = ({ mode }: { mode: "login" | "register" }) => {
         toast({ title: t("auth.meta.created"), description: t("auth.meta.welcome") });
       }
 
-      const redirectState = location.state as { from?: { pathname?: string } } | null;
-      const redirectTo = redirectState?.from?.pathname ?? "/";
-      navigate(redirectTo, { replace: true });
+      onSuccess?.();
+      if (!onSuccess) {
+        const redirectState = location.state as { from?: { pathname?: string } } | null;
+        const redirectTo = redirectState?.from?.pathname ?? "/";
+        navigate(redirectTo, { replace: true });
+      }
     } catch (error) {
       console.error("Auth error", error);
       const axiosError = error as AxiosError<{ message?: string; errors?: Array<{ msg?: string }> }>;
@@ -105,32 +114,26 @@ const AuthPage = ({ mode }: { mode: "login" | "register" }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30 py-16 px-4">
+    <motion.div
+      className="w-full max-w-lg bg-background border border-border rounded-lg p-8 shadow-lg"
+      {...formMotion}
+    >
       <motion.div
-        className="w-full max-w-lg bg-background border border-border rounded-lg p-8 shadow-lg"
+        className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-6"
         {...formMotion}
+        transition={{ duration: 0.35, delay: 0.05, ease: "easeOut" }}
       >
-        <motion.div
-          className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-6"
-          {...formMotion}
-          transition={{ duration: 0.35, delay: 0.05, ease: "easeOut" }}
-        >
-          <div>
-            <motion.h1 className="text-3xl font-display font-bold text-primary mb-2" {...formMotion} transition={{ duration: 0.35, delay: 0.05, ease: "easeOut" }}>
-              {mode === "login" ? t("auth.loginTitle") : t("auth.registerTitle")}
-            </motion.h1>
-            <motion.p className="text-muted-foreground" {...formMotion} transition={{ duration: 0.35, delay: 0.08, ease: "easeOut" }}>
-              {mode === "login"
-                ? t("auth.loginSubtitle")
-                : t("auth.registerSubtitle")}
-            </motion.p>
-          </div>
-          <Button variant="outline" asChild className="self-end sm:self-start">
-            <Link to="/">Go back home</Link>
-          </Button>
-        </motion.div>
+        <div>
+          <motion.h1 className="text-3xl font-display font-bold text-primary mb-2" {...formMotion} transition={{ duration: 0.35, delay: 0.05, ease: "easeOut" }}>
+            {mode === "login" ? t("auth.loginTitle") : t("auth.registerTitle")}
+          </motion.h1>
+          <motion.p className="text-muted-foreground" {...formMotion} transition={{ duration: 0.35, delay: 0.08, ease: "easeOut" }}>
+            {mode === "login" ? t("auth.loginSubtitle") : t("auth.registerSubtitle")}
+          </motion.p>
+        </div>
+      </motion.div>
 
-        <motion.form className="space-y-5" onSubmit={handleSubmit} {...formMotion} transition={{ duration: 0.4, delay: 0.12, ease: "easeOut" }}>
+      <motion.form className="space-y-5" onSubmit={handleSubmit} {...formMotion} transition={{ duration: 0.4, delay: 0.12, ease: "easeOut" }}>
           {mode === "register" && (
             <div>
               <label htmlFor="name" className="text-sm font-medium block mb-2">
@@ -169,7 +172,7 @@ const AuthPage = ({ mode }: { mode: "login" | "register" }) => {
           {mode === "register" && (
             <div>
               <label htmlFor="phone" className="text-sm font-medium block mb-2">
-                Phone
+                {t("auth.fields.phone")}
               </label>
               <Input
                 id="phone"
@@ -210,7 +213,7 @@ const AuthPage = ({ mode }: { mode: "login" | "register" }) => {
             </div>
             {mode === "register" && (
               <p className="mt-2 text-xs text-muted-foreground">
-                Use at least 6 characters and include a number.
+                {t("auth.validation.passwordHint")}
               </p>
             )}
             {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
@@ -248,18 +251,25 @@ const AuthPage = ({ mode }: { mode: "login" | "register" }) => {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? t("auth.actions.processing") : mode === "login" ? t("auth.actions.submitLogin") : t("auth.actions.submitRegister")}
           </Button>
-        </motion.form>
+      </motion.form>
 
-        <p className="text-sm text-muted-foreground text-center mt-6">
-          {mode === "login" ? t("auth.meta.newUser") : t("auth.meta.haveAccount")} {" "}
-          <Link
-            to={mode === "login" ? "/auth/register" : "/auth/login"}
-            className="text-primary underline font-medium"
-          >
-            {mode === "login" ? t("auth.meta.createOne") : t("auth.meta.signIn")}
-          </Link>
-        </p>
-      </motion.div>
+      <p className="text-sm text-muted-foreground text-center mt-6">
+        {mode === "login" ? t("auth.meta.newUser") : t("auth.meta.haveAccount")} {" "}
+        <Link
+          to={mode === "login" ? "/auth/register" : "/auth/login"}
+          className="text-primary underline font-medium"
+        >
+          {mode === "login" ? t("auth.meta.createOne") : t("auth.meta.signIn")}
+        </Link>
+      </p>
+    </motion.div>
+  );
+};
+
+const AuthPage = ({ mode }: { mode: "login" | "register" }) => {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-muted/30 py-16 px-4">
+      <AuthCard mode={mode} />
     </div>
   );
 };

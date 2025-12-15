@@ -34,7 +34,6 @@ const PropertyCard = ({
 
   const statusStyle: Record<string, string> = {
     "For Rent": "bg-emerald-500 text-white",
-    "Under Construction": "bg-amber-500 text-white",
     default: "bg-accent text-accent-foreground",
   };
 

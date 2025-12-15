@@ -124,7 +124,7 @@ const AdminInvestments = () => {
         <div className="md:col-span-2 space-y-1">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Search</p>
           <Input
-            placeholder="Search by property, user, or notes"
+            placeholder="Search by investment box, property, user, or notes"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-10 bg-background"
@@ -184,10 +184,14 @@ const AdminInvestments = () => {
                     <Calendar className="h-3 w-3" />
                     {new Date(investment.createdAt).toLocaleDateString()}
                   </div>
-                  <CardTitle className="text-xl font-display text-primary">{investment.property.title}</CardTitle>
-                  <p className="text-sm text-muted-foreground flex items-center gap-1">
-                    <MapPin className="h-3 w-3" /> {investment.property.location}
-                  </p>
+                  <CardTitle className="text-xl font-display text-primary">
+                    {investment.investmentBox?.name ?? investment.property?.title ?? "Unknown Investment"}
+                  </CardTitle>
+                  {investment.property?.location ? (
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <MapPin className="h-3 w-3" /> {investment.property.location}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
@@ -315,12 +319,20 @@ const AdminInvestments = () => {
                       variant="destructive"
                       size="sm"
                       className="h-8 px-2"
-                      onClick={() => deleteMutation.mutate(investment._id)}
+                      onClick={() => {
+                        if (!window.confirm("Delete this investment? This cannot be undone.")) return;
+                        deleteMutation.mutate(investment._id);
+                      }}
                       disabled={deleteMutation.isPending}
                     >
                       <Trash2 className="h-3 w-3 mr-1" /> Delete
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleNotesSave(investment)} disabled={mutation.isPending}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleNotesSave(investment)}
+                      disabled={mutation.isPending}
+                    >
                       Save Notes
                     </Button>
                   </div>
