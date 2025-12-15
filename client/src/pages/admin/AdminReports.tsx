@@ -56,7 +56,6 @@ const AdminReports = () => {
     wishlistItems: { label: "Wishlist", icon: ClipboardList, accent: "text-purple-400 bg-purple-400/10" },
     totalInvested: { label: "Total Invested", icon: CircleDollarSign, accent: "text-luxury-gold bg-luxury-gold/10" },
     actualProfit: { label: "Total Received", icon: CircleDollarSign, accent: "text-emerald-300 bg-emerald-400/10" },
-    investedProperties: { label: "Invested Properties", icon: Building2, accent: "text-emerald-400 bg-emerald-400/10" },
   };
 
   return (

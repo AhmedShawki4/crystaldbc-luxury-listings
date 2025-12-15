@@ -14,6 +14,7 @@ export interface Property {
   _id: string;
   title: string;
   location: string;
+  currencyCode?: "EGP" | "SAR" | "EUR" | "AED" | "RUB";
   priceLabel: string;
   priceValue: number;
   beds: number;
@@ -26,6 +27,7 @@ export interface Property {
   features: string[];
   type: string;
   status: string;
+  rentPayPeriod?: "day" | "month" | "year";
   isFeatured: boolean;
   isInvestable?: boolean;
   minInvestmentAmount?: number;
@@ -33,10 +35,22 @@ export interface Property {
   createdAt: string;
 }
 
+export interface InvestmentBox {
+  _id: string;
+  name: string;
+  description?: string;
+  roiPercentage: number;
+  minInvestmentAmount: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
 export interface Investment {
   _id: string;
   user?: { _id: string; name: string; email: string; role: Role; phone?: string };
-  property: Pick<Property, "_id" | "title" | "location" | "coverImage" | "priceLabel">;
+  investmentBox?: Pick<InvestmentBox, "_id" | "name" | "description" | "roiPercentage" | "minInvestmentAmount">;
+  // Legacy (older investments may still reference a property)
+  property?: Pick<Property, "_id" | "title" | "location" | "coverImage" | "priceLabel">;
   investmentAmount: number;
   amountReceived: number;
   expectedProfit: number;
@@ -45,6 +59,20 @@ export interface Investment {
   roiPercentage: number;
   notes?: string;
   payoutDate?: string;
+  createdAt: string;
+}
+
+export interface RentalRequest {
+  _id: string;
+  user?: { _id: string; name: string; email: string; role: Role; phone?: string };
+  property: Pick<Property, "_id" | "title" | "location" | "coverImage" | "priceLabel" | "priceValue" | "rentPayPeriod" | "status">;
+  status: "Pending" | "Approved" | "Declined";
+  payPeriod: "day" | "month" | "year";
+  priceValue: number;
+  startDate?: string;
+  dueDate?: string;
+  endDate?: string;
+  notes?: string;
   createdAt: string;
 }
 

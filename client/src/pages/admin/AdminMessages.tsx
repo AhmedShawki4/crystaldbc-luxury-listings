@@ -81,12 +81,18 @@ const AdminMessages = () => {
                   )}
                 </div>
                 {canDelete && (
-                  <Button variant="destructive" size="icon" onClick={() => deleteMutation.mutate(message._id)}>
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => {
+                      if (!window.confirm("Delete this message? This cannot be undone.")) return;
+                      deleteMutation.mutate(message._id);
+                    }}
+                  >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 )}
               </div>
-
               {message.message && (
                 <p className="rounded-2xl bg-muted/40 p-4 text-sm text-muted-foreground">
                   <span className="mb-2 flex items-center gap-2 text-primary">

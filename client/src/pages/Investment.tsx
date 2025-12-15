@@ -1,13 +1,35 @@
 import "@google/model-viewer";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, TrendingUp, Building2, BarChart3, PieChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
+import apiClient from "@/lib/apiClient";
+import type { InvestmentBox } from "@/types";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+
+const fetchInvestmentBoxes = async () => {
+    const { data } = await apiClient.get<{ boxes: InvestmentBox[] }>("/investment-boxes");
+    return data.boxes;
+};
 
 const Investment = () => {
     const { t } = useTranslation();
+    const { toast } = useToast();
+    const { data: boxesData, isLoading: boxesLoading } = useQuery({ queryKey: ["investment-boxes"], queryFn: fetchInvestmentBoxes });
+    const boxes = boxesData ?? [];
+
+    const [selectedBox, setSelectedBox] = useState<InvestmentBox | null>(null);
+    const [isInvestDialogOpen, setIsInvestDialogOpen] = useState(false);
+    const [investmentAmount, setInvestmentAmount] = useState("");
+    const [investmentNotes, setInvestmentNotes] = useState("");
+    const [submittingInvestment, setSubmittingInvestment] = useState(false);
+
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -39,6 +61,59 @@ const Investment = () => {
             icon: PieChart
         }
     ];
+
+    const openInvestDialog = (box: InvestmentBox) => {
+        setSelectedBox(box);
+        setInvestmentAmount("");
+        setInvestmentNotes("");
+        setIsInvestDialogOpen(true);
+    };
+
+    const handleInvestSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
+        if (!selectedBox) return;
+
+        const amountNumber = Number(investmentAmount);
+        if (Number.isNaN(amountNumber) || amountNumber <= 0) {
+            toast({ title: t("myInvestments.boxes.toasts.enterValidAmount"), variant: "destructive" });
+            return;
+        }
+
+        if (selectedBox.minInvestmentAmount > 0 && amountNumber < selectedBox.minInvestmentAmount) {
+            toast({
+                title: t("myInvestments.boxes.toasts.amountBelowMinimumTitle"),
+                description: t("myInvestments.boxes.toasts.amountBelowMinimumDescription", {
+                    amount: Math.round(selectedBox.minInvestmentAmount).toLocaleString(),
+                }),
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setSubmittingInvestment(true);
+        try {
+            await apiClient.post("/investments", {
+                investmentBoxId: selectedBox._id,
+                investmentAmount: amountNumber,
+                notes: investmentNotes.trim() || undefined,
+            });
+
+            toast({
+                title: t("myInvestments.boxes.toasts.requestSubmittedTitle"),
+                description: t("myInvestments.boxes.toasts.requestSubmittedDescription"),
+            });
+            setIsInvestDialogOpen(false);
+        } catch (err) {
+            console.error("Investment request failed", err);
+            toast({
+                title: t("myInvestments.boxes.toasts.unableToSubmitTitle"),
+                description: t("myInvestments.boxes.toasts.unableToSubmitDescription"),
+                variant: "destructive",
+            });
+        } finally {
+            setSubmittingInvestment(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-background">
@@ -96,6 +171,69 @@ const Investment = () => {
                             />
                         </div>
                     </div>
+                </div>
+            </section>
+
+            {/* Investment Boxes Section */}
+            <section className="py-20 bg-background">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
+                        <div>
+                            <h2 className="text-3xl md:text-4xl font-display font-bold text-primary">
+                                {t("myInvestments.boxes.title")}
+                            </h2>
+                            <p className="text-lg text-muted-foreground max-w-2xl">
+                                {t("myInvestments.boxes.subtitle")}
+                            </p>
+                        </div>
+                        <Button asChild variant="outline">
+                            <Link to="/my-investments">{t("investment.ctaMyInvestments")}</Link>
+                        </Button>
+                    </div>
+
+                    {boxesLoading ? (
+                        <p className="text-muted-foreground">{t("common.loading")}</p>
+                    ) : (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            {boxes.map((box) => (
+                                <Card key={box._id} className="border-border/50 overflow-hidden">
+                                    <CardHeader className="bg-muted/30">
+                                        <CardTitle className="text-2xl font-display">{box.name}</CardTitle>
+                                        {box.description ? (
+                                            <p className="text-muted-foreground">{box.description}</p>
+                                        ) : null}
+                                    </CardHeader>
+                                    <CardContent className="p-6 space-y-6">
+                                        <div className="flex flex-wrap gap-2 text-sm font-semibold">
+                                            <span className="px-4 py-2 rounded-full bg-luxury-gold/15 text-luxury-gold">
+                                                {t("myInvestments.boxes.roiBadge", { value: box.roiPercentage })}
+                                            </span>
+                                            <span className="px-4 py-2 rounded-full bg-muted text-foreground">
+                                                {t("myInvestments.boxes.minInvestment", { amount: Math.round(box.minInvestmentAmount).toLocaleString() })}
+                                            </span>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div className="rounded-xl border border-border/60 p-4">
+                                                <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("myInvestments.labels.roiPercent")}</p>
+                                                <p className="text-3xl font-display font-bold text-primary">{box.roiPercentage}%</p>
+                                            </div>
+                                            <div className="rounded-xl border border-border/60 p-4">
+                                                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                                                    {t("myInvestments.boxes.minInvestment", { amount: Math.round(box.minInvestmentAmount).toLocaleString() })}
+                                                </p>
+                                                <p className="text-3xl font-display font-bold text-primary">{Math.round(box.minInvestmentAmount).toLocaleString()}</p>
+                                            </div>
+                                        </div>
+
+                                        <Button className="w-full" size="lg" onClick={() => openInvestDialog(box)}>
+                                            {t("myInvestments.boxes.investCta")}
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </section>
 
@@ -263,6 +401,52 @@ const Investment = () => {
                     </div>
                 </div>
             </section>
+
+            <Dialog open={isInvestDialogOpen} onOpenChange={setIsInvestDialogOpen}>
+                <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle className="text-2xl font-display">
+                            {t("myInvestments.boxes.dialogTitle", { title: selectedBox?.name ?? "" })}
+                        </DialogTitle>
+                        <DialogDescription>{t("myInvestments.boxes.dialogDescription")}</DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleInvestSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">{t("myInvestments.labels.investmentAmount")}</label>
+                            <Input
+                                type="number"
+                                min={selectedBox?.minInvestmentAmount ?? 0}
+                                value={investmentAmount}
+                                onChange={(e) => setInvestmentAmount(e.target.value)}
+                                required
+                            />
+                            {selectedBox?.minInvestmentAmount ? (
+                                <p className="text-xs text-muted-foreground">
+                                    {t("myInvestments.boxes.minimumAllowed", {
+                                        amount: Math.round(selectedBox.minInvestmentAmount).toLocaleString(),
+                                    })}
+                                </p>
+                            ) : null}
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">{t("propertyDetail.rent.notesOptional")}</label>
+                            <Textarea
+                                value={investmentNotes}
+                                onChange={(e) => setInvestmentNotes(e.target.value)}
+                                placeholder={t("propertyDetail.rent.notesPlaceholder")}
+                            />
+                        </div>
+                        <div className="flex items-center justify-end gap-3">
+                            <Button type="button" variant="ghost" onClick={() => setIsInvestDialogOpen(false)}>
+                                {t("propertyDetail.cancel")}
+                            </Button>
+                            <Button type="submit" disabled={submittingInvestment}>
+                                {submittingInvestment ? t("propertyDetail.submitting") : t("myInvestments.boxes.submitRequest")}
+                            </Button>
+                        </div>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

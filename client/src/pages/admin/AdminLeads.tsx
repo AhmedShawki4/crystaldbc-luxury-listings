@@ -89,13 +89,19 @@ const AdminLeads = () => {
                     {lead.status}
                   </span>
                   {canDelete && (
-                    <Button variant="destructive" size="icon" onClick={() => deleteMutation.mutate(lead._id)}>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => {
+                        if (!window.confirm("Delete this lead? This cannot be undone.")) return;
+                        deleteMutation.mutate(lead._id);
+                      }}
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   )}
                 </div>
               </div>
-
               {lead.message && (
                 <p className="rounded-2xl bg-muted/50 p-3 text-sm text-muted-foreground">
                   <span className="inline-flex items-center gap-2 font-medium text-primary">

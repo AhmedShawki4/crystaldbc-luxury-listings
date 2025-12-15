@@ -196,7 +196,7 @@ const Home = () => {
             <div className="order-2 lg:order-1 h-[300px] md:h-[400px] relative">
               {/* @ts-ignore */}
               <model-viewer
-                src="/city_globe3d_model.glb"
+                src="/base_basic_pbr.glb"
                 alt="3D City Model"
                 loading="lazy"
                 auto-rotate

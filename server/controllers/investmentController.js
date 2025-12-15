@@ -1,4 +1,5 @@
 const Investment = require("../models/Investment");
+const InvestmentBox = require("../models/InvestmentBox");
 const Property = require("../models/Property");
 
 const computeExpectedProfit = (investment) => {
@@ -21,39 +22,38 @@ const canManageInvestment = (user, investment) => {
 
 exports.createInvestment = async (req, res) => {
   try {
-    const { propertyId, investmentAmount, notes } = req.body;
+    const { investmentBoxId, investmentAmount, notes } = req.body;
     const parsedAmount = Number(investmentAmount);
 
-    if (!propertyId || !Number.isFinite(parsedAmount) || parsedAmount <= 0) {
-      return res.status(400).json({ message: "Property and investment amount are required" });
+    if (!investmentBoxId || !Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ message: "Investment box and investment amount are required" });
     }
 
-    const property = await Property.findById(propertyId);
-    if (!property) {
-      return res.status(404).json({ message: "Property not found" });
-    }
-    if (!property.isInvestable) {
-      return res.status(400).json({ message: "This property is not open for investments" });
+    const box = await InvestmentBox.findById(investmentBoxId);
+    if (!box || box.isActive === false) {
+      return res.status(404).json({ message: "Investment box not found" });
     }
 
-    const minAmount = property.minInvestmentAmount || 0;
+    const minAmount = box.minInvestmentAmount || 0;
     if (minAmount > 0 && parsedAmount < minAmount) {
-      return res.status(400).json({ message: `Minimum investment for this property is EGP ${minAmount.toLocaleString()}` });
+      return res.status(400).json({ message: `Minimum investment for this box is EGP ${minAmount.toLocaleString()}` });
     }
 
-    const existing = await Investment.findOne({ user: req.user._id, property: propertyId });
+    const existing = await Investment.findOne({ user: req.user._id, investmentBox: investmentBoxId });
     if (existing) {
-      return res.status(400).json({ message: "You already have an investment for this property" });
+      return res.status(400).json({ message: "You already have an investment for this investment box" });
     }
 
     const investment = await Investment.create({
       user: req.user._id,
-      property: property._id,
+      investmentBox: box._id,
       investmentAmount: parsedAmount,
+      roiPercentage: box.roiPercentage || 0,
       notes,
     });
 
     await investment.populate([
+      { path: "investmentBox", select: "name description roiPercentage minInvestmentAmount" },
       { path: "property", select: "title location coverImage priceLabel" },
       { path: "user", select: "name email role phone" },
     ]);
@@ -69,7 +69,10 @@ exports.getMyInvestments = async (req, res) => {
   try {
     const investments = await Investment.find({ user: req.user._id })
       .sort({ createdAt: -1 })
-      .populate([{ path: "property", select: "title location coverImage priceLabel" }]);
+      .populate([
+        { path: "investmentBox", select: "name description roiPercentage minInvestmentAmount" },
+        { path: "property", select: "title location coverImage priceLabel" },
+      ]);
 
     res.json({ investments });
   } catch (error) {
@@ -90,6 +93,7 @@ exports.getInvestments = async (req, res) => {
       .sort({ createdAt: -1 })
       .populate([
         { path: "user", select: "name email role phone" },
+        { path: "investmentBox", select: "name description roiPercentage minInvestmentAmount" },
         { path: "property", select: "title location coverImage priceLabel" },
       ]);
 
@@ -97,6 +101,7 @@ exports.getInvestments = async (req, res) => {
       ? investments.filter((inv) => {
           const term = search.toLowerCase();
           return (
+            inv.investmentBox?.name?.toLowerCase().includes(term) ||
             inv.property?.title?.toLowerCase().includes(term) ||
             inv.user?.name?.toLowerCase().includes(term) ||
             inv.user?.email?.toLowerCase().includes(term) ||
@@ -116,6 +121,7 @@ exports.getInvestment = async (req, res) => {
   try {
     const investment = await Investment.findById(req.params.id).populate([
       { path: "user", select: "name email role phone" },
+      { path: "investmentBox", select: "name description roiPercentage minInvestmentAmount" },
       { path: "property", select: "title location coverImage priceLabel" },
     ]);
 
@@ -163,6 +169,7 @@ exports.updateInvestment = async (req, res) => {
     await investment.save();
     await investment.populate([
       { path: "user", select: "name email role phone" },
+      { path: "investmentBox", select: "name description roiPercentage minInvestmentAmount" },
       { path: "property", select: "title location coverImage priceLabel" },
     ]);
 
@@ -204,6 +211,7 @@ exports.addPayment = async (req, res) => {
     await investment.save();
     await investment.populate([
       { path: "user", select: "name email role phone" },
+      { path: "investmentBox", select: "name description roiPercentage minInvestmentAmount" },
       { path: "property", select: "title location coverImage priceLabel" },
     ]);
 

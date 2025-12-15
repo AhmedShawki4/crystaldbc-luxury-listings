@@ -4,6 +4,11 @@ const propertySchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
     location: { type: String, required: true },
+    currencyCode: {
+      type: String,
+      enum: ["EGP", "SAR", "EUR", "AED", "RUB"],
+      default: "EGP",
+    },
     priceLabel: { type: String, required: true },
     priceValue: { type: Number, required: true },
     beds: { type: Number, required: true },
@@ -16,6 +21,11 @@ const propertySchema = new mongoose.Schema(
     features: [{ type: String }],
     type: { type: String, required: true },
     status: { type: String, required: true, default: "For Sale" },
+    rentPayPeriod: {
+      type: String,
+      enum: ["day", "month", "year"],
+      default: "month",
+    },
     isFeatured: { type: Boolean, default: false },
     isInvestable: { type: Boolean, default: false },
     minInvestmentAmount: { type: Number, default: 0 },

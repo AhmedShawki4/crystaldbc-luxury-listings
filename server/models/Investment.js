@@ -3,7 +3,10 @@ const mongoose = require("mongoose");
 const investmentSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    property: { type: mongoose.Schema.Types.ObjectId, ref: "Property", required: true },
+    // New: invest in investment boxes instead of properties.
+    investmentBox: { type: mongoose.Schema.Types.ObjectId, ref: "InvestmentBox" },
+    // Legacy: kept for backward compatibility with existing documents.
+    property: { type: mongoose.Schema.Types.ObjectId, ref: "Property" },
     investmentAmount: { type: Number, required: true },
     amountReceived: { type: Number, default: 0 },
     expectedProfit: { type: Number, default: 0 },
