@@ -58,6 +58,16 @@ const AdminInvestments = () => {
     onError: () => toast({ title: "Delete failed", variant: "destructive" }),
   });
 
+  const increaseReviewMutation = useMutation({
+    mutationFn: ({ id, decision }: { id: string; decision: "approve" | "reject" }) =>
+      apiClient.post(`/investments/${id}/increase-request/review`, { decision }),
+    onSuccess: () => {
+      toast({ title: "Increase request updated" });
+      queryClient.invalidateQueries({ queryKey: ["investments"] });
+    },
+    onError: () => toast({ title: "Failed to update increase request", variant: "destructive" }),
+  });
+
   const summary = useMemo(() => {
     if (!data?.length) return { total: 0, pending: 0, approved: 0, rejected: 0, paid: 0 };
     return data.reduce(
@@ -176,6 +186,11 @@ const AdminInvestments = () => {
 
       <div className="space-y-6">
         {data?.map((investment) => (
+          (() => {
+            const isIncreasePending = investment.increaseRequest?.status === "Pending";
+            const requestLabel = isIncreasePending ? "Request to increase" : "New investment";
+            const requestedAdditional = Number(investment.increaseRequest?.additionalAmount) || 0;
+            return (
           <Card key={investment._id} className="overflow-hidden border-border/60 hover:border-border transition-colors shadow-sm">
             <CardHeader className="bg-muted/30 pb-4 border-b border-border/50">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -194,12 +209,26 @@ const AdminInvestments = () => {
                   ) : null}
                 </div>
                 <div className="flex flex-wrap gap-2">
+                  <span
+                    className={
+                      isIncreasePending
+                        ? "px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-700 border border-amber-500/20"
+                        : "px-3 py-1 rounded-full text-xs font-medium bg-slate-500/10 text-slate-700 border border-slate-500/20"
+                    }
+                  >
+                    {requestLabel}
+                  </span>
                   <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
                     Inv: EGP {investment.investmentAmount.toLocaleString()}
                   </span>
                   <span className="px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                     Exp: EGP {Math.round(investment.expectedProfit || investment.investmentAmount * (investment.roiPercentage / 100)).toLocaleString()}
                   </span>
+                  {isIncreasePending && requestedAdditional > 0 ? (
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-700 border border-amber-500/20">
+                      + EGP {Math.round(requestedAdditional).toLocaleString()}
+                    </span>
+                  ) : null}
                 </div>
               </div>
 
@@ -219,6 +248,45 @@ const AdminInvestments = () => {
             </CardHeader>
 
             <CardContent className="p-6 space-y-6">
+              {isIncreasePending ? (
+                <div className="p-4 rounded-lg border border-amber-500/20 bg-amber-500/5">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="text-sm font-semibold">Increase request</div>
+                      <div className="text-sm text-muted-foreground">
+                        Requested additional: <span className="font-medium">EGP {Math.round(requestedAdditional).toLocaleString()}</span>
+                      </div>
+                      {investment.increaseRequest?.note ? (
+                        <div className="text-sm text-muted-foreground">Note: {investment.increaseRequest.note}</div>
+                      ) : null}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          if (!window.confirm("Approve this increase request?")) return;
+                          increaseReviewMutation.mutate({ id: investment._id, decision: "approve" });
+                        }}
+                        disabled={increaseReviewMutation.isPending}
+                      >
+                        Approve Increase
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          if (!window.confirm("Reject this increase request?")) return;
+                          increaseReviewMutation.mutate({ id: investment._id, decision: "reject" });
+                        }}
+                        disabled={increaseReviewMutation.isPending}
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 
                 {/* Investment Details Group */}
@@ -340,10 +408,12 @@ const AdminInvestments = () => {
               </div>
             </CardContent>
           </Card>
+            );
+          })()
         ))}
       </div>
 
-      {(mutation.isPending || deleteMutation.isPending) && (
+      {(mutation.isPending || deleteMutation.isPending || increaseReviewMutation.isPending) && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground justify-center py-4">
           <Loader2 className="h-4 w-4 animate-spin" />
           Saving changes...

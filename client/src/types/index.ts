@@ -58,6 +58,14 @@ export interface Investment {
   paymentStatus: "Not Paid" | "Partially Paid" | "Paid";
   roiPercentage: number;
   notes?: string;
+  increaseRequest?: {
+    additionalAmount?: number;
+    note?: string;
+    status?: "Pending" | "Approved" | "Rejected";
+    createdAt?: string;
+    reviewedAt?: string;
+    reviewedBy?: { _id: string; name: string; email: string; role: Role; phone?: string };
+  };
   payoutDate?: string;
   createdAt: string;
 }
