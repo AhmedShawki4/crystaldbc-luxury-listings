@@ -13,9 +13,11 @@ import { cn } from "@/lib/utils";
 export const AuthCard = ({
   mode,
   onSuccess,
+  onSwitchMode,
 }: {
   mode: "login" | "register";
   onSuccess?: () => void;
+  onSwitchMode?: () => void;
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -97,6 +99,8 @@ export const AuthCard = ({
       }
 
       onSuccess?.();
+      // If we are in a modal (onSuccess is provided usually implies this, but let's be safe), 
+      // we might not want to navigate. But the original code only navigated if !onSuccess.
       if (!onSuccess) {
         const redirectState = location.state as { from?: { pathname?: string } } | null;
         const redirectTo = redirectState?.from?.pathname ?? "/";
@@ -134,133 +138,143 @@ export const AuthCard = ({
       </motion.div>
 
       <motion.form className="space-y-5" onSubmit={handleSubmit} {...formMotion} transition={{ duration: 0.4, delay: 0.12, ease: "easeOut" }}>
-          {mode === "register" && (
-            <div>
-              <label htmlFor="name" className="text-sm font-medium block mb-2">
-                {t("auth.fields.name")}
-              </label>
-              <Input
-                id="name"
-                name="name"
-                required
-                value={formState.name}
-                onChange={handleChange}
-                className={cn(errors.name && "border-destructive focus-visible:ring-destructive")}
-                aria-invalid={!!errors.name}
-              />
-              {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name}</p>}
-            </div>
-          )}
-
+        {mode === "register" && (
           <div>
-            <label htmlFor="email" className="text-sm font-medium block mb-2">
-                {t("auth.fields.email")}
+            <label htmlFor="name" className="text-sm font-medium block mb-2">
+              {t("auth.fields.name")}
             </label>
             <Input
-              id="email"
-              name="email"
-              type="email"
+              id="name"
+              name="name"
               required
-              value={formState.email}
+              value={formState.name}
               onChange={handleChange}
-              className={cn(errors.email && "border-destructive focus-visible:ring-destructive")}
-              aria-invalid={!!errors.email}
+              className={cn(errors.name && "border-destructive focus-visible:ring-destructive")}
+              aria-invalid={!!errors.name}
             />
-            {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
+            {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name}</p>}
           </div>
+        )}
 
+        <div>
+          <label htmlFor="email" className="text-sm font-medium block mb-2">
+            {t("auth.fields.email")}
+          </label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            required
+            value={formState.email}
+            onChange={handleChange}
+            className={cn(errors.email && "border-destructive focus-visible:ring-destructive")}
+            aria-invalid={!!errors.email}
+          />
+          {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
+        </div>
+
+        {mode === "register" && (
+          <div>
+            <label htmlFor="phone" className="text-sm font-medium block mb-2">
+              {t("auth.fields.phone")}
+            </label>
+            <Input
+              id="phone"
+              name="phone"
+              required
+              value={formState.phone}
+              onChange={handleChange}
+              className={cn(errors.phone && "border-destructive focus-visible:ring-destructive")}
+              aria-invalid={!!errors.phone}
+            />
+            {errors.phone && <p className="mt-1 text-xs text-destructive">{errors.phone}</p>}
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <label htmlFor="password" className="text-sm font-medium block mb-2">
+            {t("auth.fields.password")}
+          </label>
+          <div className="relative">
+            <Input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              required
+              value={formState.password}
+              onChange={handleChange}
+              className={cn("pr-12", errors.password && "border-destructive focus-visible:ring-destructive")}
+              aria-invalid={!!errors.password}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-primary transition-colors"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          </div>
           {mode === "register" && (
-            <div>
-              <label htmlFor="phone" className="text-sm font-medium block mb-2">
-                {t("auth.fields.phone")}
-              </label>
-              <Input
-                id="phone"
-                name="phone"
-                required
-                value={formState.phone}
-                onChange={handleChange}
-                className={cn(errors.phone && "border-destructive focus-visible:ring-destructive")}
-                aria-invalid={!!errors.phone}
-              />
-              {errors.phone && <p className="mt-1 text-xs text-destructive">{errors.phone}</p>}
-            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {t("auth.validation.passwordHint")}
+            </p>
           )}
+          {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
+        </div>
 
+        {mode === "register" && (
           <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium block mb-2">
-              {t("auth.fields.password")}
+            <label htmlFor="confirmPassword" className="text-sm font-medium block mb-2">
+              {t("auth.fields.confirmPassword")}
             </label>
             <div className="relative">
               <Input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirm ? "text" : "password"}
                 required
-                value={formState.password}
+                value={formState.confirmPassword}
                 onChange={handleChange}
-                className={cn("pr-12", errors.password && "border-destructive focus-visible:ring-destructive")}
-                aria-invalid={!!errors.password}
+                className={cn("pr-12", errors.confirmPassword && "border-destructive focus-visible:ring-destructive")}
+                aria-invalid={!!errors.confirmPassword}
               />
               <button
                 type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
+                onClick={() => setShowConfirm((prev) => !prev)}
                 className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-primary transition-colors"
-                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-label={showConfirm ? "Hide confirm password" : "Show confirm password"}
               >
-                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                {showConfirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
             </div>
-            {mode === "register" && (
-              <p className="mt-2 text-xs text-muted-foreground">
-                {t("auth.validation.passwordHint")}
-              </p>
-            )}
-            {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
+            {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword}</p>}
           </div>
+        )}
 
-          {mode === "register" && (
-            <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="text-sm font-medium block mb-2">
-                {t("auth.fields.confirmPassword")}
-              </label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirm ? "text" : "password"}
-                  required
-                  value={formState.confirmPassword}
-                  onChange={handleChange}
-                  className={cn("pr-12", errors.confirmPassword && "border-destructive focus-visible:ring-destructive")}
-                  aria-invalid={!!errors.confirmPassword}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm((prev) => !prev)}
-                  className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-primary transition-colors"
-                  aria-label={showConfirm ? "Hide confirm password" : "Show confirm password"}
-                >
-                  {showConfirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
-              {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword}</p>}
-            </div>
-          )}
-
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? t("auth.actions.processing") : mode === "login" ? t("auth.actions.submitLogin") : t("auth.actions.submitRegister")}
-          </Button>
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? t("auth.actions.processing") : mode === "login" ? t("auth.actions.submitLogin") : t("auth.actions.submitRegister")}
+        </Button>
       </motion.form>
 
       <p className="text-sm text-muted-foreground text-center mt-6">
         {mode === "login" ? t("auth.meta.newUser") : t("auth.meta.haveAccount")} {" "}
-        <Link
-          to={mode === "login" ? "/auth/register" : "/auth/login"}
-          className="text-primary underline font-medium"
-        >
-          {mode === "login" ? t("auth.meta.createOne") : t("auth.meta.signIn")}
-        </Link>
+        {onSwitchMode ? (
+          <button
+            type="button"
+            onClick={onSwitchMode}
+            className="text-primary underline font-medium cursor-pointer"
+          >
+            {mode === "login" ? t("auth.meta.createOne") : t("auth.meta.signIn")}
+          </button>
+        ) : (
+          <Link
+            to={mode === "login" ? "/auth/register" : "/auth/login"}
+            className="text-primary underline font-medium"
+          >
+            {mode === "login" ? t("auth.meta.createOne") : t("auth.meta.signIn")}
+          </Link>
+        )}
       </p>
     </motion.div>
   );

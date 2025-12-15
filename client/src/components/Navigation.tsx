@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
+import AuthModal from "./AuthModal";
 import type { LucideIcon } from "lucide-react";
 import { Menu, X, Home, Building2, Info, PhoneCall, Heart, Sparkles, TrendingUp, KeyRound, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,13 @@ const Navigation = () => {
   const handleLanguageChange = (lang: string) => {
     i18n.changeLanguage(lang);
     setActiveLang(lang);
+  };
+
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+
+  const toggleAuthMode = () => {
+    setAuthMode((prev) => (prev === "login" ? "register" : "login"));
   };
 
   const navLinks: NavLinkItem[] = [
@@ -179,11 +187,24 @@ const Navigation = () => {
               </div>
             ) : (
               <>
-                <Button asChild variant="ghost" className="h-9 px-3 text-white hover:text-white/80">
-                  <Link to="/auth/login">{t("nav.login")}</Link>
+                <Button
+                  variant="ghost"
+                  className="h-9 px-3 text-white hover:text-white/80"
+                  onClick={() => {
+                    setAuthMode("login");
+                    setAuthModalOpen(true);
+                  }}
+                >
+                  {t("nav.login")}
                 </Button>
-                <Button asChild className="h-9 px-3 bg-accent text-accent-foreground hover:bg-accent/90">
-                  <Link to="/auth/register">{t("nav.createAccount")}</Link>
+                <Button
+                  className="h-9 px-3 bg-accent text-accent-foreground hover:bg-accent/90"
+                  onClick={() => {
+                    setAuthMode("register");
+                    setAuthModalOpen(true);
+                  }}
+                >
+                  {t("nav.createAccount")}
                 </Button>
               </>
             )}
@@ -273,26 +294,38 @@ const Navigation = () => {
                 </div>
               ) : (
                 <div className="flex flex-col gap-3 border-t border-white/10 pt-4">
-                  <Link
-                    to="/auth/login"
-                    onClick={() => setIsOpen(false)}
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      setAuthMode("login");
+                      setAuthModalOpen(true);
+                    }}
                     className="flex items-center justify-center rounded-lg border border-white/30 bg-white/10 hover:bg-white/15 px-4 py-3 text-white font-semibold transition-all"
                   >
                     {t("nav.login")}
-                  </Link>
-                  <Link
-                    to="/auth/register"
-                    onClick={() => setIsOpen(false)}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      setAuthMode("register");
+                      setAuthModalOpen(true);
+                    }}
                     className="flex items-center justify-center rounded-lg bg-accent hover:bg-accent/90 px-4 py-3 text-accent-foreground font-semibold shadow-lg transition-all"
                   >
                     {t("nav.createAccount")}
-                  </Link>
+                  </button>
                 </div>
               )}
             </div>
           </div>
         )}
       </div>
+      <AuthModal
+        isOpen={authModalOpen}
+        onOpenChange={setAuthModalOpen}
+        initialMode={authMode}
+        onSwitchMode={toggleAuthMode}
+      />
     </nav>
   );
 };

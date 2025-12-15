@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import useAuth from "@/hooks/useAuth";
 import type { AxiosError } from "axios";
+import AuthModal from "@/components/AuthModal";
 
 const fetchMyInvestments = async () => {
     const { data } = await apiClient.get<{ investments: Array<{ investmentBox?: { _id?: string } }> }>("/investments/my");
@@ -48,6 +49,27 @@ const Investment = () => {
     const [investmentNotes, setInvestmentNotes] = useState("");
     const [submittingInvestment, setSubmittingInvestment] = useState(false);
 
+    // Re-authentication state
+    const [reAuthOpen, setReAuthOpen] = useState(false);
+    const [reAuthMode, setReAuthMode] = useState<"login" | "register">("login");
+
+    const handleMyInvestmentsClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        // Always require re-auth for security when accessing from this page
+        setReAuthMode("login");
+        setReAuthOpen(true);
+    };
+
+    const handleReAuthSuccess = () => {
+        setReAuthOpen(false);
+        toast({ title: t("auth.meta.welcomeBack"), description: "Identity verified successfully." });
+        navigate("/my-investments");
+    };
+
+    const toggleReAuthMode = () => {
+        setReAuthMode(prev => prev === "login" ? "register" : "login");
+    };
+
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -56,6 +78,7 @@ const Investment = () => {
     const heroTitleParts = heroTitle.split(" ");
     const highlightWords = heroTitleParts.slice(-2).join(" ") || heroTitle;
     const heroTitlePrefix = heroTitleParts.slice(0, heroTitleParts.length - 2).join(" ");
+
 
     const benefits = [
         {
@@ -178,8 +201,12 @@ const Investment = () => {
                                 <Button asChild size="lg" className="bg-luxury-gold hover:bg-luxury-gold-light text-luxury-dark font-semibold text-lg px-8">
                                     <Link to="/contact">{t("investment.ctaStart")}</Link>
                                 </Button>
-                                <Button asChild size="lg" className="bg-white text-luxury-dark hover:bg-white/90 font-semibold text-lg px-8">
-                                    <Link to="/my-investments">{t("investment.ctaMyInvestments")}</Link>
+                                <Button
+                                    size="lg"
+                                    className="bg-white text-luxury-dark hover:bg-white/90 font-semibold text-lg px-8"
+                                    onClick={handleMyInvestmentsClick}
+                                >
+                                    {t("investment.ctaMyInvestments")}
                                 </Button>
                                 <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white/10 font-semibold text-lg px-8">
                                     {t("investment.ctaBrochure")}
@@ -219,8 +246,8 @@ const Investment = () => {
                                 {t("myInvestments.boxes.subtitle")}
                             </p>
                         </div>
-                        <Button asChild variant="outline">
-                            <Link to="/my-investments">{t("investment.ctaMyInvestments")}</Link>
+                        <Button variant="outline" onClick={handleMyInvestmentsClick}>
+                            {t("investment.ctaMyInvestments")}
                         </Button>
                     </div>
 
@@ -442,6 +469,14 @@ const Investment = () => {
                 </div>
             </section>
 
+            <AuthModal
+                isOpen={reAuthOpen}
+                onOpenChange={setReAuthOpen}
+                initialMode={reAuthMode}
+                onSwitchMode={toggleReAuthMode}
+                onAuthSuccess={handleReAuthSuccess}
+            />
+
             <Dialog open={isInvestDialogOpen} onOpenChange={setIsInvestDialogOpen}>
                 <DialogContent className="max-w-lg">
                     <DialogHeader>
@@ -487,7 +522,7 @@ const Investment = () => {
                     </form>
                 </DialogContent>
             </Dialog>
-        </div>
+        </div >
     );
 };
 
