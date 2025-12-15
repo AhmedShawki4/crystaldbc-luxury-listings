@@ -135,7 +135,7 @@ const AdminOverview = () => {
             </div>
             <div className="rounded-2xl bg-white/5 border border-white/10 p-4 flex items-center justify-between flex-wrap gap-4">
               <div>
-                <p className="text-white/70">Invested Properties</p>
+                <p className="text-white/70">Invested Boxes</p>
                 <p className="text-2xl font-bold text-white">{investedProperties}</p>
                 <p className="text-xs text-white/50">Projects currently funded</p>
                 <p className="text-xs text-white/60 mt-2">Portfolio coverage { (coverageRatio * 100).toFixed(1)}%</p>
@@ -181,7 +181,7 @@ const AdminOverview = () => {
               <p className="text-xs text-white/60">Active</p>
             </div>
             <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-              <p className="text-white/70">Invested Properties</p>
+              <p className="text-white/70">Invested Boxes</p>
               <p className="text-xl font-semibold flex items-center gap-2"><Building2 className="h-4 w-4 text-emerald-300" />{investedProperties}</p>
               <p className="text-xs text-white/60">Currently funded</p>
             </div>

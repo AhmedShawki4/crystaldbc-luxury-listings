@@ -22,6 +22,17 @@ const investmentSchema = new mongoose.Schema(
     },
     roiPercentage: { type: Number, default: 0 },
     notes: { type: String },
+    increaseRequest: {
+      additionalAmount: { type: Number },
+      note: { type: String },
+      status: {
+        type: String,
+        enum: ["Pending", "Approved", "Rejected"],
+      },
+      createdAt: { type: Date },
+      reviewedAt: { type: Date },
+      reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    },
     payoutDate: { type: Date },
   },
   { timestamps: true }

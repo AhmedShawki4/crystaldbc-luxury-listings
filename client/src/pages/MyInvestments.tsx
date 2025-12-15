@@ -58,6 +58,12 @@ const MyInvestments = () => {
   const [investmentNotes, setInvestmentNotes] = useState("");
   const [submittingInvestment, setSubmittingInvestment] = useState(false);
 
+  const [increaseBox, setIncreaseBox] = useState<InvestmentBox | null>(null);
+  const [isIncreaseDialogOpen, setIsIncreaseDialogOpen] = useState(false);
+  const [increaseAmount, setIncreaseAmount] = useState("");
+  const [increaseNote, setIncreaseNote] = useState("");
+  const [submittingIncrease, setSubmittingIncrease] = useState(false);
+
   const unknownPropertyLabel = t("myInvestments.unknownProperty");
   const notScheduledLabel = t("myInvestments.notScheduled");
 
@@ -137,11 +143,63 @@ const MyInvestments = () => {
     return new Set(investments.map((inv) => inv.investmentBox?._id).filter(Boolean) as string[]);
   }, [investments]);
 
+  const investmentByBoxId = useMemo(() => {
+    const map = new Map<string, Investment>();
+    investments.forEach((inv) => {
+      const boxId = inv.investmentBox?._id;
+      if (boxId) map.set(boxId, inv);
+    });
+    return map;
+  }, [investments]);
+
   const openInvestDialog = (box: InvestmentBox) => {
     setSelectedBox(box);
     setInvestmentAmount("");
     setInvestmentNotes("");
     setIsInvestDialogOpen(true);
+  };
+
+  const openIncreaseDialog = (box: InvestmentBox) => {
+    setIncreaseBox(box);
+    setIncreaseAmount("");
+    setIncreaseNote("");
+    setIsIncreaseDialogOpen(true);
+  };
+
+  const handleIncreaseSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!increaseBox) return;
+
+    const investment = investmentByBoxId.get(increaseBox._id);
+    if (!investment?._id) {
+      toast({ title: "Unable to request increase", description: "No investment found for this box.", variant: "destructive" });
+      return;
+    }
+
+    const amountNumber = Number(increaseAmount);
+    if (!Number.isFinite(amountNumber) || amountNumber <= 0) {
+      toast({ title: "Enter a valid amount", variant: "destructive" });
+      return;
+    }
+
+    setSubmittingIncrease(true);
+    try {
+      await apiClient.post(`/investments/${investment._id}/increase-request`, {
+        additionalAmount: amountNumber,
+        note: increaseNote.trim() || undefined,
+      });
+
+      toast({
+        title: "Increase request sent",
+        description: "An admin will review your request shortly.",
+      });
+      setIsIncreaseDialogOpen(false);
+    } catch (error) {
+      console.error("Increase request failed", error);
+      toast({ title: "Unable to send request", description: "Please try again.", variant: "destructive" });
+    } finally {
+      setSubmittingIncrease(false);
+    }
   };
 
   const handleInvestSubmit = async (event: React.FormEvent) => {
@@ -335,6 +393,8 @@ const MyInvestments = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {boxes.map((box) => {
                   const alreadyInvested = investedBoxIds.has(box._id);
+                  const invested = alreadyInvested ? investmentByBoxId.get(box._id) : undefined;
+                  const increasePending = invested?.increaseRequest?.status === "Pending";
                   return (
                     <Card key={box._id} className="border-border/50">
                       <CardHeader>
@@ -352,10 +412,10 @@ const MyInvestments = () => {
                         </div>
                         <Button
                           className="w-full"
-                          onClick={() => openInvestDialog(box)}
-                          disabled={alreadyInvested}
+                          onClick={() => (alreadyInvested ? openIncreaseDialog(box) : openInvestDialog(box))}
+                          disabled={alreadyInvested && increasePending}
                         >
-                          {alreadyInvested ? t("myInvestments.boxes.alreadyInvested") : t("myInvestments.boxes.investCta")}
+                          {alreadyInvested ? (increasePending ? "Increase Requested" : "Request Increase") : t("myInvestments.boxes.investCta")}
                         </Button>
                       </CardContent>
                     </Card>
@@ -405,6 +465,43 @@ const MyInvestments = () => {
                   </Button>
                   <Button type="submit" disabled={submittingInvestment}>
                     {submittingInvestment ? t("propertyDetail.submitting") : t("myInvestments.boxes.submitRequest")}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={isIncreaseDialogOpen} onOpenChange={setIsIncreaseDialogOpen}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-display">Request Increase — {increaseBox?.name ?? ""}</DialogTitle>
+                <DialogDescription>Send a request to increase your investment amount for this box.</DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleIncreaseSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Additional amount</label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={increaseAmount}
+                    onChange={(e) => setIncreaseAmount(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Note (optional)</label>
+                  <Textarea
+                    value={increaseNote}
+                    onChange={(e) => setIncreaseNote(e.target.value)}
+                    placeholder="Add any details for the admin team"
+                  />
+                </div>
+                <div className="flex items-center justify-end gap-3">
+                  <Button type="button" variant="ghost" onClick={() => setIsIncreaseDialogOpen(false)}>
+                    {t("propertyDetail.cancel")}
+                  </Button>
+                  <Button type="submit" disabled={submittingIncrease}>
+                    {submittingIncrease ? t("propertyDetail.submitting") : "Send Request"}
                   </Button>
                 </div>
               </form>

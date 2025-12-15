@@ -1,6 +1,6 @@
 import "@google/model-viewer";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, CheckCircle2, TrendingUp, Building2, BarChart3, PieChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import useAuth from "@/hooks/useAuth";
+import type { AxiosError } from "axios";
+
+const fetchMyInvestments = async () => {
+    const { data } = await apiClient.get<{ investments: Array<{ investmentBox?: { _id?: string } }> }>("/investments/my");
+    return data.investments;
+};
 
 const fetchInvestmentBoxes = async () => {
     const { data } = await apiClient.get<{ boxes: InvestmentBox[] }>("/investment-boxes");
@@ -21,8 +28,19 @@ const fetchInvestmentBoxes = async () => {
 const Investment = () => {
     const { t } = useTranslation();
     const { toast } = useToast();
+    const { isAuthenticated, user } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
     const { data: boxesData, isLoading: boxesLoading } = useQuery({ queryKey: ["investment-boxes"], queryFn: fetchInvestmentBoxes });
     const boxes = boxesData ?? [];
+
+    const isUser = user?.role === "user";
+    const { data: myInvestmentsData } = useQuery({
+        queryKey: ["my-investments"],
+        queryFn: fetchMyInvestments,
+        enabled: isAuthenticated && isUser,
+    });
+    const investedBoxIds = new Set((myInvestmentsData ?? []).map((inv) => inv.investmentBox?._id).filter(Boolean) as string[]);
 
     const [selectedBox, setSelectedBox] = useState<InvestmentBox | null>(null);
     const [isInvestDialogOpen, setIsInvestDialogOpen] = useState(false);
@@ -63,6 +81,19 @@ const Investment = () => {
     ];
 
     const openInvestDialog = (box: InvestmentBox) => {
+        if (!isAuthenticated) {
+            navigate("/auth/login", { state: { from: location } });
+            return;
+        }
+        if (!isUser) {
+            toast({ title: "Only users can invest", description: "Please sign in with a user account.", variant: "destructive" });
+            return;
+        }
+        if (investedBoxIds.has(box._id)) {
+            toast({ title: "Already invested", description: "You already have an investment in this box.", variant: "destructive" });
+            navigate("/my-investments");
+            return;
+        }
         setSelectedBox(box);
         setInvestmentAmount("");
         setInvestmentNotes("");
@@ -105,9 +136,11 @@ const Investment = () => {
             setIsInvestDialogOpen(false);
         } catch (err) {
             console.error("Investment request failed", err);
+            const axiosError = err as AxiosError<{ message?: string }>;
+            const serverMessage = axiosError.response?.data?.message;
             toast({
                 title: t("myInvestments.boxes.toasts.unableToSubmitTitle"),
-                description: t("myInvestments.boxes.toasts.unableToSubmitDescription"),
+                description: serverMessage ?? t("myInvestments.boxes.toasts.unableToSubmitDescription"),
                 variant: "destructive",
             });
         } finally {
@@ -226,8 +259,15 @@ const Investment = () => {
                                             </div>
                                         </div>
 
-                                        <Button className="w-full" size="lg" onClick={() => openInvestDialog(box)}>
-                                            {t("myInvestments.boxes.investCta")}
+                                        <Button
+                                            className="w-full"
+                                            size="lg"
+                                            onClick={() => openInvestDialog(box)}
+                                            disabled={isAuthenticated && isUser && investedBoxIds.has(box._id)}
+                                        >
+                                            {isAuthenticated && isUser && investedBoxIds.has(box._id)
+                                                ? t("myInvestments.boxes.alreadyInvested")
+                                                : t("myInvestments.boxes.investCta")}
                                         </Button>
                                     </CardContent>
                                 </Card>

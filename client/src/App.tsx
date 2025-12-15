@@ -63,7 +63,7 @@ const App = () => {
               <Route
                 path="my-investments"
                 element={
-                  <ProtectedRoute roles={["user", "admin", "employee", "property-handler"]}>
+                  <ProtectedRoute roles={["user"]}>
                     <MyInvestments />
                   </ProtectedRoute>
                 }

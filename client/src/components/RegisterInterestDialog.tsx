@@ -60,8 +60,8 @@ const RegisterInterestDialog = ({
     if (typeof window === "undefined") return;
 
     const lastPrompt = window.localStorage.getItem(promptStorageKey);
-    const sixHours = 6 * 60 * 60 * 1000;
-    if (lastPrompt && Date.now() - Number(lastPrompt) < sixHours) {
+    const twentyFourHours = 24 * 60 * 60 * 1000;
+    if (lastPrompt && Date.now() - Number(lastPrompt) < twentyFourHours) {
       return;
     }
 
@@ -72,6 +72,13 @@ const RegisterInterestDialog = ({
 
     return () => clearTimeout(timer);
   }, [location.pathname, isExternallyControlled, promptStorageKey]);
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setIsOpen(nextOpen);
+    if (!isExternallyControlled && nextOpen && typeof window !== "undefined") {
+      window.localStorage.setItem(promptStorageKey, Date.now().toString());
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,16 +122,12 @@ const RegisterInterestDialog = ({
     }));
   };
 
-  const handleClose = () => {
-    setIsOpen(false);
-  };
-
   if (!isStandardUser || hideOnAuth) {
     return null;
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="dialog-scroll w-[95vw] max-w-[520px] sm:max-w-[500px] max-h-[85vh] sm:max-h-[90vh] overflow-y-auto bg-luxury-dark text-white border-white/20 p-0 gap-0 rounded-2xl mx-auto my-6 [&>button]:text-white [&>button]:hover:text-white/80 [&>button]:top-3 [&>button]:right-3 sm:[&>button]:top-4 sm:[&>button]:right-4 [&>button>svg]:h-5 [&>button>svg]:w-5 [&>button]:z-10">
         {/* Header */}
         <div className="px-4 sm:px-6 pt-5 pb-4 sm:pt-6 sm:pb-4 sticky top-0 z-10 border-b border-white/10 bg-luxury-dark/85 backdrop-blur">
