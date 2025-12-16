@@ -15,14 +15,15 @@ const { ROLES } = require("../utils/constants");
 
 const router = express.Router();
 
-router.post("/", authenticate, authorize(ROLES.USER), createInvestment);
-router.get("/my", authenticate, authorize(ROLES.USER), getMyInvestments);
-router.post("/:id/increase-request", authenticate, authorize(ROLES.USER), requestIncrease);
+router.post("/", authenticate, authorize(ROLES.INVESTOR), createInvestment);
+router.get("/my", authenticate, authorize(ROLES.INVESTOR), getMyInvestments);
+router.post("/:id/increase-request", authenticate, authorize(ROLES.INVESTOR), requestIncrease);
 router.post("/:id/increase-request/review", authenticate, authorize(ROLES.ADMIN), reviewIncreaseRequest);
 router.get("/", authenticate, authorize(ROLES.ADMIN), getInvestments);
 router.get("/:id", authenticate, authorize(ROLES.ADMIN), getInvestment);
 router.put("/:id", authenticate, authorize(ROLES.ADMIN), updateInvestment);
-router.post("/:id/payments", authenticate, authorize(ROLES.ADMIN, ROLES.USER), addPayment);
+router.post("/:id/payments", authenticate, authorize(ROLES.ADMIN, ROLES.INVESTOR), addPayment);
 router.delete("/:id", authenticate, authorize(ROLES.ADMIN), deleteInvestment);
 
 module.exports = router;
+

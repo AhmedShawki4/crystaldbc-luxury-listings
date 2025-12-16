@@ -17,7 +17,7 @@ const fetchUsers = async () => {
   return data.users;
 };
 
-const roles: Role[] = ["admin", "employee", "property-handler", "user", "guest"];
+const roles: Role[] = ["admin", "employee", "property-handler", "investor", "user", "guest"];
 
 const AdminUsers = () => {
   const { data } = useQuery({ queryKey: ["users"], queryFn: fetchUsers });

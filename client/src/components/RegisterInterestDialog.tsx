@@ -45,15 +45,16 @@ const RegisterInterestDialog = ({
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const isStandardUser = user?.role === "user";
+  // Show popup only for guests (not logged in)
+  const isGuest = !user;
   const hideOnAuth = location.pathname.startsWith("/auth");
 
-  const promptStorageKey = useMemo(() => `crystaldbc:lastInterestPrompt:${user?.id ?? "guest"}`, [user?.id]);
+  const promptStorageKey = useMemo(() => `crystaldbc:lastInterestPrompt:guest`, []);
 
   // Determine if we're using external or internal control
   const isExternallyControlled = externalOpen !== undefined;
   const isOpen = isExternallyControlled ? externalOpen : internalOpen;
-  const setIsOpen = isExternallyControlled ? (onOpenChange || (() => {})) : setInternalOpen;
+  const setIsOpen = isExternallyControlled ? (onOpenChange || (() => { })) : setInternalOpen;
 
   useEffect(() => {
     if (isExternallyControlled) return;
@@ -122,7 +123,7 @@ const RegisterInterestDialog = ({
     }));
   };
 
-  if (!isStandardUser || hideOnAuth) {
+  if (!isGuest || hideOnAuth) {
     return null;
   }
 
@@ -149,7 +150,7 @@ const RegisterInterestDialog = ({
         {/* Form */}
         <form onSubmit={handleSubmit} className="px-4 py-4 space-y-3 sm:px-6 sm:py-5 sm:space-y-4">
           <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
-            Join thousands of investors who trust our agency to navigate Egypt real estate. 
+            Join thousands of investors who trust our agency to navigate Egypt real estate.
             Get tailored recommendations and market insights.
           </p>
 

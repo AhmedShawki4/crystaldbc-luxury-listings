@@ -2,9 +2,9 @@ import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import AuthModal from "./AuthModal";
 import type { LucideIcon } from "lucide-react";
-import { Menu, X, Home, Building2, Info, PhoneCall, Heart, Sparkles, TrendingUp, KeyRound, ChevronDown } from "lucide-react";
+import { Menu, X, Home, Building2, Info, PhoneCall, Heart, Sparkles, TrendingUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { US, EG, DE, RU } from 'country-flag-icons/react/3x2';
+import { US, EG, DE, RU, SA } from 'country-flag-icons/react/3x2';
 import { cn } from "@/lib/utils";
 import useAuth from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
@@ -53,7 +53,6 @@ const Navigation = () => {
   const navLinks: NavLinkItem[] = [
     { name: t("nav.home"), path: "/", icon: Home },
     { name: t("nav.properties"), path: "/listings", icon: Building2 },
-    { name: t("nav.forRent"), path: "/for-rent", icon: KeyRound },
     { name: t("nav.investment"), path: "/investment", icon: TrendingUp },
     { name: t("nav.about"), path: "/about", icon: Info },
     { name: t("nav.contact"), path: "/contact", icon: PhoneCall },

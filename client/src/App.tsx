@@ -9,7 +9,7 @@ import Layout from "./components/Layout";
 import RegisterInterestDialog from "./components/RegisterInterestDialog";
 import Home from "./pages/Home";
 import Listings from "./pages/Listings";
-import ForRent from "./pages/ForRent";
+
 import PropertyDetail from "./pages/PropertyDetail";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -55,7 +55,7 @@ const App = () => {
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
               <Route path="listings" element={<Listings />} />
-              <Route path="for-rent" element={<ForRent />} />
+
               <Route path="property/:propertyId" element={<PropertyDetail />} />
               <Route path="about" element={<About />} />
               <Route path="contact" element={<Contact />} />
@@ -63,7 +63,7 @@ const App = () => {
               <Route
                 path="my-investments"
                 element={
-                  <ProtectedRoute roles={["user"]}>
+                  <ProtectedRoute roles={["user", "investor"]}>
                     <MyInvestments />
                   </ProtectedRoute>
                 }

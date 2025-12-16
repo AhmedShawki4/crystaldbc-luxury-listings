@@ -35,11 +35,11 @@ const Investment = () => {
     const { data: boxesData, isLoading: boxesLoading } = useQuery({ queryKey: ["investment-boxes"], queryFn: fetchInvestmentBoxes });
     const boxes = boxesData ?? [];
 
-    const isUser = user?.role === "user";
+    const isInvestor = user?.role === "investor";
     const { data: myInvestmentsData } = useQuery({
         queryKey: ["my-investments"],
         queryFn: fetchMyInvestments,
-        enabled: isAuthenticated && isUser,
+        enabled: isAuthenticated && isInvestor,
     });
     const investedBoxIds = new Set((myInvestmentsData ?? []).map((inv) => inv.investmentBox?._id).filter(Boolean) as string[]);
 
@@ -108,8 +108,8 @@ const Investment = () => {
             navigate("/auth/login", { state: { from: location } });
             return;
         }
-        if (!isUser) {
-            toast({ title: "Only users can invest", description: "Please sign in with a user account.", variant: "destructive" });
+        if (!isInvestor) {
+            toast({ title: "Only investors can invest", description: "Please contact an admin to get investor access.", variant: "destructive" });
             return;
         }
         if (investedBoxIds.has(box._id)) {
@@ -290,9 +290,9 @@ const Investment = () => {
                                             className="w-full"
                                             size="lg"
                                             onClick={() => openInvestDialog(box)}
-                                            disabled={isAuthenticated && isUser && investedBoxIds.has(box._id)}
+                                            disabled={isAuthenticated && isInvestor && investedBoxIds.has(box._id)}
                                         >
-                                            {isAuthenticated && isUser && investedBoxIds.has(box._id)
+                                            {isAuthenticated && isInvestor && investedBoxIds.has(box._id)
                                                 ? t("myInvestments.boxes.alreadyInvested")
                                                 : t("myInvestments.boxes.investCta")}
                                         </Button>

@@ -20,7 +20,7 @@ const resources = {
       },
       layout: {
         tagline: "Luxury Experience",
-        locations: "Egypt | Dubai",
+        locations: "Egypt | Dubai | Germany | Saudi Arabia | Russia",
       },
       common: {
         loading: "Loading...",
@@ -491,19 +491,19 @@ const resources = {
           next: "Next slide",
         },
         breadcrumb: {
-            phone: "الهاتف",
+          phone: "الهاتف",
         },
       },
       propertyDetail: {
-          validation: {
-            nameRequired: "الاسم مطلوب.",
-            emailRequired: "البريد الإلكتروني مطلوب.",
-            phoneRequired: "رقم الهاتف مطلوب.",
-            passwordMin: "يجب أن تكون كلمة المرور 6 أحرف على الأقل.",
-            passwordNumber: "يجب أن تتضمن كلمة المرور رقمًا واحدًا على الأقل.",
-            passwordMismatch: "كلمتا المرور غير متطابقتين.",
-            passwordHint: "استخدم 6 أحرف على الأقل وتضمّن رقمًا.",
-          },
+        validation: {
+          nameRequired: "الاسم مطلوب.",
+          emailRequired: "البريد الإلكتروني مطلوب.",
+          phoneRequired: "رقم الهاتف مطلوب.",
+          passwordMin: "يجب أن تكون كلمة المرور 6 أحرف على الأقل.",
+          passwordNumber: "يجب أن تتضمن كلمة المرور رقمًا واحدًا على الأقل.",
+          passwordMismatch: "كلمتا المرور غير متطابقتين.",
+          passwordHint: "استخدم 6 أحرف على الأقل وتضمّن رقمًا.",
+        },
         loading: "Loading property details...",
         backToListings: "Back to Listings",
         notFoundTitle: "Property Not Found",
@@ -634,7 +634,7 @@ const resources = {
           requestIncrease: "Request to increase amount",
           paymentStatus: "Payment Status",
           status: "Status",
-            phone: "Telefon",
+          phone: "Telefon",
           scheduledDepositDate: "Scheduled deposit date",
           notes: "Notes",
           id: "ID",
@@ -663,19 +663,19 @@ const resources = {
           backToHome: "Back to Home",
           goToHomepage: "Go to Homepage",
           signOut: "Sign out",
-            phone: "Телефон",
+          phone: "Телефон",
           adminMenu: "Admin Menu",
           menuButton: "Menu",
         },
-          validation: {
-            nameRequired: "Имя обязательно.",
-            emailRequired: "Email обязателен.",
-            phoneRequired: "Телефон обязателен.",
-            passwordMin: "Пароль должен быть не короче 6 символов.",
-            passwordNumber: "Пароль должен содержать хотя бы одну цифру.",
-            passwordMismatch: "Пароли не совпадают.",
-            passwordHint: "Используйте минимум 6 символов и добавьте цифру.",
-          },
+        validation: {
+          nameRequired: "Имя обязательно.",
+          emailRequired: "Email обязателен.",
+          phoneRequired: "Телефон обязателен.",
+          passwordMin: "Пароль должен быть не короче 6 символов.",
+          passwordNumber: "Пароль должен содержать хотя бы одну цифру.",
+          passwordMismatch: "Пароли не совпадают.",
+          passwordHint: "Используйте минимум 6 символов и добавьте цифру.",
+        },
         nav: {
           overview: "Overview",
           properties: "Properties",
@@ -914,7 +914,7 @@ const resources = {
       },
       layout: {
         tagline: "تجربة فاخرة",
-        locations: "مصر | دبي  ",
+        locations: "مصر | دبي | ألمانيا | السعودية | روسيا",
       },
       common: {
         loading: "جاري التحميل...",
@@ -1735,7 +1735,7 @@ const resources = {
       },
       layout: {
         tagline: "Luxus Erlebnis",
-        locations: "Ägypten | Dubai",
+        locations: "Ägypten | Dubai | Deutschland | Saudi-Arabien | Russland",
       },
       common: {
         loading: "Laden...",
@@ -2542,7 +2542,7 @@ const resources = {
       },
       layout: {
         tagline: "Роскошный опыт",
-        locations: "Египет | Дубай",
+        locations: "Египет | Дубай | Германия | Саудовская Аравия | Россия",
       },
       common: {
         loading: "Загрузка...",
