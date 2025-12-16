@@ -87,11 +87,11 @@ const Navigation = () => {
         </div>
         <div className="flex items-center justify-between h-14 md:h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link to="/" className="flex items-center gap-2 group ml-4 lg:ml-10">
             <img
               src="/crystaldbclogo.jpeg"
               alt="CrystalDBC Logo"
-              className="h-10 md:h-12 w-auto drop-shadow-lg transition-transform group-hover:scale-105"
+              className="h-12 md:h-14 w-auto drop-shadow-lg transition-transform group-hover:scale-105"
             />
           </Link>
 

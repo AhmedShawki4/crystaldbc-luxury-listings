@@ -426,6 +426,14 @@ const resources = {
           "Quarterly Performance Reports",
         ],
         ctaButton: "Contact Investment Team",
+        investorsOnly: "Investors Only",
+        toasts: {
+          onlyInvestorsTitle: "Only investors can access investments",
+          onlyInvestorsDescription: "Please contact an admin to get investor access.",
+          identityVerified: "Identity verified successfully.",
+          alreadyInvestedTitle: "Already invested",
+          alreadyInvestedDescription: "You already have an investment in this box.",
+        },
       },
       auth: {
         loginTitle: "Welcome Back",
@@ -1331,6 +1339,14 @@ const resources = {
           "تقارير أداء ربع سنوية",
         ],
         ctaButton: "تواصل مع فريق الاستثمار",
+        investorsOnly: "للمستثمرين فقط",
+        toasts: {
+          onlyInvestorsTitle: "فقط المستثمرون يمكنهم الوصول",
+          onlyInvestorsDescription: "يرجى التواصل مع المسؤول للحصول على صلاحية المستثمر.",
+          identityVerified: "تم التحقق من الهوية بنجاح.",
+          alreadyInvestedTitle: "تم الاستثمار مسبقاً",
+          alreadyInvestedDescription: "لديك استثمار بالفعل في هذا الصندوق.",
+        },
       },
       auth: {
         loginTitle: "مرحبا بعودتك",
@@ -2138,6 +2154,14 @@ const resources = {
           "Quartalsweise Performance-Reports",
         ],
         ctaButton: "Investment-Team kontaktieren",
+        investorsOnly: "Nur für Investoren",
+        toasts: {
+          onlyInvestorsTitle: "Nur Investoren haben Zugang",
+          onlyInvestorsDescription: "Bitte kontaktieren Sie einen Admin für Investorenzugang.",
+          identityVerified: "Identität erfolgreich bestätigt.",
+          alreadyInvestedTitle: "Bereits investiert",
+          alreadyInvestedDescription: "Sie haben bereits in diese Box investiert.",
+        },
       },
       auth: {
         loginTitle: "Willkommen zurück",
@@ -2818,6 +2842,14 @@ const resources = {
           "Поддержка 24/7",
         ],
         ctaButton: "Связаться",
+        investorsOnly: "Только для инвесторов",
+        toasts: {
+          onlyInvestorsTitle: "Доступ только для инвесторов",
+          onlyInvestorsDescription: "Пожалуйста, свяжитесь с администратором для получения доступа.",
+          identityVerified: "Личность успешно подтверждена.",
+          alreadyInvestedTitle: "Уже инвестировано",
+          alreadyInvestedDescription: "У вас уже есть инвестиция в этот бокс.",
+        },
         benefits: {
           roi: { title: "Высокая доходность", description: "Оптимизированные показатели ROI." },
           security: { title: "Надежность", description: "Активы с низким риском." },
