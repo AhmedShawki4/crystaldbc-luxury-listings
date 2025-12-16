@@ -3,16 +3,14 @@ import gsap from "gsap";
 
 const EntranceAnimation = () => {
     const [isVisible, setIsVisible] = useState(() => {
-        // Check session storage on mount
-        return !sessionStorage.getItem("animation_played");
+        // Check localStorage on mount - shows only once per new user
+        return !localStorage.getItem("animation_played_once");
     });
 
     const containerRef = useRef<HTMLDivElement>(null);
-    const lobbyRef = useRef<HTMLDivElement>(null);      // Layer 1 (Back)
-    const hallway2Ref = useRef<HTMLDivElement>(null);   // Layer 2
-    const hallway1Ref = useRef<HTMLDivElement>(null);   // Layer 3
-    const openedDoorRef = useRef<HTMLDivElement>(null); // Layer 4
-    const entranceRef = useRef<HTMLDivElement>(null);   // Layer 5 (Front)
+    const hallway1Ref = useRef<HTMLDivElement>(null);   // Layer 1 (Back - Final Destination)
+    const openedDoorRef = useRef<HTMLDivElement>(null); // Layer 2
+    const entranceRef = useRef<HTMLDivElement>(null);   // Layer 3 (Front)
 
     const [hasStarted, setHasStarted] = useState(false);
 
@@ -39,7 +37,7 @@ const EntranceAnimation = () => {
 
         const ctx = gsap.context(() => {
             // Initial positioning - all layers centered and covering screen
-            gsap.set([lobbyRef.current, hallway2Ref.current, hallway1Ref.current, openedDoorRef.current, entranceRef.current], {
+            gsap.set([hallway1Ref.current, openedDoorRef.current, entranceRef.current], {
                 position: "absolute",
                 top: 0,
                 left: 0,
@@ -50,15 +48,11 @@ const EntranceAnimation = () => {
             });
 
             // Set initial z-indices
-            gsap.set(lobbyRef.current, { zIndex: 1 });
-            gsap.set(hallway2Ref.current, { zIndex: 2 });
-            gsap.set(hallway1Ref.current, { zIndex: 3 });
-            gsap.set(openedDoorRef.current, { zIndex: 4, opacity: 0 }); // Hidden initially
-            gsap.set(entranceRef.current, { zIndex: 5 });
+            gsap.set(hallway1Ref.current, { zIndex: 1 });
+            gsap.set(openedDoorRef.current, { zIndex: 2, opacity: 0 }); // Hidden initially
+            gsap.set(entranceRef.current, { zIndex: 3 });
 
             // Initial scale for movement effect
-            gsap.set(lobbyRef.current, { scale: 1 });
-            gsap.set(hallway2Ref.current, { scale: 1.2 });
             gsap.set(hallway1Ref.current, { scale: 1.2 });
         }, containerRef);
 
@@ -72,21 +66,20 @@ const EntranceAnimation = () => {
 
         const tl = gsap.timeline({
             onComplete: () => {
-                sessionStorage.setItem("animation_played", "true");
+                localStorage.setItem("animation_played_once", "true");
                 gsap.to(containerRef.current, {
                     opacity: 0,
-                    duration: 1,
+                    duration: 0.5,
                     ease: "power2.inOut",
                     onComplete: () => setIsVisible(false)
                 });
             }
         });
 
-        // Step 1: Click Entrance -> Show Opened Door
-        // Instant switch or very fast fade to simulate door opening
+        // Step 1: Click Entrance -> Show Opened Door (fast)
         tl.to(entranceRef.current, {
             opacity: 0,
-            duration: 0.5,
+            duration: 0.3,
             ease: "power1.inOut"
         })
             .to(openedDoorRef.current, {
@@ -94,40 +87,16 @@ const EntranceAnimation = () => {
                 duration: 0.1,
             }, "<");
 
-        // Step 2: Zoom into Opened Door -> Reveal Hallway 1
+        // Step 2: Zoom into Opened Door -> Reveal Hallway 1 (Final)
         tl.to(openedDoorRef.current, {
             opacity: 0,
-            duration: 2.5,
+            duration: 1.0,
             ease: "power1.inOut"
         })
             .fromTo(hallway1Ref.current,
                 { opacity: 0, scale: 1.2 },
-                { opacity: 1, scale: 1.8, duration: 2.5, ease: "power1.inOut" },
-                "<" // Overlap start
-            );
-
-        // Step 3: Zoom Hallway 1 -> Reveal Hallway 2
-        tl.to(hallway1Ref.current, {
-            opacity: 0,
-            duration: 2.5,
-            ease: "power1.inOut"
-        })
-            .fromTo(hallway2Ref.current,
-                { opacity: 0, scale: 1.2 },
-                { opacity: 1, scale: 1.5, duration: 2.5, ease: "power1.inOut" },
-                "-=1.5" // Start before previous finishes
-            );
-
-        // Step 4: Zoom Hallway 2 -> Reveal Lobby
-        tl.to(hallway2Ref.current, {
-            opacity: 0,
-            duration: 2.5,
-            ease: "power1.inOut"
-        })
-            .fromTo(lobbyRef.current,
-                { opacity: 0, scale: 1.1 }, // Slight zoom out for final landing
-                { opacity: 1, scale: 1, duration: 2.5, ease: "power2.out" },
-                "-=1.5"
+                { opacity: 1, scale: 1, duration: 1.2, ease: "power2.out" },
+                "-=0.6"
             );
     };
 
@@ -142,28 +111,18 @@ const EntranceAnimation = () => {
             }
             onClick={handleEnter}
         >
-            {/* Layer 1: Lobby (Final Destination) */}
-            <div ref={lobbyRef}>
-                <img src="/lobby.jpeg" alt="Lobby" className="w-full h-full object-cover" />
+            {/* Layer 1: Hallway 1 (Final Destination) */}
+            <div ref={hallway1Ref}>
+                <img src="/hallway1.jpeg" alt="Hallway" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-black/20" />
             </div>
 
-            {/* Layer 2: Hallway 2 */}
-            <div ref={hallway2Ref}>
-                <img src="/hallway2.jpeg" alt="Hallway 2" className="w-full h-full object-cover" />
-            </div>
-
-            {/* Layer 3: Hallway 1 */}
-            <div ref={hallway1Ref}>
-                <img src="/hallway1.jpeg" alt="Hallway 1" className="w-full h-full object-cover" />
-            </div>
-
-            {/* Layer 4: Opened Door */}
+            {/* Layer 2: Opened Door */}
             <div ref={openedDoorRef}>
                 <img src="/openeddoor.jpeg" alt="Opened Door" className="w-full h-full object-cover" />
             </div>
 
-            {/* Layer 5: Entrance (First View) */}
+            {/* Layer 3: Entrance (First View) */}
             <div ref={entranceRef}>
                 <img src="/entrance.jpeg" alt="Entrance" className="w-full h-full object-cover" />
 
@@ -182,3 +141,4 @@ const EntranceAnimation = () => {
 };
 
 export default EntranceAnimation;
+
