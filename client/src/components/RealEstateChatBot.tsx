@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface Message {
   id: number;
@@ -24,34 +25,13 @@ interface Message {
   timestamp: Date;
   properties?: Property[];
 }
-
-const QUICK_ACTIONS = [
-  "Can I schedule a call?",
-  "I'm looking to buy a property.",
-  "Can you share latest listings?",
-];
-
-const getSuggestedReplies = (message: Message): string[] => {
-  const base: string[] = [];
-  const text = message.text.toLowerCase();
-
-  if (message.properties && message.properties.length > 0) {
-    base.push("Show more options", "Schedule a viewing", "Talk to an agent", "Save this listing");
-  } else if (text.includes("invest")) {
-    base.push("Share top investment areas", "Expected ROI?", "Talk to an agent");
-  } else if (text.includes("schedule") || text.includes("call")) {
-    base.push("Schedule a call", "Talk to an agent", "Show latest listings");
-  } else {
-    base.push("Show latest listings", "Talk to an agent", "What are your fees?");
-  }
-
-  return Array.from(new Set(base)).slice(0, 4);
-};
-
 const isPropertyQuery = (query: string) => {
   const lower = query.toLowerCase();
   return (
     /listing|property|apartment|villa|house|penthouse|chalet/.test(lower) ||
+    /عقار|شقة|فيلا|منزل|بنتهاوس|شاليه/.test(lower) ||
+    /immobilie|wohnung|villa|haus|penthouse/.test(lower) ||
+    /недвижимость|квартира|вилла|дом|пентхаус|шале/.test(lower) ||
     /(\d+)\s*(million|m|k|thousand|egp|aed)/.test(lower) ||
     /bed|bedroom/.test(lower) ||
     lower.includes("buy") ||
@@ -62,20 +42,44 @@ const isPropertyQuery = (query: string) => {
 
 const wantsHumanSupport = (query: string) => {
   const lower = query.toLowerCase();
-  return lower.includes("agent") || lower.includes("human") || lower.includes("representative") || lower.includes("advisor");
+  return (
+    lower.includes("agent") ||
+    lower.includes("human") ||
+    lower.includes("representative") ||
+    lower.includes("advisor") ||
+    lower.includes("بشري") ||
+    lower.includes("مستشار") ||
+    lower.includes("وكيل") ||
+    lower.includes("berater") ||
+    lower.includes("makler") ||
+    lower.includes("beraterin") ||
+    lower.includes("агент") ||
+    lower.includes("консультант")
+  );
 };
 
 const detectPropertyType = (query: string): string | null => {
   const lower = query.toLowerCase();
-  if (lower.includes("apartment")) return "apartment";
-  if (lower.includes("villa")) return "villa";
-  if (lower.includes("penthouse")) return "penthouse";
-  if (lower.includes("chalet")) return "chalet";
-  if (lower.includes("house")) return "house";
+  if (lower.includes("apartment") || lower.includes("wohnung") || lower.includes("شقة") || lower.includes("квартира")) {
+    return "apartment";
+  }
+  if (lower.includes("villa") || lower.includes("فيلا") || lower.includes("вилла")) {
+    return "villa";
+  }
+  if (lower.includes("penthouse") || lower.includes("بنتهاوس") || lower.includes("пентхаус")) {
+    return "penthouse";
+  }
+  if (lower.includes("chalet") || lower.includes("شاليه") || lower.includes("шале")) {
+    return "chalet";
+  }
+  if (lower.includes("house") || lower.includes("haus") || lower.includes("منزل") || lower.includes("дом")) {
+    return "house";
+  }
   return null;
 };
 
 const RealEstateChatBot = () => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -95,6 +99,12 @@ const RealEstateChatBot = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const QUICK_ACTIONS = [
+    t("chatbot.quickActions.scheduleCall"),
+    t("chatbot.quickActions.buyProperty"),
+    t("chatbot.quickActions.latestListings"),
+  ];
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -109,18 +119,52 @@ const RealEstateChatBot = () => {
       setMessages([
         {
           id: 1,
-          text: "Hello! 👋 I'm your real estate expert from CrystalDBC. I can help you find, buy, sell, or rent properties in Egypt, provide investment advice, share the latest listings, and answer any questions about the Egypt property market. Let me know how I can assist you today! 🏡🌟",
+          text: t("chatbot.messages.welcome"),
           sender: "bot",
           timestamp: new Date(),
         },
       ]);
       setSuggestedReplies([
-        "Show latest listings",
-        "Talk to an agent",
-        "Share investment tips",
+        t("chatbot.suggestions.showLatestListings"),
+        t("chatbot.suggestions.talkToAgent"),
+        t("chatbot.suggestions.shareInvestmentTips"),
       ]);
     }
-  }, [isOpen, messages.length]);
+  }, [isOpen, messages.length, t]);
+
+  const getSuggestedReplies = (message: Message): string[] => {
+    const base: string[] = [];
+    const text = message.text.toLowerCase();
+
+    if (message.properties && message.properties.length > 0) {
+      base.push(
+        t("chatbot.suggestions.showMoreOptions"),
+        t("chatbot.suggestions.scheduleViewing"),
+        t("chatbot.suggestions.talkToAgent"),
+        t("chatbot.suggestions.saveListing"),
+      );
+    } else if (text.includes("invest")) {
+      base.push(
+        t("chatbot.suggestions.shareTopInvestmentAreas"),
+        t("chatbot.suggestions.expectedRoi"),
+        t("chatbot.suggestions.talkToAgent"),
+      );
+    } else if (text.includes("schedule") || text.includes("call")) {
+      base.push(
+        t("chatbot.suggestions.scheduleCall"),
+        t("chatbot.suggestions.talkToAgent"),
+        t("chatbot.suggestions.showLatestListings"),
+      );
+    } else {
+      base.push(
+        t("chatbot.suggestions.showLatestListings"),
+        t("chatbot.suggestions.talkToAgent"),
+        t("chatbot.suggestions.whatAreYourFees"),
+      );
+    }
+
+    return Array.from(new Set(base)).slice(0, 4);
+  };
 
   const filterProperties = (query: string): Property[] => {
     const lowerQuery = query.toLowerCase();
@@ -179,7 +223,7 @@ const RealEstateChatBot = () => {
     if (wantsHumanSupport(userMessage)) {
       return {
         id: Date.now(),
-        text: "No problem—I can connect you to a live agent. Please share your name, email, and the best phone number. You can also press 'Talk to an agent' below to send your details now.",
+        text: t("chatbot.messages.humanHandoffIntro"),
         sender: "bot",
         timestamp: new Date(),
       };
@@ -193,7 +237,7 @@ const RealEstateChatBot = () => {
     ) {
       return {
         id: Date.now(),
-        text: "I'd be happy to schedule a call for you! Please contact us at +1 (888) 555-1234 or email info@crystaldbc.com. You can also visit our Contact page for more options. Our team is available Monday-Friday 9 AM - 6 PM, Saturday 10 AM - 4 PM.",
+        text: t("chatbot.messages.scheduleCall"),
         sender: "bot",
         timestamp: new Date(),
       };
@@ -210,7 +254,7 @@ const RealEstateChatBot = () => {
       if (filteredProps.length > 0) {
         return {
           id: Date.now(),
-          text: `Great! I found ${filteredProps.length} ${filteredProps.length === 1 ? 'property' : 'properties'} that match your criteria. Here ${filteredProps.length === 1 ? 'is what' : 'are some options'} I found:`,
+          text: t("chatbot.messages.buyWithResults", { count: filteredProps.length }),
           sender: "bot",
           timestamp: new Date(),
           properties: filteredProps.slice(0, 3),
@@ -218,7 +262,7 @@ const RealEstateChatBot = () => {
       } else {
         return {
           id: Date.now(),
-          text: "I'd love to help you find the perfect property! Could you tell me more about what you're looking for? For example:\n\n• Your budget\n• Preferred location\n• Number of bedrooms\n• Property type (villa, apartment, penthouse, etc.)",
+          text: t("chatbot.messages.buyNoResults"),
           sender: "bot",
           timestamp: new Date(),
         };
@@ -240,8 +284,8 @@ const RealEstateChatBot = () => {
       return {
         id: Date.now(),
         text: availableText
-          ? `Yes, here ${result.length === 1 ? "is" : "are"} the ${type ? `${type} ` : ""}options available right now:`
-          : "Here are some of our latest luxury listings:",
+          ? t("chatbot.messages.latestListingsAvailable", { type: type || "" })
+          : t("chatbot.messages.latestListingsGeneric"),
         sender: "bot",
         timestamp: new Date(),
         properties: result,
@@ -264,8 +308,8 @@ const RealEstateChatBot = () => {
         return {
           id: Date.now(),
           text: availableText
-            ? `Yes, here ${filteredProps.length === 1 ? "is" : "are"} the ${type ? `${type} ` : ""}options available right now:`
-            : `I found ${filteredProps.length} ${filteredProps.length === 1 ? "property" : "properties"} matching your search! Here ${filteredProps.length === 1 ? "it is" : "are the top matches"}:`,
+            ? t("chatbot.messages.filteredAvailable", { type: type || "" })
+            : t("chatbot.messages.filteredWithResults", { count: filteredProps.length }),
           sender: "bot",
           timestamp: new Date(),
           properties: filteredProps.slice(0, 3),
@@ -273,7 +317,7 @@ const RealEstateChatBot = () => {
       } else {
         return {
           id: Date.now(),
-          text: "I couldn't find properties matching those exact criteria, but I have many other amazing listings! Would you like to see our featured properties or adjust your search?",
+          text: t("chatbot.messages.filteredNoResults"),
           sender: "bot",
           timestamp: new Date(),
         };
@@ -284,7 +328,7 @@ const RealEstateChatBot = () => {
     if (lowerMessage.includes("sell") || lowerMessage.includes("rent out")) {
       return {
         id: Date.now(),
-        text: "Looking to sell or rent out your property? Perfect! 🏡 Our team can help you get the best value. Please contact us at info@crystaldbc.com or call +1 (888) 555-1234 to discuss your property details and get a free valuation.",
+        text: t("chatbot.messages.sellOrRent"),
         sender: "bot",
         timestamp: new Date(),
       };
@@ -298,7 +342,7 @@ const RealEstateChatBot = () => {
     ) {
       return {
         id: Date.now(),
-        text: "I'd be happy to provide investment guidance! 💼 The Egypt property market offers excellent opportunities. Our investment specialists can provide personalized advice based on your goals. Would you like to schedule a consultation? You can also browse our premium listings to see current opportunities.",
+        text: t("chatbot.messages.investmentAdvice"),
         sender: "bot",
         timestamp: new Date(),
       };
@@ -307,7 +351,7 @@ const RealEstateChatBot = () => {
     // Default response
     return {
       id: Date.now(),
-      text: "I'm here to help you with all your real estate needs! I can:\n\n• Help you find properties to buy or rent\n• Schedule property viewings\n• Provide market insights\n• Answer questions about listings\n• Connect you with our expert agents\n\nWhat would you like to know?",
+      text: t("chatbot.messages.defaultHelp"),
       sender: "bot",
       timestamp: new Date(),
     };
@@ -363,7 +407,7 @@ const RealEstateChatBot = () => {
     event.preventDefault();
 
     if (!handoffForm.fullName.trim() || !handoffForm.email.trim()) {
-      toast({ title: "Please add your name and email", variant: "destructive" });
+      toast({ title: t("chatbot.toasts.nameEmailRequired"), variant: "destructive" });
       return;
     }
 
@@ -383,16 +427,23 @@ const RealEstateChatBot = () => {
         ...prev,
         {
           id: Date.now(),
-          text: "Thanks! A human agent will reach out shortly with a tailored response.",
+          text: t("chatbot.messages.handoffThanks"),
           sender: "bot",
           timestamp: new Date(),
         },
       ]);
-      setSuggestedReplies(["Call me back", "Share the latest listings"]);
+      setSuggestedReplies([
+        t("chatbot.suggestions.callMeBack"),
+        t("chatbot.suggestions.showLatestListings"),
+      ]);
     } catch (error) {
       console.error("Failed to submit handoff", error);
       setIsSubmittingLead(false);
-      toast({ title: "Could not send your details", description: "Please try again in a moment.", variant: "destructive" });
+      toast({
+        title: t("chatbot.toasts.handoffErrorTitle"),
+        description: t("chatbot.toasts.handoffErrorDescription"),
+        variant: "destructive",
+      });
     }
   };
 
@@ -403,7 +454,7 @@ const RealEstateChatBot = () => {
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "fixed bottom-4 right-4 sm:bottom-6 sm:right-6 h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-luxury z-50 group",
-          "text-white transition-all duration-500 hover:scale-105 chat-gradient",
+          "luxury-gradient text-luxury-dark border border-luxury-gold shadow-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl",
           isOpen && "scale-0"
         )}
         aria-label="Open chat"
@@ -420,7 +471,7 @@ const RealEstateChatBot = () => {
           />
         </svg>
         <span className="absolute -top-9 sm:-top-10 px-2 py-1 text-[11px] sm:text-xs bg-amber-400 text-white rounded shadow opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-          Chat
+          {t("chatbot.tooltipLabel")}
         </span>
       </Button>
 
@@ -434,8 +485,8 @@ const RealEstateChatBot = () => {
                 <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="font-semibold text-xs sm:text-sm">CrystalDBC Agent</h3>
-                <p className="text-[10px] sm:text-xs opacity-90">Online now</p>
+                <h3 className="font-semibold text-xs sm:text-sm">{t("chatbot.headerTitle")}</h3>
+                <p className="text-[10px] sm:text-xs opacity-90">{t("chatbot.headerStatusOnline")}</p>
               </div>
             </div>
             <Button
@@ -493,9 +544,9 @@ const RealEstateChatBot = () => {
                               {property.price}
                             </p>
                             <div className="flex gap-1.5 sm:gap-2 mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-muted-foreground">
-                              <span>{property.beds} beds</span>
+                              <span>{property.beds} {t("chatbot.propertyCard.beds")}</span>
                               <span>•</span>
-                              <span>{property.baths} baths</span>
+                              <span>{property.baths} {t("chatbot.propertyCard.baths")}</span>
                               <span>•</span>
                               <span>{property.sqft}</span>
                             </div>
@@ -510,7 +561,7 @@ const RealEstateChatBot = () => {
                             setIsOpen(false);
                           }}
                         >
-                          View All Listings
+                          {t("chatbot.propertyCard.viewAllListings")}
                         </Button>
                       </div>
                     )}
@@ -522,7 +573,7 @@ const RealEstateChatBot = () => {
                 <div className="flex justify-start">
                   <div className="bg-muted text-foreground rounded-lg p-2.5 sm:p-3 text-xs sm:text-sm max-w-[75%] sm:max-w-[70%] rounded-bl-none">
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] sm:text-xs">CrystalDBC Agent is typing</span>
+                      <span className="text-[11px] sm:text-xs">{t("chatbot.typingIndicator")}</span>
                       <div className="flex items-center gap-1 text-muted-foreground">
                         <span className="h-2 w-2 bg-foreground/50 rounded-full animate-bounce" />
                         <span className="h-2 w-2 bg-foreground/40 rounded-full animate-bounce [animation-delay:80ms]" />
@@ -586,11 +637,11 @@ const RealEstateChatBot = () => {
               <div className="mt-3 sm:mt-4 border border-border bg-muted/30 rounded-lg p-2.5 sm:p-3">
                 <div className="flex items-center justify-between gap-2">
                   <div>
-                    <p className="text-xs sm:text-sm font-semibold">Need a human?</p>
-                    <p className="text-[11px] sm:text-xs text-muted-foreground">Talk directly to an agent for tailored help.</p>
+                    <p className="text-xs sm:text-sm font-semibold">{t("chatbot.humanCardTitle")}</p>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground">{t("chatbot.humanCardDescription")}</p>
                   </div>
                   <Button size="sm" variant="secondary" className="text-xs sm:text-sm" onClick={() => setShowHandoffDialog(true)}>
-                    Talk to an agent
+                    {t("chatbot.humanCardCta")}
                   </Button>
                 </div>
               </div>
@@ -611,7 +662,7 @@ const RealEstateChatBot = () => {
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Type your message..."
+                placeholder={t("chatbot.inputPlaceholder")}
                 className="flex-1 text-xs sm:text-sm h-9 sm:h-10 rounded-full px-3 sm:px-4"
               />
               <Button
@@ -630,43 +681,43 @@ const RealEstateChatBot = () => {
       <Dialog open={showHandoffDialog} onOpenChange={(open) => !isSubmittingLead && setShowHandoffDialog(open)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Talk to an agent</DialogTitle>
+            <DialogTitle>{t("chatbot.dialogTitle")}</DialogTitle>
             <DialogDescription>
-              Share your details and a human agent will reach out quickly.
+              {t("chatbot.dialogDescription")}
             </DialogDescription>
           </DialogHeader>
           <form className="space-y-3" onSubmit={handleHandoffSubmit}>
             <Input
               value={handoffForm.fullName}
               onChange={(e) => setHandoffForm((prev) => ({ ...prev, fullName: e.target.value }))}
-              placeholder="Full name"
+              placeholder={t("chatbot.form.fullName")}
               required
             />
             <Input
               type="email"
               value={handoffForm.email}
               onChange={(e) => setHandoffForm((prev) => ({ ...prev, email: e.target.value }))}
-              placeholder="Email"
+              placeholder={t("chatbot.form.email")}
               required
             />
             <Input
               value={handoffForm.phoneNumber}
               onChange={(e) => setHandoffForm((prev) => ({ ...prev, phoneNumber: e.target.value }))}
-              placeholder="Phone (optional)"
+              placeholder={t("chatbot.form.phone")}
             />
             <textarea
               value={handoffForm.message}
               onChange={(e) => setHandoffForm((prev) => ({ ...prev, message: e.target.value }))}
-              placeholder="What do you need help with?"
+              placeholder={t("chatbot.form.message")}
               className="w-full rounded-md border border-border bg-background p-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               rows={4}
             />
             <DialogFooter className="flex gap-2 sm:gap-3">
               <Button type="submit" disabled={isSubmittingLead}>
-                {isSubmittingLead ? "Sending..." : "Send to agent"}
+                {isSubmittingLead ? t("chatbot.form.sending") : t("chatbot.form.sendToAgent")}
               </Button>
               <Button type="button" variant="ghost" onClick={() => setShowHandoffDialog(false)} disabled={isSubmittingLead}>
-                Cancel
+                {t("chatbot.form.cancel")}
               </Button>
             </DialogFooter>
           </form>

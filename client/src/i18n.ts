@@ -897,6 +897,82 @@ const resources = {
         removed: "Removed from wishlist",
         removeFailed: "Failed to remove",
       },
+      chatbot: {
+        tooltipLabel: "Chat",
+        headerTitle: "CrystalDBC Agent",
+        headerStatusOnline: "Online now",
+        typingIndicator: "CrystalDBC Agent is typing",
+        humanCardTitle: "Need a human?",
+        humanCardDescription: "Talk directly to an agent for tailored help.",
+        humanCardCta: "Talk to an agent",
+        inputPlaceholder: "Type your message...",
+        dialogTitle: "Talk to an agent",
+        dialogDescription: "Share your details and a human agent will reach out quickly.",
+        form: {
+          fullName: "Full name",
+          email: "Email",
+          phone: "Phone (optional)",
+          message: "What do you need help with?",
+          sending: "Sending...",
+          sendToAgent: "Send to agent",
+          cancel: "Cancel",
+        },
+        quickActions: {
+          scheduleCall: "Can I schedule a call?",
+          buyProperty: "I'm looking to buy a property.",
+          latestListings: "Can you share latest listings?",
+        },
+        suggestions: {
+          showLatestListings: "Show latest listings",
+          talkToAgent: "Talk to an agent",
+          shareInvestmentTips: "Share investment tips",
+          showMoreOptions: "Show more options",
+          scheduleViewing: "Schedule a viewing",
+          saveListing: "Save this listing",
+          shareTopInvestmentAreas: "Share top investment areas",
+          expectedRoi: "Expected ROI?",
+          scheduleCall: "Schedule a call",
+          whatAreYourFees: "What are your fees?",
+          callMeBack: "Call me back",
+        },
+        propertyCard: {
+          viewAllListings: "View All Listings",
+          beds: "beds",
+          baths: "baths",
+        },
+        messages: {
+          welcome:
+            "Hello! 👋 I'm your real estate expert from CrystalDBC. I can help you find, buy, sell, or rent properties in Egypt, provide investment advice, share the latest listings, and answer any questions about the Egypt property market. Let me know how I can assist you today! 🏡🌟",
+          humanHandoffIntro:
+            "No problem—I can connect you to a live agent. Please share your name, email, and the best phone number. You can also press 'Talk to an agent' below to send your details now.",
+          scheduleCall:
+            "I'd be happy to schedule a call for you! Please contact us at +1 (888) 555-1234 or email info@crystaldbc.com. You can also visit our Contact page for more options. Our team is available Monday-Friday 9 AM - 6 PM, Saturday 10 AM - 4 PM.",
+          buyWithResults:
+            "Great! I found {{count}} matching properties that fit your criteria. Here are some options I found:",
+          buyNoResults:
+            "I'd love to help you find the perfect property! Could you tell me more about what you're looking for? For example:\n\n• Your budget\n• Preferred location\n• Number of bedrooms\n• Property type (villa, apartment, penthouse, etc.)",
+          latestListingsGeneric: "Here are some of our latest luxury listings:",
+          latestListingsAvailable: "Yes, here are the {{type}} options available right now:",
+          filteredWithResults:
+            "I found {{count}} matching properties based on your search. Here are the top matches:",
+          filteredAvailable: "Yes, here are the {{type}} options available right now:",
+          filteredNoResults:
+            "I couldn't find properties matching those exact criteria, but I have many other amazing listings! Would you like to see our featured properties or adjust your search?",
+          sellOrRent:
+            "Looking to sell or rent out your property? Perfect! 🏡 Our team can help you get the best value. Please contact us at info@crystaldbc.com or call +1 (888) 555-1234 to discuss your property details and get a free valuation.",
+          investmentAdvice:
+            "I'd be happy to provide investment guidance! 💼 The Egypt property market offers excellent opportunities. Our investment specialists can provide personalized advice based on your goals. Would you like to schedule a consultation? You can also browse our premium listings to see current opportunities.",
+          defaultHelp:
+            "I'm here to help you with all your real estate needs! I can:\n\n• Help you find properties to buy or rent\n• Schedule property viewings\n• Provide market insights\n• Answer questions about listings\n• Connect you with our expert agents\n\nWhat would you like to know?",
+          handoffThanks:
+            "Thanks! A human agent will reach out shortly with a tailored response.",
+        },
+        toasts: {
+          nameEmailRequired: "Please add your name and email",
+          handoffErrorTitle: "Could not send your details",
+          handoffErrorDescription: "Please try again in a moment.",
+        },
+      },
       notFound: {
         title: "404",
         subtitle: "Oops! Page not found",
@@ -1726,6 +1802,82 @@ const resources = {
         removed: "تمت الإزالة من المفضلة",
         removeFailed: "فشل الحذف",
       },
+      chatbot: {
+        tooltipLabel: "الدردشة",
+        headerTitle: "وكيل CrystalDBC",
+        headerStatusOnline: "متصل الآن",
+        typingIndicator: "وكيل CrystalDBC يكتب...",
+        humanCardTitle: "تحتاج إلى موظف حقيقي؟",
+        humanCardDescription: "تحدث مباشرة مع وكيل للحصول على مساعدة مخصصة.",
+        humanCardCta: "تحدث مع وكيل",
+        inputPlaceholder: "اكتب رسالتك...",
+        dialogTitle: "تحدث مع وكيل",
+        dialogDescription: "شارك بياناتك وسيتواصل معك وكيل بشري في أسرع وقت.",
+        form: {
+          fullName: "الاسم الكامل",
+          email: "البريد الإلكتروني",
+          phone: "الهاتف (اختياري)",
+          message: "بماذا يمكننا مساعدتك؟",
+          sending: "جارٍ الإرسال...",
+          sendToAgent: "إرسال للوكيل",
+          cancel: "إلغاء",
+        },
+        quickActions: {
+          scheduleCall: "هل يمكنني حجز مكالمة؟",
+          buyProperty: "أبحث عن عقار للشراء.",
+          latestListings: "هل يمكنك مشاركة أحدث العقارات؟",
+        },
+        suggestions: {
+          showLatestListings: "اعرض أحدث العقارات",
+          talkToAgent: "تحدث مع وكيل",
+          shareInvestmentTips: "شارك نصائح استثمارية",
+          showMoreOptions: "عرض المزيد من الخيارات",
+          scheduleViewing: "حجز موعد معاينة",
+          saveListing: "حفظ هذا العقار",
+          shareTopInvestmentAreas: "شارك أفضل مناطق الاستثمار",
+          expectedRoi: "ما هو العائد المتوقع؟",
+          scheduleCall: "حجز مكالمة",
+          whatAreYourFees: "ما هي رسومكم؟",
+          callMeBack: "اتصلوا بي لاحقًا",
+        },
+        propertyCard: {
+          viewAllListings: "عرض كل العقارات",
+          beds: "غرف",
+          baths: "حمامات",
+        },
+        messages: {
+          welcome:
+            "مرحبًا! 👋 أنا خبير العقارات الخاص بك من CrystalDBC. أستطيع مساعدتك في العثور على عقار للشراء أو الإيجار في مصر، وتقديم نصائح استثمارية، ومشاركة أحدث العروض، والرد على أسئلتك حول سوق العقارات في مصر. أخبرني كيف يمكنني مساعدتك اليوم! 🏡🌟",
+          humanHandoffIntro:
+            "لا مشكلة — يمكنني ربطك بوكيل بشري مباشرة. من فضلك شارك اسمك وبريدك الإلكتروني وأفضل رقم هاتف للتواصل، أو اضغط على \"تحدث مع وكيل\" بالأسفل لإرسال بياناتك الآن.",
+          scheduleCall:
+            "يسرّنا جدًّا تحديد مكالمة معك! يمكنك التواصل معنا على info@crystaldbc.com أو عبر الهاتف حسب بيانات الاتصال في صفحة تواصل معنا. فريقنا متاح خلال ساعات العمل الرسمية.",
+          buyWithResults:
+            "رائع! وجدنا {{count}} عقارًا يناسب معاييرك. إليك بعض الخيارات المقترحة:",
+          buyNoResults:
+            "يسعدني مساعدتك في العثور على العقار المثالي! هل يمكنك تزويدي بمزيد من التفاصيل حول ما تبحث عنه؟ مثلًا:\n\n• الميزانية المتوقعة\n• الموقع المفضل\n• عدد غرف النوم\n• نوع العقار (فيلا، شقة، بنتهاوس، إلخ)",
+          latestListingsGeneric: "إليك بعضًا من أحدث عقاراتنا الفاخرة:",
+          latestListingsAvailable: "نعم، هذه هي خيارات {{type}} المتاحة حاليًا:",
+          filteredWithResults:
+            "وجدت {{count}} عقارًا مناسبًا لبحثك. إليك أفضل النتائج:",
+          filteredAvailable: "نعم، هذه هي خيارات {{type}} المتاحة حاليًا:",
+          filteredNoResults:
+            "لم أجد عقارات تطابق هذه المعايير بالضبط، لكن لدينا العديد من العروض المميزة الأخرى! هل تودّ مشاهدة العقارات المميزة لدينا أو تعديل معايير البحث؟",
+          sellOrRent:
+            "هل ترغب في بيع عقارك أو تأجيره؟ خيار ممتاز! 🏡 يمكن لفريقنا مساعدتك في تحقيق أفضل عائد. تواصل معنا عبر البريد info@crystaldbc.com أو من خلال صفحة تواصل معنا لمناقشة تفاصيل عقارك والحصول على تقييم مبدئي.",
+          investmentAdvice:
+            "يسعدني تقديم إرشادات استثمارية! 💼 سوق العقارات في مصر يوفّر فرصًا ممتازة. يمكن لمستشارينا إعداد خطة استثمارية بناءً على أهدافك. هل تودّ تحديد جلسة استشارية؟ يمكنك أيضًا تصفح عقاراتنا المميزة للاطلاع على الفرص الحالية.",
+          defaultHelp:
+            "أنا هنا لمساعدتك في كل ما يخص العقارات! يمكنني:\n\n• مساعدتك في العثور على عقارات للبيع أو للإيجار\n• حجز مواعيد لمعاينة العقارات\n• تقديم رؤى حول السوق\n• الإجابة عن أسئلتك حول العقارات\n• ربطك بفريق الخبراء لدينا\n\nبماذا تحب أن نبدأ؟",
+          handoffThanks:
+            "شكرًا لك! سيتواصل معك وكيل بشري قريبًا مع رد مخصص.",
+        },
+        toasts: {
+          nameEmailRequired: "من فضلك أدخل الاسم والبريد الإلكتروني",
+          handoffErrorTitle: "تعذّر إرسال بياناتك",
+          handoffErrorDescription: "حاول مرة أخرى بعد قليل.",
+        },
+      },
       notFound: {
         title: "404",
         subtitle: "عذراً! الصفحة غير موجودة",
@@ -2541,6 +2693,82 @@ const resources = {
         removed: "Aus Merkliste entfernt",
         removeFailed: "Entfernen fehlgeschlagen",
       },
+      chatbot: {
+        tooltipLabel: "Chat",
+        headerTitle: "CrystalDBC-Berater",
+        headerStatusOnline: "Jetzt online",
+        typingIndicator: "CrystalDBC-Berater schreibt...",
+        humanCardTitle: "Brauchen Sie persönliche Hilfe?",
+        humanCardDescription: "Sprechen Sie direkt mit einem Berater für individuelle Unterstützung.",
+        humanCardCta: "Mit Berater sprechen",
+        inputPlaceholder: "Nachricht eingeben...",
+        dialogTitle: "Mit einem Berater sprechen",
+        dialogDescription: "Teilen Sie Ihre Daten, und ein Berater meldet sich zeitnah bei Ihnen.",
+        form: {
+          fullName: "Vollständiger Name",
+          email: "E-Mail",
+          phone: "Telefon (optional)",
+          message: "Wobei können wir Ihnen helfen?",
+          sending: "Senden...",
+          sendToAgent: "An Berater senden",
+          cancel: "Abbrechen",
+        },
+        quickActions: {
+          scheduleCall: "Kann ich ein Gespräch vereinbaren?",
+          buyProperty: "Ich möchte eine Immobilie kaufen.",
+          latestListings: "Können Sie mir die neuesten Angebote zeigen?",
+        },
+        suggestions: {
+          showLatestListings: "Neueste Angebote anzeigen",
+          talkToAgent: "Mit Berater sprechen",
+          shareInvestmentTips: "Investmenttipps teilen",
+          showMoreOptions: "Weitere Optionen anzeigen",
+          scheduleViewing: "Besichtigung vereinbaren",
+          saveListing: "Angebot speichern",
+          shareTopInvestmentAreas: "Top-Investmentstandorte zeigen",
+          expectedRoi: "Wie hoch ist der erwartete ROI?",
+          scheduleCall: "Gespräch vereinbaren",
+          whatAreYourFees: "Wie hoch sind Ihre Gebühren?",
+          callMeBack: "Bitte zurückrufen",
+        },
+        propertyCard: {
+          viewAllListings: "Alle Angebote anzeigen",
+          beds: "Zimmer",
+          baths: "Bäder",
+        },
+        messages: {
+          welcome:
+            "Hallo! 👋 Ich bin Ihr Immobilienexperte von CrystalDBC. Ich helfe Ihnen, Immobilien in Ägypten zu finden, zu kaufen, zu verkaufen oder zu mieten, Investmentchancen zu entdecken und Fragen zum Markt zu beantworten. Sagen Sie mir einfach, wobei ich Sie heute unterstützen darf! 🏡🌟",
+          humanHandoffIntro:
+            "Kein Problem – ich kann Sie mit einem persönlichen Berater verbinden. Bitte teilen Sie Ihren Namen, Ihre E-Mail-Adresse und die beste Telefonnummer oder klicken Sie unten auf \"Mit Berater sprechen\", um Ihre Daten zu senden.",
+          scheduleCall:
+            "Gerne vereinbaren wir ein Gespräch mit Ihnen! Kontaktieren Sie uns per E-Mail unter info@crystaldbc.com oder nutzen Sie die Kontaktseite, um weitere Optionen zu sehen. Unser Team ist während der Geschäftszeiten erreichbar.",
+          buyWithResults:
+            "Großartig! Ich habe {{count}} passende Immobilien gefunden. Hier sind einige Optionen:",
+          buyNoResults:
+            "Ich helfe Ihnen gern, die passende Immobilie zu finden! Können Sie mir ein paar Details nennen? Zum Beispiel:\n\n• Ihr Budget\n• Bevorzugte Lage\n• Anzahl der Schlafzimmer\n• Immobilientyp (Villa, Wohnung, Penthouse usw.)",
+          latestListingsGeneric: "Hier sind einige unserer neuesten Luxusangebote:",
+          latestListingsAvailable: "Ja, hier sind die verfügbaren {{type}}-Optionen:",
+          filteredWithResults:
+            "Ich habe {{count}} passende Immobilien zu Ihrer Suche gefunden. Hier sind die Top-Ergebnisse:",
+          filteredAvailable: "Ja, hier sind die verfügbaren {{type}}-Optionen:",
+          filteredNoResults:
+            "Ich konnte keine Immobilien finden, die genau diesen Kriterien entsprechen, aber wir haben viele weitere attraktive Angebote. Möchten Sie unsere empfohlenen Objekte sehen oder Ihre Suche anpassen?",
+          sellOrRent:
+            "Sie möchten Ihre Immobilie verkaufen oder vermieten? Hervorragend! 🏡 Unser Team hilft Ihnen, den bestmöglichen Wert zu erzielen. Kontaktieren Sie uns unter info@crystaldbc.com oder über die Kontaktseite, um Details zu besprechen.",
+          investmentAdvice:
+            "Gern unterstütze ich Sie mit Investmentberatung! 💼 Der ägyptische Immobilienmarkt bietet spannende Chancen. Unsere Experten erstellen eine Strategie basierend auf Ihren Zielen. Möchten Sie ein Beratungsgespräch vereinbaren oder zunächst unsere Premiumangebote ansehen?",
+          defaultHelp:
+            "Ich unterstütze Sie bei allen Fragen rund um Immobilien! Ich kann:\n\n• Immobilien zum Kauf oder zur Miete finden\n• Besichtigungstermine koordinieren\n• Markteinblicke geben\n• Fragen zu Angeboten beantworten\n• Sie mit unseren Experten verbinden\n\nWomit möchten Sie beginnen?",
+          handoffThanks:
+            "Vielen Dank! Ein Berater wird sich in Kürze mit einer individuellen Antwort bei Ihnen melden.",
+        },
+        toasts: {
+          nameEmailRequired: "Bitte geben Sie Ihren Namen und Ihre E-Mail an",
+          handoffErrorTitle: "Details konnten nicht gesendet werden",
+          handoffErrorDescription: "Bitte versuchen Sie es in Kürze erneut.",
+        },
+      },
       notFound: {
         title: "404",
         subtitle: "Ups! Seite nicht gefunden",
@@ -3344,6 +3572,82 @@ const resources = {
         explore: "Смотреть объекты",
         removed: "Удалено из избранного",
         removeFailed: "Не удалось удалить",
+      },
+      chatbot: {
+        tooltipLabel: "Чат",
+        headerTitle: "Агент CrystalDBC",
+        headerStatusOnline: "Сейчас онлайн",
+        typingIndicator: "Агент CrystalDBC печатает...",
+        humanCardTitle: "Нужен живой специалист?",
+        humanCardDescription: "Пообщайтесь напрямую с агентом и получите персональную помощь.",
+        humanCardCta: "Связаться с агентом",
+        inputPlaceholder: "Введите ваше сообщение...",
+        dialogTitle: "Связаться с агентом",
+        dialogDescription: "Оставьте свои данные, и с вами свяжется специалист.",
+        form: {
+          fullName: "Полное имя",
+          email: "Email",
+          phone: "Телефон (необязательно)",
+          message: "Чем мы можем помочь?",
+          sending: "Отправка...",
+          sendToAgent: "Отправить агенту",
+          cancel: "Отмена",
+        },
+        quickActions: {
+          scheduleCall: "Могу ли я назначить звонок?",
+          buyProperty: "Я хочу купить недвижимость.",
+          latestListings: "Можете показать последние объявления?",
+        },
+        suggestions: {
+          showLatestListings: "Показать последние объявления",
+          talkToAgent: "Связаться с агентом",
+          shareInvestmentTips: "Поделиться советами по инвестициям",
+          showMoreOptions: "Показать больше вариантов",
+          scheduleViewing: "Назначить просмотр",
+          saveListing: "Сохранить объект",
+          shareTopInvestmentAreas: "Показать лучшие районы для инвестиций",
+          expectedRoi: "Каков ожидаемый ROI?",
+          scheduleCall: "Назначить звонок",
+          whatAreYourFees: "Какова ваша комиссия?",
+          callMeBack: "Перезвоните мне",
+        },
+        propertyCard: {
+          viewAllListings: "Показать все объекты",
+          beds: "спален",
+          baths: "ванных",
+        },
+        messages: {
+          welcome:
+            "Здравствуйте! 👋 Я ваш эксперт по недвижимости из CrystalDBC. Помогу подобрать, купить, продать или арендовать недвижимость в Египте, поделюсь инвестиционными идеями и актуальными предложениями. Напишите, чем я могу помочь сегодня! 🏡🌟",
+          humanHandoffIntro:
+            "Я могу связать вас с живым специалистом. Пожалуйста, укажите ваше имя, e-mail и удобный номер телефона или нажмите \"Связаться с агентом\" ниже, чтобы отправить данные.",
+          scheduleCall:
+            "Мы с удовольствием организуем звонок! Свяжитесь с нами по адресу info@crystaldbc.com или через страницу контактов на сайте. Команда доступна в рабочее время.",
+          buyWithResults:
+            "Отлично! Я нашёл {{count}} подходящих объектов. Вот некоторые варианты:",
+          buyNoResults:
+            "Я с радостью помогу вам найти идеальный объект! Расскажите подробнее, что вы ищете, например:\n\n• Бюджет\n• Предпочитаемый район\n• Количество спален\n• Тип недвижимости (вилла, квартира, пентхаус и т. д.)",
+          latestListingsGeneric: "Вот несколько наших последних предложений класса люкс:",
+          latestListingsAvailable: "Да, вот доступные варианты {{type}}:",
+          filteredWithResults:
+            "Я нашёл {{count}} объектов, соответствующих вашему запросу. Вот лучшие из них:",
+          filteredAvailable: "Да, вот доступные варианты {{type}}:",
+          filteredNoResults:
+            "Мне не удалось найти объекты с такими параметрами, но у нас есть много других интересных предложений. Хотите посмотреть рекомендованные объекты или изменить параметры поиска?",
+          sellOrRent:
+            "Планируете продать или сдавать свою недвижимость? Отлично! 🏡 Наша команда поможет получить максимальную стоимость. Напишите нам на info@crystaldbc.com или воспользуйтесь страницей контактов, чтобы обсудить детали и получить предварительную оценку.",
+          investmentAdvice:
+            "С радостью помогу с инвестиционными решениями! 💼 Рынок недвижимости Египта предлагает хорошие возможности. Наши консультанты подготовят стратегию с учётом ваших целей. Хотите назначить консультацию или сначала посмотреть премиальные предложения?",
+          defaultHelp:
+            "Я помогу вам со всеми вопросами по недвижимости! Я могу:\n\n• Подобрать объекты для покупки или аренды\n• Организовать просмотры\n• Поделиться аналитикой рынка\n• Ответить на вопросы по объектам\n• Соединить вас с экспертами нашей команды\n\nС чего начнём?",
+          handoffThanks:
+            "Спасибо! В ближайшее время с вами свяжется агент с персональным предложением.",
+        },
+        toasts: {
+          nameEmailRequired: "Пожалуйста, укажите имя и e-mail",
+          handoffErrorTitle: "Не удалось отправить данные",
+          handoffErrorDescription: "Попробуйте снова чуть позже.",
+        },
       },
       notFound: {
         title: "404",
