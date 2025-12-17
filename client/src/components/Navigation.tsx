@@ -163,9 +163,16 @@ const Navigation = () => {
               <span className="text-white/80 text-sm">Checking session...</span>
             ) : isAuthenticated ? (
               <div className="flex items-center gap-3 text-white">
-                <div className="text-right">
-                  <p className="text-sm font-semibold leading-none">{user?.name}</p>
-                  <p className="text-[11px] text-white/70 capitalize">{user?.role}</p>
+                <div className="flex items-center gap-2">
+                  <img
+                    src="/crystaldbclogo.jpeg"
+                    alt="Crystal DBC"
+                    className="h-8 w-8 rounded-full object-cover border border-luxury-gold/30"
+                  />
+                  <div className="text-right">
+                    <p className="text-sm font-semibold leading-none">{user?.name}</p>
+                    <p className="text-[11px] text-white/70 capitalize">{user?.role}</p>
+                  </div>
                 </div>
                 {(user?.role === "admin" || user?.role === "employee" || user?.role === "property-handler") && (
                   <Button
@@ -267,6 +274,18 @@ const Navigation = () => {
                 <span className="text-white/80 text-sm">Checking session...</span>
               ) : isAuthenticated ? (
                 <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
+                  {/* User Info with Logo */}
+                  <div className="flex items-center gap-3 px-3 py-2">
+                    <img
+                      src="/crystaldbclogo.jpeg"
+                      alt="Crystal DBC"
+                      className="h-10 w-10 rounded-full object-cover border border-luxury-gold/30"
+                    />
+                    <div>
+                      <p className="text-sm font-semibold text-white leading-none">{user?.name}</p>
+                      <p className="text-[11px] text-white/70 capitalize">{user?.role}</p>
+                    </div>
+                  </div>
                   {(user?.role === "admin" || user?.role === "employee" || user?.role === "property-handler") && (
                     <Link
                       to="/admin"

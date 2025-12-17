@@ -1,7 +1,7 @@
 import "@google/model-viewer";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, CheckCircle2, TrendingUp, Building2, BarChart3, PieChart } from "lucide-react";
+import { ArrowRight, CheckCircle2, TrendingUp, Building2, BarChart3, PieChart, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTranslation } from "react-i18next";
@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import useAuth from "@/hooks/useAuth";
 import type { AxiosError } from "axios";
 import AuthModal from "@/components/AuthModal";
+import { jsPDF } from "jspdf";
 
 type PendingAction = { type: "my-investments" } | { type: "invest"; box: InvestmentBox };
 
@@ -58,6 +59,117 @@ const Investment = () => {
     const [authPromptOpen, setAuthPromptOpen] = useState(false);
     const [authPromptMode, setAuthPromptMode] = useState<"login" | "register">("login");
     const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
+
+    // Download Brochure Function
+    const handleDownloadBrochure = () => {
+        const doc = new jsPDF();
+        
+        // Header
+        doc.setFillColor(26, 26, 26);
+        doc.rect(0, 0, 210, 50, 'F');
+        
+        doc.setTextColor(212, 175, 55);
+        doc.setFontSize(28);
+        doc.setFont("helvetica", "bold");
+        doc.text("Crystal DBC", 105, 25, { align: "center" });
+        
+        doc.setFontSize(12);
+        doc.setTextColor(255, 255, 255);
+        doc.text("Luxury Real Estate Investment", 105, 35, { align: "center" });
+        
+        // Content Section
+        doc.setTextColor(26, 26, 26);
+        doc.setFontSize(20);
+        doc.setFont("helvetica", "bold");
+        doc.text("Investment Opportunities", 20, 70);
+        
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(80, 80, 80);
+        
+        const introText = "Crystal DBC offers exclusive investment opportunities in premium real estate across Dubai and Egypt. Our carefully curated portfolio delivers exceptional returns while maintaining the highest standards of luxury and quality.";
+        const splitIntro = doc.splitTextToSize(introText, 170);
+        doc.text(splitIntro, 20, 85);
+        
+        // Key Statistics
+        doc.setFontSize(16);
+        doc.setTextColor(26, 26, 26);
+        doc.setFont("helvetica", "bold");
+        doc.text("Key Investment Metrics", 20, 115);
+        
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        
+        const stats = [
+            { label: "Average Annual ROI", value: "35%" },
+            { label: "Assets Under Management", value: "$500M+" },
+            { label: "Avg. Tenant Placement", value: "12 Days" },
+            { label: "Premium Listings", value: "150+" },
+        ];
+        
+        let yPos = 128;
+        stats.forEach((stat) => {
+            doc.setTextColor(212, 175, 55);
+            doc.setFont("helvetica", "bold");
+            doc.text(stat.value, 20, yPos);
+            doc.setTextColor(80, 80, 80);
+            doc.setFont("helvetica", "normal");
+            doc.text(stat.label, 60, yPos);
+            yPos += 10;
+        });
+        
+        // Investment Benefits
+        doc.setFontSize(16);
+        doc.setTextColor(26, 26, 26);
+        doc.setFont("helvetica", "bold");
+        doc.text("Why Invest With Us", 20, 180);
+        
+        const benefits = [
+            "✓ Expert market analysis and property selection",
+            "✓ Transparent and secure investment process",
+            "✓ Premium property management services",
+            "✓ Regular performance reports and updates",
+            "✓ Dedicated investor relations team",
+        ];
+        
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(80, 80, 80);
+        yPos = 193;
+        benefits.forEach((benefit) => {
+            doc.text(benefit, 20, yPos);
+            yPos += 8;
+        });
+        
+        // Contact Section
+        doc.setFillColor(245, 245, 245);
+        doc.rect(0, 245, 210, 52, 'F');
+        
+        doc.setFontSize(14);
+        doc.setTextColor(26, 26, 26);
+        doc.setFont("helvetica", "bold");
+        doc.text("Contact Us", 20, 258);
+        
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(80, 80, 80);
+        doc.text("Email: info@crystaldbc.com", 20, 270);
+        doc.text("Phone: +1 (888) 555-1234", 20, 278);
+        doc.text("Website: www.crystaldbc.com", 20, 286);
+        
+        // Footer
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text("© 2024 Crystal DBC. All rights reserved.", 105, 295, { align: "center" });
+        
+        // Save the PDF
+        doc.save("Crystal_DBC_Investment_Brochure.pdf");
+        
+        toast({
+            title: t("investment.toasts.brochureDownloaded") || "Brochure Downloaded",
+            description: t("investment.toasts.brochureDownloadedDesc") || "Your investment brochure has been downloaded successfully.",
+        });
+    };
 
     const handleMyInvestmentsClick = (e?: React.MouseEvent) => {
         e?.preventDefault();
@@ -245,7 +357,8 @@ const Investment = () => {
                                 >
                                     {t("investment.ctaMyInvestments")}
                                 </Button>
-                                <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white/10 font-semibold text-lg px-8">
+                                <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white/10 font-semibold text-lg px-8" onClick={handleDownloadBrochure}>
+                                    <Download className="mr-2 h-5 w-5" />
                                     {t("investment.ctaBrochure")}
                                 </Button>
                             </div>
@@ -258,10 +371,11 @@ const Investment = () => {
                                 poster="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
                                 alt="A 3D model of a luxury property"
                                 shadow-intensity="1"
+                                loading="eager"
                                 auto-rotate
                                 camera-controls
                                 camera-orbit="45deg 55deg 2.5m"
-                                rotation-per-second="30deg"
+                                rotation-per-second="45deg"
                                 interaction-prompt="none"
                                 disable-zoom
                                 style={{ width: '100%', height: '100%' }}

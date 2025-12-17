@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, FormEvent } from "react";
-import { MessageCircle, X, Send } from "lucide-react";
+import { MessageCircle, X, Send, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -357,7 +357,7 @@ const RealEstateChatBot = () => {
     };
   };
 
-  const handleSendMessage = (text?: string) => {
+  const handleSendMessage = async (text?: string) => {
     const messageText = text || inputValue.trim();
     if (!messageText) return;
 
@@ -376,18 +376,62 @@ const RealEstateChatBot = () => {
     setIsTyping(true);
     setIsLoadingProperties(isPropertyQuery(messageText));
 
-    // Generate bot response
-    setTimeout(() => {
-      const botResponse = generateBotResponse(messageText);
+    try {
+      // Call the AI chat API
+      const response = await apiClient.post("/chat", {
+        message: messageText,
+        history: messages.slice(-10), // Send last 10 messages for context
+      });
+
+      const { response: aiResponse, properties: apiProperties } = response.data;
+
+      // Convert API properties to our Property type
+      const formattedProperties: Property[] = (apiProperties || []).map((p: any) => ({
+        id: p.id,
+        title: p.title,
+        location: p.location,
+        price: p.price,
+        beds: p.beds,
+        baths: p.baths,
+        sqft: p.sqft,
+        image: p.image,
+        status: p.status,
+        priceValue: 0,
+        type: "",
+        description: "",
+        featured: false,
+        gallery: [],
+        features: [],
+      }));
+
+      const botResponse: Message = {
+        id: Date.now(),
+        text: aiResponse,
+        sender: "bot",
+        timestamp: new Date(),
+        properties: formattedProperties.length > 0 ? formattedProperties : undefined,
+      };
+
       setMessages((prev) => [...prev, botResponse]);
       setSuggestedReplies(getSuggestedReplies(botResponse));
-      setIsTyping(false);
-      setIsLoadingProperties(false);
-
+      
       if (wantsHumanSupport(messageText)) {
         setShowHandoffDialog(true);
       }
-    }, 500);
+    } catch (error) {
+      console.error("Chat API error:", error);
+      // Fallback to local response generation
+      const botResponse = generateBotResponse(messageText);
+      setMessages((prev) => [...prev, botResponse]);
+      setSuggestedReplies(getSuggestedReplies(botResponse));
+      
+      if (wantsHumanSupport(messageText)) {
+        setShowHandoffDialog(true);
+      }
+    } finally {
+      setIsTyping(false);
+      setIsLoadingProperties(false);
+    }
   };
 
   const handleQuickAction = (action: string) => {
@@ -449,29 +493,34 @@ const RealEstateChatBot = () => {
 
   return (
     <>
-      {/* Chat Button */}
+      {/* Chat Button - Premium Floating Design */}
       <Button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "fixed bottom-4 right-4 sm:bottom-6 sm:right-6 h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-luxury z-50 group",
-          "luxury-gradient text-luxury-dark border border-luxury-gold shadow-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl",
-          isOpen && "scale-0"
+          "fixed bottom-4 right-4 sm:bottom-6 sm:right-6 h-14 w-14 sm:h-16 sm:w-16 rounded-full z-50 group overflow-hidden",
+          "bg-gradient-to-br from-luxury-gold via-amber-500 to-luxury-gold-light",
+          "shadow-[0_8px_32px_rgba(212,175,55,0.4)] hover:shadow-[0_12px_40px_rgba(212,175,55,0.6)]",
+          "border-2 border-luxury-gold/30",
+          "transition-all duration-500 hover:scale-110",
+          isOpen && "scale-0 opacity-0"
         )}
         aria-label="Open chat"
       >
-        <svg
-          className="h-5 w-5 sm:h-6 sm:w-6"
-          viewBox="0 0 1000 1000"
-          role="img"
-          aria-hidden="true"
-        >
-          <path
-            fill="currentColor"
-            d="M881.1,720.5H434.7L173.3,941V720.5h-54.4C58.8,720.5,10,671.1,10,610.2v-441C10,108.4,58.8,59,118.9,59h762.2C941.2,59,990,108.4,990,169.3v441C990,671.1,941.2,720.5,881.1,720.5L881.1,720.5z M935.6,169.3c0-30.4-24.4-55.2-54.5-55.2H118.9c-30.1,0-54.5,24.7-54.5,55.2v441c0,30.4,24.4,55.1,54.5,55.1h54.4h54.4v110.3l163.3-110.2H500h381.1c30.1,0,54.5-24.7,54.5-55.1V169.3L935.6,169.3z M717.8,444.8c-30.1,0-54.4-24.7-54.4-55.1c0-30.4,24.3-55.2,54.4-55.2c30.1,0,54.5,24.7,54.5,55.2C772.2,420.2,747.8,444.8,717.8,444.8L717.8,444.8z M500,444.8c-30.1,0-54.4-24.7-54.4-55.1c0-30.4,24.3-55.2,54.4-55.2c30.1,0,54.4,24.7,54.4,55.2C554.4,420.2,530.1,444.8,500,444.8L500,444.8z M282.2,444.8c-30.1,0-54.5-24.7-54.5-55.1c0-30.4,24.4-55.2,54.5-55.2c30.1,0,54.4,24.7,54.4,55.2C336.7,420.2,312.3,444.8,282.2,444.8L282.2,444.8z"
-          />
-        </svg>
-        <span className="absolute -top-9 sm:-top-10 px-2 py-1 text-[11px] sm:text-xs bg-amber-400 text-white rounded shadow opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+        {/* Animated Ring Effect */}
+        <span className="absolute inset-0 rounded-full border-2 border-white/30 animate-ping opacity-75" />
+        <span className="absolute inset-1 rounded-full border border-white/20" />
+        
+        {/* Icon Container */}
+        <div className="relative z-10 flex items-center justify-center">
+          <MessageCircle className="h-6 w-6 sm:h-7 sm:w-7 text-luxury-dark fill-luxury-dark/10 group-hover:scale-110 transition-transform duration-300" />
+          {/* Online Indicator */}
+          <span className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-white animate-pulse" />
+        </div>
+        
+        {/* Hover Tooltip */}
+        <span className="absolute -top-12 left-1/2 -translate-x-1/2 px-4 py-2 text-xs font-medium bg-luxury-dark text-white rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap border border-luxury-gold/20">
           {t("chatbot.tooltipLabel")}
+          <span className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full border-8 border-transparent border-t-luxury-dark" />
         </span>
       </Button>
 

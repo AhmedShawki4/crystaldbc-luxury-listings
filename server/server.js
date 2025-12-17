@@ -48,6 +48,7 @@ app.use("/api/activity-logs", require("./routes/activityRoutes"));
 app.use("/api/investments", require("./routes/investmentRoutes"));
 app.use("/api/investment-boxes", require("./routes/investmentBoxRoutes"));
 app.use("/api/rentals", require("./routes/rentalRoutes"));
+app.use("/api/chat", require("./routes/chatRoutes"));
 
 app.use(errorHandler);
 

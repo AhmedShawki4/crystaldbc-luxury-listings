@@ -52,7 +52,7 @@ const Home = () => {
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      // Animate sections on scroll
+      // Animate sections on scroll - trigger earlier for better UX
       const sections = gsap.utils.toArray<HTMLElement>(".reveal-section");
       sections.forEach((section) => {
         gsap.fromTo(
@@ -65,13 +65,13 @@ const Home = () => {
             ease: "power3.out",
             scrollTrigger: {
               trigger: section,
-              start: "top 80%",
+              start: "top 95%",
             },
           }
         );
       });
 
-      // Animate cards staggering
+      // Animate cards staggering - trigger earlier
       const cardGrids = gsap.utils.toArray<HTMLElement>(".stagger-grid");
       cardGrids.forEach((grid) => {
         gsap.fromTo(
@@ -85,7 +85,7 @@ const Home = () => {
             ease: "power2.out",
             scrollTrigger: {
               trigger: grid,
-              start: "top 85%",
+              start: "top 95%",
             },
           }
         );
@@ -198,8 +198,9 @@ const Home = () => {
               <model-viewer
                 src="/base_basic_pbr.glb"
                 alt="3D City Model"
-                loading="lazy"
+                loading="eager"
                 auto-rotate
+                rotation-per-second="45deg"
                 camera-controls
                 disable-zoom
                 interaction-prompt="none"
@@ -273,55 +274,83 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 4. Featured Properties Section */}
-      <section className="py-32 relative overflow-hidden reveal-section">
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background/50" />
+      {/* 4. Featured Properties Section - Premium Showcase */}
+      <section className="py-32 relative overflow-hidden reveal-section bg-gradient-to-b from-luxury-dark via-luxury-dark/95 to-luxury-dark">
+        {/* Decorative Background Elements */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-luxury-gold/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-luxury-gold/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
+          <div className="absolute top-1/2 left-1/2 w-[800px] h-[800px] bg-luxury-gold/3 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
         </div>
+        
         <div className="relative z-10">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Premium Header */}
             <div className="text-center mb-20">
-              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("home.exquisiteEyebrow")}</span>
-              <h2 className="text-4xl md:text-5xl font-display font-medium text-primary mb-6">
+              <div className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/30 mb-8">
+                <Sparkles className="h-4 w-4 text-luxury-gold" />
+                <span className="text-luxury-gold uppercase tracking-[0.25em] text-xs font-semibold">{t("home.exquisiteEyebrow")}</span>
+                <Sparkles className="h-4 w-4 text-luxury-gold" />
+              </div>
+              <h2 className="text-4xl md:text-6xl font-display font-medium text-white mb-6">
                 {t("home.featuredTitle")}
               </h2>
-              <div className="w-24 h-[1px] bg-primary/20 mx-auto mb-6"></div>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed">
+              <div className="flex items-center justify-center gap-4 mb-8">
+                <div className="w-16 h-[1px] bg-gradient-to-r from-transparent to-luxury-gold/60" />
+                <div className="w-2 h-2 bg-luxury-gold rotate-45" />
+                <div className="w-16 h-[1px] bg-gradient-to-l from-transparent to-luxury-gold/60" />
+              </div>
+              <p className="text-lg text-white/70 max-w-2xl mx-auto font-light leading-relaxed">
                 {t("home.featuredSubtitle")}
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-16 stagger-grid">
-              {isLoadingFeatured && <p className="text-muted-foreground text-center col-span-3">{t("common.loadingListings")}</p>}
+            {/* Featured Properties Grid with Enhanced Styling */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16 stagger-grid">
+              {isLoadingFeatured && <p className="text-white/60 text-center col-span-3">{t("common.loadingListings")}</p>}
               {!isLoadingFeatured && featuredProperties.length === 0 && (
-                <p className="text-muted-foreground text-center col-span-3">{t("listings.emptyTitle")}</p>
+                <p className="text-white/60 text-center col-span-3">{t("listings.emptyTitle")}</p>
               )}
-              {featuredProperties.map((property) => (
-                <div key={property._id} className="group cursor-pointer">
-                  <PropertyCard
-                    id={property._id}
-                    image={property.coverImage}
-                    title={property.title}
-                    location={property.location}
-                    price={property.priceLabel}
-                    beds={property.beds}
-                    baths={property.baths}
-                    sqft={property.sqftLabel}
-                    status={property.status}
-                  />
+              {featuredProperties.map((property, index) => (
+                <div 
+                  key={property._id} 
+                  className={`group cursor-pointer transform transition-all duration-500 hover:scale-[1.02] ${index === 1 ? 'lg:scale-105 lg:z-10' : ''}`}
+                >
+                  <div className="relative">
+                    {/* Featured Badge for Middle Card */}
+                    {index === 1 && (
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20 px-4 py-1.5 bg-luxury-gold text-luxury-dark text-xs font-bold uppercase tracking-wider rounded-full shadow-lg">
+                        ★ Top Pick
+                      </div>
+                    )}
+                    <div className={`bg-white/5 backdrop-blur-sm rounded-xl overflow-hidden border transition-all duration-500 ${index === 1 ? 'border-luxury-gold/50 shadow-2xl shadow-luxury-gold/10' : 'border-white/10 hover:border-luxury-gold/30'}`}>
+                      <PropertyCard
+                        id={property._id}
+                        image={property.coverImage}
+                        title={property.title}
+                        location={property.location}
+                        price={property.priceLabel}
+                        beds={property.beds}
+                        baths={property.baths}
+                        sqft={property.sqftLabel}
+                        status={property.status}
+                      />
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
 
+            {/* Enhanced CTA */}
             <div className="text-center">
               <Button
                 asChild
                 size="lg"
-                variant="outline"
-                className="border-primary/20 hover:bg-primary text-primary hover:text-white rounded-none px-12 py-6 text-lg transition-all duration-300"
+                className="bg-luxury-gold hover:bg-luxury-gold-light text-luxury-dark rounded-none px-14 py-7 text-lg font-semibold transition-all duration-300 shadow-xl shadow-luxury-gold/20 hover:shadow-2xl hover:shadow-luxury-gold/30"
               >
-                <Link to="/listings">
+                <Link to="/listings" className="flex items-center gap-3">
                   {t("home.viewAll")}
+                  <ArrowRight className="h-5 w-5" />
                 </Link>
               </Button>
             </div>
@@ -572,43 +601,6 @@ const Home = () => {
                   </Button>
                 </div>
               </form>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4b. Lifestyle / About Section (Re-inserted) */}
-      <section className="py-32 bg-secondary/30 relative reveal-section">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <div className="relative">
-              <div className="aspect-[4/5] bg-gray-200 overflow-hidden relative z-10">
-                <img src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1600&auto=format&fit=crop" alt="Luxury Interior" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
-              </div>
-              <div className="absolute -bottom-10 -right-10 w-2/3 aspect-square bg-white p-2 z-20 shadow-xl hidden md:block">
-                <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=800&auto=format&fit=crop" alt="Detail" className="w-full h-full object-cover" />
-              </div>
-            </div>
-
-            <div className="space-y-8">
-              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold">{t("home.lifestyleEyebrow")}</span>
-              <h2 className="text-4xl md:text-5xl font-display font-medium text-primary leading-tight">{t("home.lifestyleTitle")}</h2>
-              <p className="text-lg text-muted-foreground font-light leading-relaxed">
-                {t("home.lifestyleDescription")}
-              </p>
-              <div className="grid grid-cols-2 gap-8 pt-6">
-                <div>
-                  <h4 className="text-3xl font-display text-primary mb-2">150+</h4>
-                  <p className="text-sm text-muted-foreground uppercase tracking-wider">{t("home.lifestylePremiumListings")}</p>
-                </div>
-                <div>
-                  <h4 className="text-3xl font-display text-primary mb-2">$2B+</h4>
-                  <p className="text-sm text-muted-foreground uppercase tracking-wider">{t("home.lifestyleValueSold")}</p>
-                </div>
-              </div>
-              <Button asChild className="bg-luxury-gold text-luxury-dark rounded-none px-10 py-6 mt-4 hover:bg-luxury-gold-light focus:ring-2 focus:ring-luxury-gold focus:ring-offset-2 transition-all shadow-lg">
-                <Link to="/about">{t("home.lifestyleOurStory")}</Link>
-              </Button>
             </div>
           </div>
         </div>

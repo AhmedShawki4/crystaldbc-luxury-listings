@@ -116,8 +116,8 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20 animate-bounce hidden lg:block">
+      {/* Scroll Indicator - Positioned lower */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 animate-bounce hidden lg:block">
         <div className="w-[1px] h-24 bg-gradient-to-b from-transparent via-white/50 to-white" />
         <span className="block text-white/50 text-xs tracking-[0.2em] transform -rotate-90 origin-left translate-x-3 -translate-y-8 uppercase">Scroll</span>
       </div>
