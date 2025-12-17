@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import useAuth from "@/hooks/useAuth";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminGlassCard from "@/components/admin/AdminGlassCard";
 import { Users2, Mail, Phone, UserRound, MessageCircle, Trash2 } from "lucide-react";
 
 const fetchLeads = async () => {
@@ -54,7 +55,12 @@ const AdminLeads = () => {
         description="Track register-interest submissions and nurture opportunities."
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <AdminGlassCard
+        eyebrow="Pipeline"
+        title="All leads"
+        description="Review, triage, and update lead statuses."
+        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+      >
         {data?.map((lead) => (
           <Card key={lead._id} className="border-border/70">
             <CardContent className="p-5 space-y-4">
@@ -132,7 +138,7 @@ const AdminLeads = () => {
             </CardContent>
           </Card>
         ))}
-      </div>
+      </AdminGlassCard>
     </div>
   );
 };

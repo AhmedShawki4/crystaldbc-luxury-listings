@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import apiClient from "@/lib/apiClient";
 import type { AnalyticsSummary } from "@/types";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminGlassCard from "@/components/admin/AdminGlassCard";
 import { Building2, Mail, HeartHandshake, Users2, ClipboardList, Gauge, CircleDollarSign, TrendingUp, Sparkles } from "lucide-react";
-import { Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, PieChart, Pie, Cell } from "recharts";
 
 const fetchSummary = async () => {
   const { data } = await apiClient.get<AnalyticsSummary>("/analytics/summary");
@@ -12,6 +14,7 @@ const fetchSummary = async () => {
 
 const AdminOverview = () => {
   const { data, isLoading } = useQuery({ queryKey: ["analytics"], queryFn: fetchSummary });
+  const [activeSlice, setActiveSlice] = useState<string | null>(null);
   const formatCurrency = (value: number) => `EGP ${Math.round(value).toLocaleString()}`;
 
   if (isLoading) {
@@ -46,18 +49,13 @@ const AdminOverview = () => {
     { label: "Wishlist", value: stats.wishlistItems, color: "#fb7185" },
   ];
   const pieTotal = pieData.reduce((sum, item) => sum + item.value, 0);
-  let pieGradient = "";
-  if (pieTotal > 0) {
-    let current = 0;
-    pieGradient = pieData
-      .map((item) => {
-        const start = (current / pieTotal) * 100;
-        current += item.value;
-        const end = (current / pieTotal) * 100;
-        return `${item.color} ${start}% ${end}%`;
-      })
-      .join(", ");
-  }
+  const resolvedActive =
+    pieTotal === 0
+      ? null
+      : pieData.find((s) => s.label === activeSlice) ?? pieData[0];
+  const activePercent = resolvedActive && pieTotal
+    ? Math.round((resolvedActive.value / pieTotal) * 100)
+    : 0;
 
   return (
     <div className="space-y-10">
@@ -189,58 +187,109 @@ const AdminOverview = () => {
         </div>
       </div>
 
-      <div className="rounded-3xl border border-border bg-background p-6 shadow-lg">
+      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#050816] via-[#020617] to-[#020617] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.65)]">
+        <div className="pointer-events-none absolute -left-24 top-0 h-40 w-40 rounded-full bg-luxury-gold/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-10 -bottom-10 h-48 w-48 rounded-full bg-emerald-500/10 blur-3xl" />
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-sm text-muted-foreground">Distribution</p>
-            <h3 className="text-2xl font-display font-semibold">Engagement Mix</h3>
+            <p className="text-sm text-slate-400">Distribution</p>
+            <h3 className="text-2xl font-display font-semibold text-slate-50">Engagement Mix</h3>
           </div>
         </div>
         {pieTotal === 0 ? (
-          <p className="text-muted-foreground">No data to visualize yet.</p>
+          <p className="text-slate-400">No data to visualize yet.</p>
         ) : (
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            <div
-              className="h-48 w-48 rounded-full shadow-inner border border-border"
-              style={{ backgroundImage: `conic-gradient(${pieGradient})` }}
-              aria-label="Engagement distribution pie chart"
-            />
-            <div className="flex flex-col gap-3 w-full">
-              {pieData.map((item) => (
-                <div key={item.label} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: item.color }} />
-                    <p className="text-sm text-muted-foreground">{item.label}</p>
-                  </div>
-                  <p className="text-sm font-semibold">{pieTotal ? Math.round((item.value / pieTotal) * 100) : 0}%</p>
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            <div className="relative h-56 w-56">
+              <div className="h-full w-full" style={{ animation: "spin 38s linear infinite" }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart margin={{ top: 6, right: 6, bottom: 6, left: 6 }}>
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    nameKey="label"
+                    innerRadius={64}
+                    outerRadius={86}
+                    paddingAngle={4}
+                    stroke="rgba(15,23,42,0.95)"
+                    strokeWidth={2}
+                    onClick={(_, index) => setActiveSlice(pieData[index].label)}
+                    isAnimationActive
+                  >
+                    {pieData.map((entry) => (
+                      <Cell
+                        key={entry.label}
+                        fill={entry.color}
+                        opacity={resolvedActive && resolvedActive.label !== entry.label ? 0.45 : 1}
+                        style={{ cursor: "pointer" }}
+                        onClick={() => setActiveSlice(entry.label)}
+                      />
+                    ))}
+                  </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              {resolvedActive && (
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">{resolvedActive.label}</p>
+                  <p className="text-xl font-semibold text-slate-50">{activePercent}%</p>
+                  <p className="text-[11px] text-slate-400 mt-1">{resolvedActive.value} events</p>
                 </div>
-              ))}
+              )}
+            </div>
+            <div className="flex flex-col gap-3 w-full">
+              {pieData.map((item) => {
+                const percent = pieTotal ? Math.round((item.value / pieTotal) * 100) : 0;
+                const isActive = resolvedActive?.label === item.label;
+                return (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => setActiveSlice(item.label)}
+                    className={`flex items-center justify-between rounded-xl px-3 py-2 text-left transition ${
+                      isActive ? "bg-white/5" : "bg-transparent hover:bg-white/5/50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="h-2.5 w-8 rounded-full" style={{ backgroundColor: item.color }} />
+                      <p className="text-sm text-slate-200">{item.label}</p>
+                    </div>
+                    <p className="text-sm font-semibold text-slate-50">{percent}%</p>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
       </div>
 
-      <div className="bg-background border border-border rounded-xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-display font-semibold">Recent Leads</h2>
-          <span className="text-sm text-muted-foreground">Last {recentLeads.length} submissions</span>
-        </div>
+      <AdminGlassCard
+        eyebrow="Pipeline health"
+        title="Recent Leads"
+        description={`Last ${recentLeads.length} submissions`}
+        className="mt-2"
+      >
         <div className="space-y-3">
           {recentLeads.map((lead) => (
-            <div key={lead._id} className="flex flex-col gap-3 rounded-2xl border border-border/70 bg-muted/20 p-4 md:flex-row md:items-center md:justify-between">
+            <div
+              key={lead._id}
+              className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 md:flex-row md:items-center md:justify-between"
+            >
               <div>
                 <p className="font-semibold text-primary">{lead.fullName}</p>
-                <p className="text-sm text-muted-foreground">{lead.email}</p>
+                <p className="text-sm text-slate-300">{lead.email}</p>
               </div>
               <div className="flex flex-wrap gap-3 text-xs font-medium uppercase tracking-wide">
-                <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-500">{lead.status}</span>
-                <span className="rounded-full bg-slate-500/10 px-3 py-1 text-slate-400">{lead.source}</span>
+                <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-400">{lead.status}</span>
+                <span className="rounded-full bg-slate-500/20 px-3 py-1 text-slate-300">{lead.source}</span>
               </div>
             </div>
           ))}
-          {recentLeads.length === 0 && <p className="text-muted-foreground">No leads yet.</p>}
+          {recentLeads.length === 0 && (
+            <p className="text-sm text-slate-300/80">No leads yet.</p>
+          )}
         </div>
-      </div>
+      </AdminGlassCard>
     </div>
   );
 };

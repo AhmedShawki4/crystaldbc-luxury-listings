@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
 import type { RentalRequest } from "@/types";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminGlassCard from "@/components/admin/AdminGlassCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -137,7 +138,12 @@ const AdminRentals = () => {
         description="Approve, decline, or schedule rent payments for For Rent properties."
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end bg-card p-4 rounded-lg border shadow-sm">
+      <AdminGlassCard
+        eyebrow="Filters"
+        title="Refine rent requests"
+        description="Search and segment by status to focus follow-ups."
+        className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"
+      >
         <div className="md:col-span-2 space-y-1">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Search</p>
           <Input
@@ -159,7 +165,7 @@ const AdminRentals = () => {
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </AdminGlassCard>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="bg-card/50">

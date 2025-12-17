@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import AdminGlassCard from "@/components/admin/AdminGlassCard";
 import { BadgeDollarSign, CheckCircle, CircleDollarSign, Loader2, Mail, Phone, ShieldAlert, ShieldCheck, Trash2, User, Calendar, MapPin } from "lucide-react";
 
 const STATUS_OPTIONS = ["Pending", "Approved", "Rejected"] as const;
@@ -130,7 +131,12 @@ const AdminInvestments = () => {
         description="Manage user investment requests, approvals, and funding."
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end bg-card p-4 rounded-lg border shadow-sm">
+      <AdminGlassCard
+        eyebrow="Filters"
+        title="Refine investments"
+        description="Search and segment by status and payment state."
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end"
+      >
         <div className="md:col-span-2 space-y-1">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Search</p>
           <Input
@@ -160,7 +166,7 @@ const AdminInvestments = () => {
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </AdminGlassCard>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="bg-card/50">

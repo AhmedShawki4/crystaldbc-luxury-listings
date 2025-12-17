@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import uploadImage from "@/lib/uploadImage";
 import { getMediaUrl } from "@/lib/media";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminGlassCard from "@/components/admin/AdminGlassCard";
 import { Building2 } from "lucide-react";
 import useAuth from "@/hooks/useAuth";
 
@@ -213,8 +214,11 @@ const AdminProperties = () => {
         description="Create, update, or archive listings across the portfolio."
       />
 
-      <Card>
-        <CardContent className="p-6">
+      <AdminGlassCard
+        eyebrow="Listing details"
+        title={editingId ? "Edit property" : "Create property"}
+        description="Update core information, pricing, media, and highlights."
+      >
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium">Title</label>
@@ -404,8 +408,7 @@ const AdminProperties = () => {
               </Button>
             </div>
           </form>
-        </CardContent>
-      </Card>
+      </AdminGlassCard>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {isLoading && <p className="text-muted-foreground">Loading properties...</p>}

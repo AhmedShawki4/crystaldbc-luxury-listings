@@ -45,6 +45,14 @@ const resources = {
         exquisiteEyebrow: "Exquisite Selection",
         successStories: "Success Stories",
         realResults: "Real Results, Real Wealth",
+        floating: {
+          tagline: "Curated Luxury Residences",
+          headline1: "Experience the pinnacle of luxury living.",
+          headline2: "Where vision meets reality in Dubai.",
+          headline3: "Are you ready to elevate your portfolio?",
+          headline4: "Welcome to CrystalDBC.",
+          scroll: "Scroll to explore the world of CrystalDBC.",
+        },
         successStats: [
           {
             value: "35%",
@@ -1023,6 +1031,14 @@ const resources = {
         exquisiteEyebrow: "اختيارات فاخرة",
         successStories: "قصص النجاح",
         realResults: "نتائج حقيقية، ثروة حقيقية",
+        floating: {
+          tagline: "عقارات فاخرة مختارة بعناية",
+          headline1: "اختبر قمة أسلوب الحياة الفاخر.",
+          headline2: "حيث تلتقي الرؤية بالواقع في دبي.",
+          headline3: "هل أنت مستعد لرفع مستوى محفظتك الاستثمارية؟",
+          headline4: "مرحبًا بك في CrystalDBC.",
+          scroll: "قم بالتمرير لاستكشاف عالم CrystalDBC.",
+        },
         successStats: [
           {
             value: "35%",
@@ -1928,6 +1944,14 @@ const resources = {
         exquisiteEyebrow: "Exklusive Auswahl",
         successStories: "Erfolgsgeschichten",
         realResults: "Echte Ergebnisse, echtes Vermögen",
+        floating: {
+          tagline: "Kuratiertes Luxus-Portfolio",
+          headline1: "Erleben Sie den Gipfel luxuriösen Wohnens.",
+          headline2: "Wo Vision in Dubai auf Realität trifft.",
+          headline3: "Sind Sie bereit, Ihr Portfolio zu erhöhen?",
+          headline4: "Willkommen bei CrystalDBC.",
+          scroll: "Scrollen Sie, um die Welt von CrystalDBC zu entdecken.",
+        },
         successStats: [
           {
             value: "35%",
@@ -2819,6 +2843,14 @@ const resources = {
         exquisiteEyebrow: "Изысканный выбор",
         successStories: "Истории успеха",
         realResults: "Реальные результаты, реальное богатство",
+        floating: {
+          tagline: "Кураторская коллекция элитной недвижимости",
+          headline1: "Испытайте вершину роскошной жизни.",
+          headline2: "Там, где видение встречается с реальностью в Дубае.",
+          headline3: "Готовы поднять своё инвестиционное портфолио на новый уровень?",
+          headline4: "Добро пожаловать в CrystalDBC.",
+          scroll: "Прокрутите, чтобы открыть мир CrystalDBC.",
+        },
         successStats: [
           {
             value: "35%",
