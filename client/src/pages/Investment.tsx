@@ -55,6 +55,14 @@ const Investment = () => {
 
     const handleMyInvestmentsClick = (e: React.MouseEvent) => {
         e.preventDefault();
+        if (!isAuthenticated) {
+            navigate("/auth/login", { state: { from: location } });
+            return;
+        }
+        if (!isInvestor) {
+            toast({ title: t("investment.toasts.onlyInvestorsTitle"), description: t("investment.toasts.onlyInvestorsDescription"), variant: "destructive" });
+            return;
+        }
         // Always require re-auth for security when accessing from this page
         setReAuthMode("login");
         setReAuthOpen(true);
@@ -62,7 +70,7 @@ const Investment = () => {
 
     const handleReAuthSuccess = () => {
         setReAuthOpen(false);
-        toast({ title: t("auth.meta.welcomeBack"), description: "Identity verified successfully." });
+        toast({ title: t("auth.meta.welcomeBack"), description: t("investment.toasts.identityVerified") });
         navigate("/my-investments");
     };
 
@@ -109,11 +117,11 @@ const Investment = () => {
             return;
         }
         if (!isInvestor) {
-            toast({ title: "Only investors can invest", description: "Please contact an admin to get investor access.", variant: "destructive" });
+            toast({ title: t("investment.toasts.onlyInvestorsTitle"), description: t("investment.toasts.onlyInvestorsDescription"), variant: "destructive" });
             return;
         }
         if (investedBoxIds.has(box._id)) {
-            toast({ title: "Already invested", description: "You already have an investment in this box.", variant: "destructive" });
+            toast({ title: t("investment.toasts.alreadyInvestedTitle"), description: t("investment.toasts.alreadyInvestedDescription"), variant: "destructive" });
             navigate("/my-investments");
             return;
         }
@@ -290,11 +298,13 @@ const Investment = () => {
                                             className="w-full"
                                             size="lg"
                                             onClick={() => openInvestDialog(box)}
-                                            disabled={isAuthenticated && isInvestor && investedBoxIds.has(box._id)}
+                                            disabled={(isAuthenticated && !isInvestor) || (isAuthenticated && isInvestor && investedBoxIds.has(box._id))}
                                         >
-                                            {isAuthenticated && isInvestor && investedBoxIds.has(box._id)
-                                                ? t("myInvestments.boxes.alreadyInvested")
-                                                : t("myInvestments.boxes.investCta")}
+                                            {isAuthenticated && !isInvestor
+                                                ? t("investment.investorsOnly")
+                                                : isAuthenticated && isInvestor && investedBoxIds.has(box._id)
+                                                    ? t("myInvestments.boxes.alreadyInvested")
+                                                    : t("myInvestments.boxes.investCta")}
                                         </Button>
                                     </CardContent>
                                 </Card>
