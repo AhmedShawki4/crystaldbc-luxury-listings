@@ -1,6 +1,6 @@
 import "@google/model-viewer";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, CheckCircle2, TrendingUp, Building2, BarChart3, PieChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import useAuth from "@/hooks/useAuth";
 import type { AxiosError } from "axios";
 import AuthModal from "@/components/AuthModal";
+
+type PendingAction = { type: "my-investments" } | { type: "invest"; box: InvestmentBox };
 
 const fetchMyInvestments = async () => {
     const { data } = await apiClient.get<{ investments: Array<{ investmentBox?: { _id?: string } }> }>("/investments/my");
@@ -31,7 +33,6 @@ const Investment = () => {
     const { toast } = useToast();
     const { isAuthenticated, user } = useAuth();
     const navigate = useNavigate();
-    const location = useLocation();
     const { data: boxesData, isLoading: boxesLoading } = useQuery({ queryKey: ["investment-boxes"], queryFn: fetchInvestmentBoxes });
     const boxes = boxesData ?? [];
 
@@ -53,10 +54,17 @@ const Investment = () => {
     const [reAuthOpen, setReAuthOpen] = useState(false);
     const [reAuthMode, setReAuthMode] = useState<"login" | "register">("login");
 
-    const handleMyInvestmentsClick = (e: React.MouseEvent) => {
-        e.preventDefault();
+    // Auth prompt for unauthenticated users (stay on page)
+    const [authPromptOpen, setAuthPromptOpen] = useState(false);
+    const [authPromptMode, setAuthPromptMode] = useState<"login" | "register">("login");
+    const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
+
+    const handleMyInvestmentsClick = (e?: React.MouseEvent) => {
+        e?.preventDefault();
         if (!isAuthenticated) {
-            navigate("/auth/login", { state: { from: location } });
+            setPendingAction({ type: "my-investments" });
+            setAuthPromptMode("login");
+            setAuthPromptOpen(true);
             return;
         }
         if (!isInvestor) {
@@ -68,6 +76,21 @@ const Investment = () => {
         setReAuthOpen(true);
     };
 
+    const handleAuthPromptSuccess = () => {
+        setAuthPromptOpen(false);
+        if (!pendingAction) return;
+
+        const actionToResume = pendingAction;
+        setPendingAction(null);
+
+        if (actionToResume.type === "my-investments") {
+            handleMyInvestmentsClick();
+            return;
+        }
+
+        openInvestDialog(actionToResume.box);
+    };
+
     const handleReAuthSuccess = () => {
         setReAuthOpen(false);
         toast({ title: t("auth.meta.welcomeBack"), description: t("investment.toasts.identityVerified") });
@@ -76,6 +99,10 @@ const Investment = () => {
 
     const toggleReAuthMode = () => {
         setReAuthMode(prev => prev === "login" ? "register" : "login");
+    };
+
+    const toggleAuthPromptMode = () => {
+        setAuthPromptMode(prev => prev === "login" ? "register" : "login");
     };
 
     useEffect(() => {
@@ -113,7 +140,9 @@ const Investment = () => {
 
     const openInvestDialog = (box: InvestmentBox) => {
         if (!isAuthenticated) {
-            navigate("/auth/login", { state: { from: location } });
+            setPendingAction({ type: "invest", box });
+            setAuthPromptMode("login");
+            setAuthPromptOpen(true);
             return;
         }
         if (!isInvestor) {
@@ -263,7 +292,10 @@ const Investment = () => {
                         <p className="text-muted-foreground">{t("common.loading")}</p>
                     ) : (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            {boxes.map((box) => (
+                            {boxes.map((box) => {
+                                const isAlreadyInvested = isAuthenticated && isInvestor && investedBoxIds.has(box._id);
+
+                                return (
                                 <Card key={box._id} className="border-border/50 overflow-hidden">
                                     <CardHeader className="bg-muted/30">
                                         <CardTitle className="text-2xl font-display">{box.name}</CardTitle>
@@ -298,17 +330,16 @@ const Investment = () => {
                                             className="w-full"
                                             size="lg"
                                             onClick={() => openInvestDialog(box)}
-                                            disabled={(isAuthenticated && !isInvestor) || (isAuthenticated && isInvestor && investedBoxIds.has(box._id))}
+                                            disabled={isAlreadyInvested}
                                         >
-                                            {isAuthenticated && !isInvestor
-                                                ? t("investment.investorsOnly")
-                                                : isAuthenticated && isInvestor && investedBoxIds.has(box._id)
-                                                    ? t("myInvestments.boxes.alreadyInvested")
-                                                    : t("myInvestments.boxes.investCta")}
+                                            {isAlreadyInvested
+                                                ? t("myInvestments.boxes.alreadyInvested")
+                                                : t("myInvestments.boxes.investCta")}
                                         </Button>
                                     </CardContent>
                                 </Card>
-                            ))}
+                            );
+                            })}
                         </div>
                     )}
                 </div>
@@ -478,6 +509,17 @@ const Investment = () => {
                     </div>
                 </div>
             </section>
+
+            <AuthModal
+                isOpen={authPromptOpen}
+                onOpenChange={(open) => {
+                    setAuthPromptOpen(open);
+                    if (!open) setPendingAction(null);
+                }}
+                initialMode={authPromptMode}
+                onSwitchMode={toggleAuthPromptMode}
+                onAuthSuccess={handleAuthPromptSuccess}
+            />
 
             <AuthModal
                 isOpen={reAuthOpen}
