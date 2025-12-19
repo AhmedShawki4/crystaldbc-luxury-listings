@@ -98,6 +98,13 @@ const generateAIResponse = async (messages, properties = []) => {
     const userMessage = messages[messages.length - 1]?.content || "";
     const detectedLanguage = detectLanguage(userMessage);
 
+    // LOG FOR DEBUGGING
+    console.log("🌍 Language Detection:", {
+      userMessage: userMessage.substring(0, 50),
+      detectedLanguage,
+      hasApiKey: !!apiKey
+    });
+
     // Enhanced language instruction
     const languageInstruction = detectedLanguage !== "English"
       ? `⚠️ MANDATORY LANGUAGE RULE ⚠️\nUser language: ${detectedLanguage}\nYou MUST respond in ${detectedLanguage} ONLY.\nDO NOT use English.\n\n`
@@ -110,25 +117,39 @@ const generateAIResponse = async (messages, properties = []) => {
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || "gpt-3.5-turbo",
+        model: "gpt-4o-mini", // Forcing a valid model that supports multi-language
         messages: [
           { role: "system", content: languageInstruction + SYSTEM_PROMPT },
           ...messages,
         ],
-        max_tokens: 500,
-        temperature: 0.7,
+        max_completion_tokens: 500,
       }),
     });
 
     if (!response.ok) {
-      console.error("OpenAI API error:", await response.text());
+      const errorText = await response.text();
+      console.error("❌ OpenAI API error:", response.status, errorText);
       return generateFallbackResponse(messages[messages.length - 1]?.content || "");
     }
 
     const data = await response.json();
-    return data.choices[0]?.message?.content || generateFallbackResponse(messages[messages.length - 1]?.content || "");
+
+    // LOG THE FULL DATA FOR DEBUGGING
+    console.log("🔍 OpenAI Full Data:", JSON.stringify(data, null, 2));
+
+    const aiResponse = data.choices?.[0]?.message?.content;
+
+    if (!aiResponse) {
+      console.warn("⚠️ No AI content found in response, using fallback.");
+      return generateFallbackResponse(messages[messages.length - 1]?.content || "");
+    }
+
+    // LOG THE AI RESPONSE
+    console.log("✅ AI Response (first 100 chars):", aiResponse.substring(0, 100));
+
+    return aiResponse;
   } catch (error) {
-    console.error("AI chat error:", error);
+    console.error("❌ AI chat error:", error.message);
     return generateFallbackResponse(messages[messages.length - 1]?.content || "");
   }
 };
@@ -136,49 +157,47 @@ const generateAIResponse = async (messages, properties = []) => {
 // Fallback responses when AI is not available
 const generateFallbackResponse = (userMessage) => {
   const lower = userMessage.toLowerCase();
+  const lang = detectLanguage(userMessage);
 
-  // Property related queries
-  if (lower.includes("property") || lower.includes("listing") || lower.includes("apartment") || lower.includes("villa") || lower.includes("penthouse")) {
-    return "I'd be happy to help you find the perfect property! We have an exclusive collection of luxury properties in Dubai and Egypt. You can browse our listings page to explore available properties, or let me know your preferences (location, budget, bedrooms) and I can guide you further.";
+  const fallbacks = {
+    English: {
+      property: "I'd be happy to help you find the perfect property! We have an exclusive collection of luxury properties in Dubai and Egypt. You can browse our listings page to explore available properties, or let me know your preferences (location, budget, bedrooms) and I can guide you further.",
+      invest: "Excellent question about investments! Crystal DBC offers exceptional investment opportunities with an average annual ROI of 35%. Our team of experts carefully selects properties with high growth potential in Dubai and Egypt. Would you like to speak with our investment team for personalized advice?",
+      schedule: "I'd be delighted to arrange that for you! Please click on 'Talk to Agent' to submit your contact details, and one of our luxury property consultants will reach out to schedule a viewing or call at your convenience.",
+      agent: "Of course! Our team of experienced luxury real estate consultants is ready to assist you. Please use the 'Talk to Agent' option to provide your details, and we'll connect you with an expert who can provide personalized guidance.",
+      price: "Our portfolio includes luxury properties across various price ranges, from luxury apartments to exclusive villas. Dubai properties start from AED 1.5M, and Egypt from EGP 8M. What budget are you considering?",
+      general: "Thank you for your message! I'm here to help you with all your luxury real estate needs in Dubai and Egypt. How may I help you today?"
+    },
+    Arabic: {
+      property: "يسعدني مساعدتك في العثور على العقار المثالي! لدينا مجموعة حصرية من العقارات الفاخرة في دبي ومصر. يمكنك تصفح صفحة القوائم لدينا لاستكشاف العقارات المتاحة، أو أخبرني بتفضيلاتك (الموقع، الميزانية، عدد الغرف) وسأقوم بإرشادك بشكل أكبر.",
+      invest: "سؤال ممتاز عن الاستثمارات! تقدم كريستال دي بي سي فرصًا استثمارية استثنائية بمتوسط عائد سنوي على الاستثمار بنسبة 35٪. يقوم فريق الخبراء لدينا باختيار العقارات ذات إمكانات النمو العالية في دبي ومصر بعناية. هل ترغب في التحدث مع فريق الاستثمار لدينا للحصول على نصيحة مخصصة؟",
+      schedule: "يسعدني ترتيب ذلك لك! يرجى النقر على 'تحدث مع وكيل' لتقديم بيانات الاتصال الخاصة بك، وسيتواصل معك أحد مستشاري العقارات الفاخرة لدينا لتحديد موعد للمعاينة أو مكالمة في الوقت الذي يناسبك.",
+      agent: "بالطبع! فريقنا من مستشاري العقارات الفاخرة ذوي الخبرة مستعد لمساعدتك. يرجى استخدام خيار 'تحدث مع وكيل' لتقديم تفاصيلك، وسنقوم بتوصيلك بخبير يمكنه تقديم إرشادات مخصصة.",
+      price: "تتضمن محفظتنا عقارات فاخرة عبر نطاقات أسعار مختلفة، من الشقق الفاخرة إلى الفيلات الحصرية. تبدأ العقارات في دبي من 1.5 مليون درهم، وفي مصر من 8 ملايين جنيه. ما هي الميزانية التي تفكر فيها؟",
+      general: "شكراً لرسالتك! أنا هنا لمساعدتك في جميع احتياجاتك العقارية الفاخرة في دبي ومصر. كيف يمكنني مساعدتك اليوم؟"
+    }
+    // Russian and German fallbacks can be added similarly
+  };
+
+  const t = fallbacks[lang] || fallbacks.English;
+
+  if (lower.includes("property") || lower.includes("listing") || lower.includes("apartment") || lower.includes("villa") || lower.includes("عقار") || lower.includes("شقة") || lower.includes("فيلا")) {
+    return t.property;
+  }
+  if (lower.includes("invest") || lower.includes("roi") || lower.includes("return") || lower.includes("استثمار") || lower.includes("عائد")) {
+    return t.invest;
+  }
+  if (lower.includes("schedule") || lower.includes("call") || lower.includes("appointment") || lower.includes("موعد") || lower.includes("اتصال")) {
+    return t.schedule;
+  }
+  if (lower.includes("agent") || lower.includes("human") || lower.includes("تحدث") || lower.includes("وكيل")) {
+    return t.agent;
+  }
+  if (lower.includes("price") || lower.includes("cost") || lower.includes("budget") || lower.includes("سعر") || lower.includes("ميزانية")) {
+    return t.price;
   }
 
-  // Investment queries
-  if (lower.includes("invest") || lower.includes("roi") || lower.includes("return")) {
-    return "Excellent question about investments! Crystal DBC offers exceptional investment opportunities with an average annual ROI of 35%. Our team of experts carefully selects properties with high growth potential in Dubai and Egypt. Would you like to speak with our investment team for personalized advice?";
-  }
-
-  // Schedule/Call queries
-  if (lower.includes("schedule") || lower.includes("call") || lower.includes("appointment") || lower.includes("viewing")) {
-    return "I'd be delighted to arrange that for you! Please click on 'Talk to Agent' to submit your contact details, and one of our luxury property consultants will reach out to schedule a viewing or call at your convenience.";
-  }
-
-  // Agent/Human queries
-  if (lower.includes("agent") || lower.includes("human") || lower.includes("representative") || lower.includes("advisor")) {
-    return "Of course! Our team of experienced luxury real estate consultants is ready to assist you. Please use the 'Talk to Agent' option to provide your details, and we'll connect you with an expert who can provide personalized guidance.";
-  }
-
-  // Price queries
-  if (lower.includes("price") || lower.includes("cost") || lower.includes("budget") || lower.includes("afford")) {
-    return "Our portfolio includes luxury properties across various price ranges, from premium apartments to exclusive villas and penthouses. Our properties in Dubai start from AED 1.5M, while our Egypt collection offers excellent value with stunning properties from EGP 5M. What budget range are you considering?";
-  }
-
-  // Location queries
-  if (lower.includes("dubai") || lower.includes("egypt") || lower.includes("location") || lower.includes("area")) {
-    return "We specialize in the most prestigious locations! In Dubai, we feature properties in Palm Jumeirah, Downtown Dubai, Emirates Hills, and Dubai Marina. In Egypt, our collection includes exclusive properties in New Cairo, North Coast, and the Red Sea area. Which location interests you most?";
-  }
-
-  // Greeting
-  if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey") || lower === "hi" || lower === "hello") {
-    return "Welcome to Crystal DBC! I'm your luxury real estate assistant. How may I assist you today? Whether you're looking for your dream home, an investment property, or just exploring our exclusive collection, I'm here to help.";
-  }
-
-  // Thank you
-  if (lower.includes("thank")) {
-    return "You're most welcome! It's my pleasure to assist you. If you have any more questions about our properties or services, feel free to ask. We're here to make your luxury real estate journey exceptional.";
-  }
-
-  // Default response
-  return "Thank you for your message! I'm here to help you with all your luxury real estate needs. I can assist you with finding properties, investment information, scheduling viewings, or connecting you with our expert agents. How may I help you today?";
+  return t.general;
 };
 
 // Search properties based on query
