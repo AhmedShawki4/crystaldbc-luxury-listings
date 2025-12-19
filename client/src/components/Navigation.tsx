@@ -41,6 +41,7 @@ const Navigation = () => {
   const handleLanguageChange = (lang: string) => {
     i18n.changeLanguage(lang);
     setActiveLang(lang);
+    localStorage.setItem("i18nextLng", lang);
   };
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
