@@ -15,6 +15,19 @@ export const getMediaUrl = (input?: string) => {
   if (/^https?:\/\//i.test(input) || input.startsWith("data:")) {
     return input;
   }
-  const normalized = input.startsWith("/") ? input : `/${input}`;
+  // If the path is root-relative and points to backend uploads, prefix with the assets base URL
+  // e.g. "/uploads/xyz.jpg" -> "http://api-origin/uploads/xyz.jpg"
+  if (input.startsWith("/uploads/")) {
+    return `${ASSETS_BASE_URL}${input}`;
+  }
+
+  // If the path is root-relative but NOT an uploads path, treat it as a client public asset
+  // served by the Vite dev server / production static host (e.g. "/lobby.jpeg").
+  if (input.startsWith("/")) {
+    return input;
+  }
+
+  // Otherwise it's a relative path stored by the backend (no leading slash), prefix assets base.
+  const normalized = `/${input}`;
   return `${ASSETS_BASE_URL}${normalized}`;
 };

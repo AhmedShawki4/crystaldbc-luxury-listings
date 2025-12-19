@@ -78,20 +78,16 @@ const Navigation = () => {
     >
       <div className="pointer-events-none absolute inset-x-1/2 top-3 hidden h-10 w-[60%] -translate-x-1/2 rounded-full bg-white/10 blur-3xl lg:block" aria-hidden />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="hidden lg:flex items-center justify-between pb-1 text-[9px] font-semibold uppercase tracking-[0.32em] text-white/60">
-          <span className="flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5 text-luxury-gold" />
-            <span className="font-display font-medium text-white/90">{t("layout.tagline")}</span>
-          </span>
+        <div className="hidden lg:flex items-center justify-end pb-1 text-[9px] font-semibold uppercase tracking-[0.32em] text-white/60">
           <span className="text-white/40">{t("layout.locations")}</span>
         </div>
         <div className="flex items-center justify-between h-14 md:h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group ml-4 lg:ml-10">
             <img
-              src="/crystaldbclogo.jpeg"
+              src="/crystaldbclogo.png"
               alt="CrystalDBC Logo"
-              className="h-12 md:h-14 w-auto drop-shadow-lg transition-transform group-hover:scale-105"
+              className="h-14 md:h-16 w-auto drop-shadow-lg transition-transform group-hover:scale-105 -mt-1 md:-mt-2"
             />
           </Link>
 

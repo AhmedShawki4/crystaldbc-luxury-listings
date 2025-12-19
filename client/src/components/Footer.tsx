@@ -28,7 +28,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div>
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <img src="/crystaldbclogo.jpeg" alt="CrystalDBC Logo" className="h-12 w-auto" />
+              <img src="/crystaldbclogo.png" alt="CrystalDBC Logo" className="h-12 w-auto" />
             </Link>
             <h3 className="text-lg font-display font-semibold mb-3">CrystalDBC</h3>
             <p className="text-white/70 text-sm leading-relaxed">{content.description}</p>

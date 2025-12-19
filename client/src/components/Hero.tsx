@@ -14,7 +14,7 @@ const fallbackHero: HeroContent = {
   heading: "Discover Your Dream",
   highlight: "Luxury Property",
   subheading: "Exceptional homes, unparalleled service, and a commitment to excellence in every detail",
-  backgroundImage: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=2000",
+  backgroundImage: "/lobby.jpeg",
   primaryCta: { label: "Explore Properties", href: "/listings" },
   secondaryCta: { label: "Contact Us", href: "/contact" },
 };

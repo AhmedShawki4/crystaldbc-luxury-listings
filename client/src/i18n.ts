@@ -19,7 +19,6 @@ const resources = {
         scheduleViewing: "Schedule Viewing",
       },
       layout: {
-        tagline: "Luxury Experience",
         locations: "Egypt | Dubai | Germany | Saudi Arabia | Russia",
       },
       common: {
@@ -1005,7 +1004,6 @@ const resources = {
         scheduleViewing: "حجز زيارة",
       },
       layout: {
-        tagline: "تجربة فاخرة",
         locations: "مصر | دبي | ألمانيا | السعودية | روسيا",
       },
       common: {
@@ -1918,7 +1916,6 @@ const resources = {
         scheduleViewing: "Besichtigung buchen",
       },
       layout: {
-        tagline: "Luxus Erlebnis",
         locations: "Ägypten | Dubai | Deutschland | Saudi-Arabien | Russland",
       },
       common: {
@@ -2817,7 +2814,6 @@ const resources = {
         scheduleViewing: "Записаться на просмотр",
       },
       layout: {
-        tagline: "Роскошный опыт",
         locations: "Египет | Дубай | Германия | Саудовская Аравия | Россия",
       },
       common: {
