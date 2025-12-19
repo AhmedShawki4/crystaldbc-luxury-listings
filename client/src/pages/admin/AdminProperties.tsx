@@ -36,6 +36,7 @@ const initialFormState = {
   features: "",
   type: "",
   status: "For Sale",
+  companyName: "",
   rentPayPeriod: "month",
   isFeatured: false,
 };
@@ -130,6 +131,7 @@ const AdminProperties = () => {
       features: property.features.join(", "),
       type: property.type,
       status: property.status,
+      companyName: property.companyName ?? "",
       rentPayPeriod: property.rentPayPeriod ?? "month",
       isFeatured: property.isFeatured,
     });
@@ -347,6 +349,11 @@ const AdminProperties = () => {
           <div>
             <label className="text-sm font-medium">Type</label>
             <Input name="type" value={formState.type} onChange={handleChange} required />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Company Name (Optional)</label>
+            <Input name="companyName" value={formState.companyName} onChange={handleChange} placeholder="e.g., Crystal DBC" />
+            <p className="text-xs text-muted-foreground mt-1">Name of the company listing this property</p>
           </div>
           <div>
             <label className="text-sm font-medium">Status</label>

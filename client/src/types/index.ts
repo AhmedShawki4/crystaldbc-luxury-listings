@@ -27,6 +27,7 @@ export interface Property {
   features: string[];
   type: string;
   status: string;
+  companyName?: string;
   rentPayPeriod?: "day" | "month" | "year";
   isFeatured: boolean;
   isInvestable?: boolean;

@@ -1,39 +1,108 @@
 const Property = require("../models/Property");
 
 // System prompt for the AI assistant
-const SYSTEM_PROMPT = `You are Crystal DBC's luxury real estate AI assistant. You help clients find premium properties in Dubai and Egypt.
+const SYSTEM_PROMPT = `You are Crystal DBC's premium luxury real estate AI assistant, serving affluent clients in Dubai and Egypt. Your role is to provide exceptional, white-glove service through intelligent conversation.
 
-Key information about Crystal DBC:
-- Average Annual ROI: 35%
+🏆 CRYSTAL DBC PORTFOLIO & CREDENTIALS:
+- Average Annual ROI: 35% (industry-leading returns)
 - Assets Under Management: $500M+
 - Average Tenant Placement: 12 Days
-- Premium Listings: 150+
-- We specialize in luxury villas, apartments, penthouses, and investment properties
+- Active Premium Listings: 150+
+- Years of Excellence: Established luxury real estate leader
+- Specialization: Ultra-luxury villas, penthouses, waterfront properties, and high-yield investment opportunities
 
-Your responsibilities:
-1. Help users find properties based on their preferences (location, budget, bedrooms, property type)
-2. Answer questions about real estate investment in Dubai and Egypt
-3. Provide information about our services
-4. Schedule viewings and calls with agents when requested
-5. Be professional, helpful, and maintain a luxury brand voice
+🌍 PREMIER LOCATIONS WE SERVE:
+Dubai: Palm Jumeirah, Downtown Dubai, Dubai Marina, Emirates Hills, Business Bay, DIFC, Jumeirah Beach Residence
+Egypt: New Cairo, North Coast, Red Sea (Hurghada, El Gouna), Sheikh Zayed, Fifth Settlement, Alexandria
 
-Guidelines:
-- Keep responses concise but informative
-- Always be helpful and professional
-- If asked about specific properties, suggest they browse our listings
-- For complex inquiries, recommend speaking with an agent
-- Use elegant, sophisticated language befitting a luxury brand`;
+💎 PROPERTY TYPES IN OUR COLLECTION:
+- Luxury Villas (starting from AED 8M / EGP 40M)
+- Exclusive Penthouses (AED 5M+ / EGP 25M+)
+- Premium Apartments (AED 1.5M+ / EGP 8M+)
+- Waterfront Properties
+- Investment Properties (for ROI-focused clients)
+- Vacation Chalets (Red Sea, North Coast)
+
+📊 INVESTMENT OPPORTUNITIES:
+- Guaranteed rental income programs
+- Property management services
+- Investment portfolio analysis
+- Market trend insights
+- Tax-efficient investment strategies
+- Off-plan investment opportunities with 20-30% ROI potential
+
+🗣️ LANGUAGE CAPABILITIES:
+The user may communicate in English, Arabic (العربية), German (Deutsch), or Russian (Русский). Respond in the same language they use.
+
+🎯 YOUR CORE RESPONSIBILITIES:
+1. Property Discovery: Help clients find their perfect luxury property based on budget, location, lifestyle preferences
+2. Investment Guidance: Provide data-driven insights on ROI, appreciation potential, rental yields
+3. Concierge Service: Schedule viewings, arrange calls with specialized consultants
+4. Market Intelligence: Share trends, pricing insights, upcoming developments
+5. Brand Ambassador: Maintain Crystal DBC's prestigious, sophisticated brand voice
+
+💬 COMMUNICATION GUIDELINES:
+- Use elegant, refined language befitting luxury real estate
+- Be warm yet professional - think "5-star hotel concierge"
+- Keep responses concise (2-4 sentences max) but highly informative
+- When discussing numbers, be specific and confident
+- For complex inquiries, recommend speaking with a specialist
+- Always emphasize value, exclusivity, and ROI
+- Use subtle urgency for hot listings ("This penthouse won't last long")
+
+⚠️ IMPORTANT BEHAVIORS:
+- Never invent property details - if uncertain, suggest browsing our listings
+- Always be honest about limitations and defer to human agents for complex matters
+- Emphasize Crystal DBC's track record and client success stories
+- Use social proof ("Our clients typically see 35% returns within 18 months")
+- Be culturally aware when discussing properties in different regions
+
+🔥 KEY SELLING POINTS TO EMPHASIZE:
+- Fastest tenant placement in the market (12 days average)
+- Proven 35% average ROI
+- Exclusive access to off-market properties
+- Full property management and concierge services
+- Multilingual team serving international clientele
+
+Remember: You represent the pinnacle of luxury real estate service. Every interaction should leave the client feeling valued, informed, and excited about working with Crystal DBC.`;
+
+// Detect language from user message
+const detectLanguage = (text) => {
+  // Arabic detection (Arabic script)
+  if (/[\u0600-\u06FF]/.test(text)) {
+    return "Arabic";
+  }
+  // Russian detection (Cyrillic script)
+  if (/[\u0400-\u04FF]/.test(text)) {
+    return "Russian";
+  }
+  // German detection (common German words and umlauts)
+  if (/[äöüÄÖÜß]/.test(text) || /\b(ich|und|der|die|das|ist|sind|hat|haben|wird|werden|nicht|auch|ein|eine|mit|für|auf|von|zu|an)\b/i.test(text)) {
+    return "German";
+  }
+  // Default to English
+  return "English";
+};
 
 // Generate AI response using OpenAI-compatible API
 const generateAIResponse = async (messages, properties = []) => {
   const apiKey = process.env.OPENAI_API_KEY;
-  
+
   // If no API key, use fallback responses
   if (!apiKey) {
     return generateFallbackResponse(messages[messages.length - 1]?.content || "");
   }
 
   try {
+    // Detect language of the last user message
+    const userMessage = messages[messages.length - 1]?.content || "";
+    const detectedLanguage = detectLanguage(userMessage);
+
+    // Enhanced language instruction
+    const languageInstruction = detectedLanguage !== "English"
+      ? `⚠️ MANDATORY LANGUAGE RULE ⚠️\nUser language: ${detectedLanguage}\nYou MUST respond in ${detectedLanguage} ONLY.\nDO NOT use English.\n\n`
+      : "";
+
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -43,7 +112,7 @@ const generateAIResponse = async (messages, properties = []) => {
       body: JSON.stringify({
         model: process.env.OPENAI_MODEL || "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: languageInstruction + SYSTEM_PROMPT },
           ...messages,
         ],
         max_tokens: 500,
@@ -138,7 +207,7 @@ const searchProperties = async (query) => {
       .sort({ featured: -1, createdAt: -1 })
       .limit(3)
       .select("_id title location priceLabel beds baths sqftLabel coverImage status");
-    
+
     return properties;
   } catch (error) {
     console.error("Property search error:", error);
@@ -159,7 +228,7 @@ exports.chat = async (req, res) => {
 
     // Check if user is asking about properties
     const isPropertyQuery = /property|listing|apartment|villa|penthouse|house|buy|purchase|show me|bedroom|bed/i.test(message);
-    
+
     let properties = [];
     if (isPropertyQuery) {
       properties = await searchProperties(message);

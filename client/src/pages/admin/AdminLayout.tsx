@@ -21,6 +21,8 @@ import {
   Package,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useQuery } from "@tanstack/react-query";
+import apiClient from "@/lib/apiClient";
 
 const NAV_ITEMS: Array<{ to: string; label: string; exact?: boolean; roles?: Role[]; icon: LucideIcon }> = [
   { to: "/admin", label: "Overview", exact: true, roles: ["admin", "employee", "property-handler"], icon: Gauge },
@@ -39,6 +41,20 @@ const NAV_ITEMS: Array<{ to: string; label: string; exact?: boolean; roles?: Rol
 
 const AdminLayout = () => {
   const { user, logout } = useAuth();
+
+  // Fetch pending investments count
+  const { data: pendingCount = 0 } = useQuery({
+    queryKey: ["pending-investments-count"],
+    queryFn: async () => {
+      try {
+        const { data } = await apiClient.get("/investments?status=Pending");
+        return data.investments?.length || 0;
+      } catch (error) {
+        return 0;
+      }
+    },
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
 
   return (
     <div className="min-h-screen flex">
@@ -73,7 +89,13 @@ const AdminLayout = () => {
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-white/10">
                   <Icon className="h-4 w-4" />
                 </span>
-                <span>{item.label}</span>
+                <span className="flex-1">{item.label}</span>
+                {/* Show notification badge for Investments */}
+                {item.to === "/admin/investments" && pendingCount > 0 && (
+                  <span className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold">
+                    {pendingCount}
+                  </span>
+                )}
               </NavLink>
             );
           })}

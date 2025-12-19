@@ -196,7 +196,10 @@ const AdminInvestments = () => {
             const requestLabel = isIncreasePending ? "Request to increase" : "New investment";
             const requestedAdditional = Number(investment.increaseRequest?.additionalAmount) || 0;
             return (
-              <div key={investment._id} className="rounded-3xl border border-white/10 bg-white/5 overflow-hidden transition hover:bg-white/5">
+              <div key={investment._id} className={`rounded-3xl overflow-hidden transition hover:bg-white/5 ${investment.status === "Pending"
+                  ? "border-2 border-red-500/60 bg-red-500/10"
+                  : "border border-white/10 bg-white/5"
+                }`}>
                 <div className="bg-white/5 p-6 border-b border-white/10">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="space-y-1">

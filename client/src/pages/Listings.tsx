@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import PropertyCard from "@/components/PropertyCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Search, MapPin, Home, DollarSign, Bed, Building2, Hammer, Bath, Sparkles } from "lucide-react";
+import { Search, MapPin, Home, DollarSign, Bed, Building2, Tag, Bath, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import useProperties, { type PropertyFilters } from "@/hooks/useProperties";
 import PageHero from "@/components/PageHero";
@@ -246,7 +246,7 @@ const Listings = () => {
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="h-12">
                     <div className="flex items-center gap-2">
-                      <Hammer className="h-4 w-4 text-muted-foreground" />
+                      <Tag className="h-4 w-4 text-muted-foreground" />
                       <SelectValue placeholder={t("listings.filterOptions.anyStatus")} />
                     </div>
                   </SelectTrigger>

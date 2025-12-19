@@ -35,6 +35,7 @@ type DetailedProperty = {
   features: string[];
   type: string;
   status: string;
+  companyName?: string;
   rentPayPeriod?: "day" | "month" | "year";
 };
 
@@ -54,6 +55,7 @@ const normalizeStaticProperty = (property: StaticProperty): DetailedProperty => 
   features: property.features,
   type: property.type,
   status: property.status,
+  companyName: undefined,
   rentPayPeriod: "month",
 });
 
@@ -73,6 +75,7 @@ const normalizeApiProperty = (property: ApiProperty): DetailedProperty => ({
   features: property.features ?? [],
   type: property.type,
   status: property.status,
+  companyName: property.companyName,
   rentPayPeriod: property.rentPayPeriod,
 });
 
@@ -273,8 +276,8 @@ const PropertyDetail = () => {
                 key={index}
                 onClick={() => setSelectedImage(index)}
                 className={`relative h-32 overflow-hidden rounded-lg border-2 transition-all ${selectedImage === index
-                    ? "border-accent"
-                    : "border-transparent hover:border-border"
+                  ? "border-accent"
+                  : "border-transparent hover:border-border"
                   }`}
               >
                 <img
@@ -293,6 +296,12 @@ const PropertyDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2">
             <div className="mb-8">
+              {property.companyName && (
+                <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-luxury-gold/20 to-luxury-gold-light/20 border border-luxury-gold/30">
+                  <p className="text-xs uppercase tracking-widest text-luxury-gold/80 mb-1 font-semibold">Listed by</p>
+                  <p className="text-2xl font-display font-bold text-luxury-gold">{property.companyName}</p>
+                </div>
+              )}
               <div className="flex items-center gap-4 mb-4">
                 <span className="px-4 py-2 bg-accent/10 text-accent rounded-full text-sm font-semibold">
                   {property.status}

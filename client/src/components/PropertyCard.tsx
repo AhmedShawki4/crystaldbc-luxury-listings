@@ -15,6 +15,7 @@ interface PropertyCardProps {
   baths: number;
   sqft: string;
   status?: string;
+  companyName?: string;
 }
 
 const PropertyCard = ({
@@ -27,6 +28,7 @@ const PropertyCard = ({
   baths,
   sqft,
   status,
+  companyName,
 }: PropertyCardProps) => {
   const { addToWishlist, activeId, isAdding } = useWishlistActions();
   const rawId = id?.toString();
@@ -88,6 +90,11 @@ const PropertyCard = ({
             <MapPin className="h-4 w-4" />
             <span className="text-sm">{location}</span>
           </div>
+          {companyName && (
+            <div className="text-xs text-muted-foreground mb-3">
+              Listed by <span className="font-semibold text-foreground">{companyName}</span>
+            </div>
+          )}
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <Bed className="h-4 w-4" />
