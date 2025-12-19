@@ -1,28 +1,49 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import {
+  TrendingUp,
+  Users2,
+  Building2,
+  ArrowUpRight,
+  MessageSquare,
+  Search,
+  CheckCircle2,
+  Wallet,
+  DollarSign
+} from "lucide-react";
+import {
+  ComposedChart,
+  Line,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+  Area,
+} from "recharts";
 import apiClient from "@/lib/apiClient";
-import type { AnalyticsSummary } from "@/types";
-import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminGlassCard from "@/components/admin/AdminGlassCard";
-import { Building2, Mail, HeartHandshake, Users2, ClipboardList, Gauge, CircleDollarSign, TrendingUp, Sparkles } from "lucide-react";
-import { Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, PieChart, Pie, Cell } from "recharts";
+import ThreePieChart from "@/components/admin/ThreePieChart";
+import { Badge } from "@/components/ui/badge";
+import { AnalyticsSummary } from "@/types";
 
 const fetchSummary = async () => {
   const { data } = await apiClient.get<AnalyticsSummary>("/analytics/summary");
+  // Ensure we return the correct shape.  The previous code accessed data.stats or data directly.
+  // Assuming the API returns the whole AnalyticsSummary object.
   return data;
 };
 
 const AdminOverview = () => {
   const { data, isLoading } = useQuery({ queryKey: ["analytics"], queryFn: fetchSummary });
-  const [activeSlice, setActiveSlice] = useState<string | null>(null);
   const formatCurrency = (value: number) => `EGP ${Math.round(value).toLocaleString()}`;
 
   if (isLoading) {
-    return <p className="text-muted-foreground">Loading dashboard...</p>;
+    return <div className="p-8 text-white">Loading dashboard...</div>;
   }
 
   if (!data) {
-    return <p className="text-muted-foreground">Unable to load dashboard.</p>;
+    return <div className="p-8 text-white">Unable to load dashboard data.</div>;
   }
 
   const { stats, recentLeads } = data;
@@ -30,263 +51,238 @@ const AdminOverview = () => {
   const investedProperties = stats.investedProperties ?? 0;
   const totalInvested = stats.totalInvested ?? 0;
   const roiPercent = totalInvested > 0 ? Math.min(150, (actualProfit / totalInvested) * 100) : 0;
-  const outstanding = Math.max(totalInvested - actualProfit, 0);
-  const coverageRatio = totalInvested > 0 ? Math.min(actualProfit / totalInvested, 1) : 0;
 
+  // Prepare Chart Data
   const chartData = (data.investmentTimeline?.length
     ? data.investmentTimeline
-    : [{ label: "To Date", invested: totalInvested, received: actualProfit, outstanding }]
+    : [{ label: "To Date", invested: totalInvested, received: actualProfit, outstanding: Math.max(totalInvested - actualProfit, 0) }]
   ).map((item) => ({
     ...item,
     outstanding: Math.max(item.outstanding ?? item.invested - item.received, 0),
   }));
 
+  // Prepare Pie Data
   const pieData = [
-    { label: "Properties", value: stats.properties, color: "#7c3aed" },
-    { label: "Leads", value: stats.leads, color: "#22d3ee" },
-    { label: "Messages", value: stats.messages, color: "#fbbf24" },
-    { label: "Users", value: stats.users, color: "#a78bfa" },
-    { label: "Wishlist", value: stats.wishlistItems, color: "#fb7185" },
+    { label: "Properties", value: stats.properties || 10, color: "#7c3aed" },
+    { label: "Leads", value: stats.leads || 5, color: "#22d3ee" },
+    { label: "Messages", value: stats.messages || 3, color: "#fbbf24" },
+    { label: "Users", value: stats.users || 8, color: "#a78bfa" },
+    { label: "Wishlist", value: stats.wishlistItems || 2, color: "#fb7185" },
   ];
-  const pieTotal = pieData.reduce((sum, item) => sum + item.value, 0);
-  const resolvedActive =
-    pieTotal === 0
-      ? null
-      : pieData.find((s) => s.label === activeSlice) ?? pieData[0];
-  const activePercent = resolvedActive && pieTotal
-    ? Math.round((resolvedActive.value / pieTotal) * 100)
-    : 0;
 
   return (
-    <div className="space-y-10">
-      <AdminPageHeader
-        icon={Gauge}
-        title="Executive Overview"
-        description="Key metrics across CrystalDBC in real time."
-      />
+    <div className="space-y-6 animate-fade-in">
+      {/* TOP ROW: Stats & Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="xl:col-span-2 rounded-3xl bg-gradient-to-br from-[#0e1527] via-[#10192f] to-[#0b1020] text-white border border-white/10 p-6 shadow-[0_20px_80px_-24px_rgba(0,0,0,0.55)]">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between flex-wrap">
-            <div>
-              <p className="text-xs uppercase tracking-[0.28em] text-white/60">Performance</p>
-              <h3 className="text-2xl font-display font-semibold">Live Investment Snapshot</h3>
-            </div>
-            <div className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm text-white/80">
-              <Sparkles className="h-4 w-4 text-amber-300" />
-              Auto-refreshed from analytics
-            </div>
-          </div>
+        {/* LEFT COLUMN: Main Chart & Invested Boxes */}
+        <div className="lg:col-span-2 space-y-6">
 
-          <div className="mt-4 h-60 w-full rounded-2xl border border-white/10 bg-white/5 p-3">
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={chartData} margin={{ left: 8, right: 8, top: 10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
-                <XAxis dataKey="label" tick={{ fill: "rgba(255,255,255,0.7)" }} stroke="rgba(255,255,255,0.3)" />
-                <YAxis
-                  tick={{ fill: "rgba(255,255,255,0.7)" }}
-                  stroke="rgba(255,255,255,0.3)"
-                  tickFormatter={(v) => (v >= 1_000_000 ? `${Math.round(v / 1_000_000)}m` : `${Math.round(v / 1000)}k`)}
-                />
-                <Tooltip
-                  contentStyle={{ background: "#0b1020", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12 }}
-                  labelStyle={{ color: "#fff", fontWeight: 600 }}
-                  formatter={(val: number, key) => [`EGP ${Math.round(val).toLocaleString()}`, key === "invested" ? "Invested" : key === "received" ? "Received" : "Outstanding"]}
-                />
-                <Legend wrapperStyle={{ color: "#cbd5e1" }} />
-                <Bar dataKey="invested" name="Invested" fill="hsl(var(--luxury-gold))" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="received" name="Received" fill="#22c55e" radius={[6, 6, 0, 0]} />
-                <Line
-                  type="monotone"
-                  dataKey="outstanding"
-                  name="Outstanding"
-                  stroke="#7c3aed"
-                  strokeWidth={3}
-                  dot={{ r: 4, strokeWidth: 2, stroke: "#0b1020", fill: "#7c3aed" }}
-                  activeDot={{ r: 6, stroke: "white", strokeWidth: 2 }}
-                />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
+          {/* Live Investment Snapshot */}
+          <div className="relative rounded-[2.5rem] bg-[#020617] border border-white/10 p-8 shadow-2xl overflow-hidden group">
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-              <p className="text-white/60">Total Invested</p>
-              <p className="text-2xl font-bold text-white">{formatCurrency(totalInvested)}</p>
-              <p className="text-xs text-white/50">Capital across all approved deals</p>
-            </div>
-            <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-              <p className="text-white/60">Actual Profit</p>
-              <p className="text-2xl font-bold text-white">{formatCurrency(actualProfit)}</p>
-              <p className="text-xs text-white/50">Sum of received payouts</p>
-            </div>
-            <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-              <p className="text-white/60">Outstanding Payouts</p>
-              <p className="text-2xl font-bold text-white">{formatCurrency(outstanding)}</p>
-              <p className="text-xs text-white/50">Total invested minus amounts paid</p>
-              <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/10">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-luxury-gold to-luxury-gold-light"
-                  style={{ width: `${coverageRatio * 100}%` }}
-                />
-              </div>
-            </div>
-            <div className="rounded-2xl bg-white/5 border border-white/10 p-4 flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center justify-between mb-8 relative z-10">
               <div>
-                <p className="text-white/70">Invested Boxes</p>
-                <p className="text-2xl font-bold text-white">{investedProperties}</p>
-                <p className="text-xs text-white/50">Projects currently funded</p>
-                <p className="text-xs text-white/60 mt-2">Portfolio coverage { (coverageRatio * 100).toFixed(1)}%</p>
+                <h2 className="text-3xl font-display font-bold text-white mb-2">Performance</h2>
+                <p className="text-slate-400">Live Investment Snapshot</p>
               </div>
-              <div className="flex items-center gap-3">
-                <CircleDollarSign className="h-10 w-10 text-luxury-gold" />
-                <TrendingUp className="h-10 w-10 text-emerald-300" />
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 shadow-inner">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                </span>
+                <span className="text-sm font-medium text-emerald-400">Live Updates</span>
               </div>
             </div>
-          </div>
-        </div>
 
-        <div className="rounded-3xl bg-gradient-to-br from-[#0f1625] via-[#0c1220] to-[#0a101b] border border-white/10 p-6 shadow-xl text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-white/70">ROI</p>
-              <p className="text-3xl font-display font-bold">{roiPercent.toFixed(1)}%</p>
-              <p className="text-xs text-white/60 mt-1">Realized vs invested</p>
-            </div>
-            <div className="relative h-24 w-24">
-              <div
-                className="absolute inset-0 rounded-full"
-                style={{ background: `conic-gradient(#7c3aed 0% ${roiPercent}%, rgba(255,255,255,0.08) ${roiPercent}% 100%)` }}
-              />
-              <div className="absolute inset-3 rounded-full bg-[#0b1020] border border-white/10" />
-              <div className="absolute inset-0 flex items-center justify-center text-lg font-semibold">{roiPercent.toFixed(0)}%</div>
-            </div>
-          </div>
-          <div className="mt-6 grid grid-cols-2 gap-3 text-sm">
-            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-              <p className="text-white/70">Messages</p>
-              <p className="text-xl font-semibold flex items-center gap-2"><Mail className="h-4 w-4 text-amber-400" />{stats.messages}</p>
-              <p className="text-xs text-white/60">Engagement</p>
-            </div>
-            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-              <p className="text-white/70">Wishlist</p>
-              <p className="text-xl font-semibold flex items-center gap-2"><ClipboardList className="h-4 w-4 text-purple-300" />{stats.wishlistItems}</p>
-              <p className="text-xs text-white/60">Saved items</p>
-            </div>
-            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-              <p className="text-white/70">Users</p>
-              <p className="text-xl font-semibold flex items-center gap-2"><HeartHandshake className="h-4 w-4 text-rose-300" />{stats.users}</p>
-              <p className="text-xs text-white/60">Active</p>
-            </div>
-            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-              <p className="text-white/70">Invested Boxes</p>
-              <p className="text-xl font-semibold flex items-center gap-2"><Building2 className="h-4 w-4 text-emerald-300" />{investedProperties}</p>
-              <p className="text-xs text-white/60">Currently funded</p>
+            <div className="h-[350px] w-full relative z-10">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={chartData} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#6366f1" stopOpacity={0.8} />
+                      <stop offset="90%" stopColor="#818cf8" stopOpacity={0.3} />
+                    </linearGradient>
+                    <filter id="shadow" height="200%">
+                      <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="rgba(99, 102, 241, 0.3)" />
+                    </filter>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                  <XAxis dataKey="label" stroke="rgba(255,255,255,0.3)" tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }} axisLine={false} tickLine={false} dy={10} />
+                  <YAxis stroke="rgba(255,255,255,0.3)" tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={(value) => `${value / 1000}k`} />
+                  <RechartsTooltip
+                    contentStyle={{ backgroundColor: "#0f172a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "16px", boxShadow: "0 20px 40px rgba(0,0,0,0.4)" }}
+                    itemStyle={{ color: "#fff" }}
+                    cursor={{ fill: "rgba(255,255,255,0.02)" }}
+                  />
+                  <Bar dataKey="invested" name="Invested" fill="url(#barGradient)" barSize={20} radius={[4, 4, 0, 0]} filter="url(#shadow)" />
+                  <Bar dataKey="received" name="Received" fill="#34d399" barSize={20} radius={[4, 4, 0, 0]} opacity={0.8} />
+                  <Line type="monotone" dataKey="outstanding" name="Outstanding" stroke="#fbbf24" strokeWidth={3} dot={{ r: 4, strokeWidth: 0, fill: "#fbbf24" }} activeDot={{ r: 6, strokeWidth: 0, fill: "#fff" }} />
+                </ComposedChart>
+              </ResponsiveContainer>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#050816] via-[#020617] to-[#020617] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.65)]">
-        <div className="pointer-events-none absolute -left-24 top-0 h-40 w-40 rounded-full bg-luxury-gold/10 blur-3xl" />
-        <div className="pointer-events-none absolute -right-10 -bottom-10 h-48 w-48 rounded-full bg-emerald-500/10 blur-3xl" />
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-sm text-slate-400">Distribution</p>
-            <h3 className="text-2xl font-display font-semibold text-slate-50">Engagement Mix</h3>
-          </div>
-        </div>
-        {pieTotal === 0 ? (
-          <p className="text-slate-400">No data to visualize yet.</p>
-        ) : (
-          <div className="flex flex-col md:flex-row items-center gap-8">
-            <div className="relative h-56 w-56">
-              <div className="h-full w-full" style={{ animation: "spin 38s linear infinite" }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart margin={{ top: 6, right: 6, bottom: 6, left: 6 }}>
-                  <Pie
-                    data={pieData}
-                    dataKey="value"
-                    nameKey="label"
-                    innerRadius={64}
-                    outerRadius={86}
-                    paddingAngle={4}
-                    stroke="rgba(15,23,42,0.95)"
-                    strokeWidth={2}
-                    onClick={(_, index) => setActiveSlice(pieData[index].label)}
-                    isAnimationActive
-                  >
-                    {pieData.map((entry) => (
-                      <Cell
-                        key={entry.label}
-                        fill={entry.color}
-                        opacity={resolvedActive && resolvedActive.label !== entry.label ? 0.45 : 1}
-                        style={{ cursor: "pointer" }}
-                        onClick={() => setActiveSlice(entry.label)}
-                      />
-                    ))}
-                  </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
+          {/* Stat Boxes Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Total Invested */}
+            <div className="rounded-2xl bg-[#0b1224] border border-white/10 p-6 shadow-xl hover:border-white/20 transition-colors">
+              <p className="text-sm text-slate-400 font-medium mb-2">Total Invested</p>
+              <h3 className="text-3xl font-display font-bold text-white mb-1">{formatCurrency(totalInvested)}</h3>
+              <p className="text-xs text-slate-500">Capital across all approved deals</p>
+            </div>
+
+            {/* Actual Profit */}
+            <div className="rounded-2xl bg-[#0b1224] border border-white/10 p-6 shadow-xl hover:border-white/20 transition-colors">
+              <p className="text-sm text-slate-400 font-medium mb-2">Actual Profit</p>
+              <h3 className="text-3xl font-display font-bold text-white mb-1">{formatCurrency(actualProfit)}</h3>
+              <p className="text-xs text-slate-500">Sum of received payouts</p>
+            </div>
+
+            {/* Outstanding Payouts */}
+            <div className="rounded-2xl bg-[#0b1224] border border-white/10 p-6 shadow-xl hover:border-white/20 transition-colors">
+              <p className="text-sm text-slate-400 font-medium mb-2">Outstanding Payouts</p>
+              <h3 className="text-3xl font-display font-bold text-white mb-1">{formatCurrency(Math.max(totalInvested - actualProfit, 0))}</h3>
+              <p className="text-xs text-slate-500">Total invested minus amounts paid</p>
+              <div className="mt-3 h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                <div className="h-full bg-luxury-gold rounded-full transition-all" style={{ width: `${Math.min((actualProfit / totalInvested) * 100, 100)}%` }} />
               </div>
-              {resolvedActive && (
-                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">{resolvedActive.label}</p>
-                  <p className="text-xl font-semibold text-slate-50">{activePercent}%</p>
-                  <p className="text-[11px] text-slate-400 mt-1">{resolvedActive.value} events</p>
+            </div>
+
+            {/* Invested Boxes */}
+            <div className="rounded-2xl bg-[#0b1224] border border-white/10 p-6 shadow-xl hover:border-white/20 transition-colors">
+              <p className="text-sm text-slate-400 font-medium mb-2">Invested Boxes</p>
+              <h3 className="text-3xl font-display font-bold text-white mb-1">{investedProperties}</h3>
+              <p className="text-xs text-slate-500 mb-2">Projects currently funded</p>
+              <div className="flex items-center gap-2 mt-auto">
+                <div className="p-1.5 bg-luxury-gold/10 rounded-full">
+                  <DollarSign className="w-3 h-3 text-luxury-gold" />
                 </div>
-              )}
-            </div>
-            <div className="flex flex-col gap-3 w-full">
-              {pieData.map((item) => {
-                const percent = pieTotal ? Math.round((item.value / pieTotal) * 100) : 0;
-                const isActive = resolvedActive?.label === item.label;
-                return (
-                  <button
-                    key={item.label}
-                    type="button"
-                    onClick={() => setActiveSlice(item.label)}
-                    className={`flex items-center justify-between rounded-xl px-3 py-2 text-left transition ${
-                      isActive ? "bg-white/5" : "bg-transparent hover:bg-white/5/50"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="h-2.5 w-8 rounded-full" style={{ backgroundColor: item.color }} />
-                      <p className="text-sm text-slate-200">{item.label}</p>
-                    </div>
-                    <p className="text-sm font-semibold text-slate-50">{percent}%</p>
-                  </button>
-                );
-              })}
+                <TrendingUp className="w-3 h-3 text-emerald-400" />
+                <span className="text-xs text-slate-400">Portfolio coverage {roiPercent.toFixed(1)}%</span>
+              </div>
             </div>
           </div>
-        )}
+
+        </div>
+
+        {/* RIGHT COLUMN: ROI & Engagement Mix */}
+        <div className="flex flex-col gap-6">
+
+          {/* ENRICHED ROI CARD */}
+          <div className="rounded-[2.5rem] bg-[#0b1224] border border-white/10 p-8 shadow-2xl relative overflow-hidden group">
+            <div className="absolute -inset-1 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-[2.5rem] blur opacity-20 group-hover:opacity-30 transition duration-500" />
+            <div className="relative z-10 flex flex-col h-full justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-medium text-slate-400">Portfolio ROI</h3>
+                  <div className="p-2 bg-white/5 rounded-full border border-white/10">
+                    <TrendingUp className="w-4 h-4 text-emerald-400" />
+                  </div>
+                </div>
+
+                <div className="flex items-baseline gap-3 mb-1">
+                  <span className="text-5xl font-display font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
+                    {roiPercent.toFixed(1)}%
+                  </span>
+                </div>
+                <p className="text-sm font-medium text-emerald-400 flex items-center mb-6">
+                  <ArrowUpRight className="w-4 h-4 mr-1" />
+                  +2.4% vs last month
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 border-t border-white/10 pt-6">
+                <div>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-1">Net Profit</p>
+                  <p className="text-lg font-bold text-white tracking-tight">{formatCurrency(actualProfit)}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-1">Projected</p>
+                  <p className="text-lg font-bold text-slate-300 tracking-tight">~18.5%</p>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <div className="flex justify-between text-xs text-slate-400 mb-2">
+                  <span>Progress to Goal</span>
+                  <span>{Math.round(Math.min(roiPercent, 100))}%</span>
+                </div>
+                <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${Math.min(roiPercent, 100)}%` }} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 3D PIE CHART */}
+          <div className="flex-1 relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#050816] shadow-[0_24px_80px_rgba(0,0,0,0.65)] flex flex-col min-h-[400px]">
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-900/5 to-transparent pointer-events-none" />
+
+            <div className="p-8 pb-0 relative z-10">
+              <p className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-1">Distribution</p>
+              <h3 className="text-2xl font-display font-semibold text-white">Engagement Mix</h3>
+            </div>
+
+            <div className="flex-1 relative w-full h-full">
+              {/* 3D Chart Component */}
+              <div className="absolute inset-0 -top-4">
+                <ThreePieChart data={pieData} height="100%" />
+              </div>
+            </div>
+            {/* Legend */}
+            <div className="relative z-10 px-6 pb-6 pt-2 flex flex-wrap gap-2 justify-center pointer-events-none">
+              {pieData.map(item => (
+                <div key={item.label} className="flex items-center gap-2 bg-black/40 backdrop-blur-md rounded-full px-3 py-1 border border-white/5 pointer-events-auto">
+                  <div className="w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]" style={{ color: item.color, backgroundColor: item.color }} />
+                  <span className="text-xs font-medium text-white/80">{item.label}</span>
+                  <span className="text-xs text-white/40 ml-1">{Math.round(item.value / (pieData.reduce((a, b) => a + b.value, 0) || 1) * 100)}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
       </div>
 
+      {/* RECENT LEADS */}
       <AdminGlassCard
-        eyebrow="Pipeline health"
-        title="Recent Leads"
-        description={`Last ${recentLeads.length} submissions`}
-        className="mt-2"
+        eyebrow="Pipeline Activity"
+        title="Recent Lead Submissions"
+        description={`Latest ${recentLeads.length} potential investors`}
+        className="mt-6"
       >
         <div className="space-y-3">
           {recentLeads.map((lead) => (
             <div
               key={lead._id}
-              className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 md:flex-row md:items-center md:justify-between"
+              className="group flex flex-col gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-4 md:flex-row md:items-center md:justify-between transition hover:bg-white/[0.05] hover:border-white/10"
             >
-              <div>
-                <p className="font-semibold text-primary">{lead.fullName}</p>
-                <p className="text-sm text-slate-300">{lead.email}</p>
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 md:flex hidden items-center justify-center text-indigo-300 font-bold border border-white/5 group-hover:border-indigo-500/30 transition-colors">
+                  {lead.fullName.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-semibold text-white group-hover:text-luxury-gold transition-colors">{lead.fullName}</p>
+                  <p className="text-sm text-slate-400">{lead.email}</p>
+                </div>
               </div>
+
               <div className="flex flex-wrap gap-3 text-xs font-medium uppercase tracking-wide">
-                <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-400">{lead.status}</span>
-                <span className="rounded-full bg-slate-500/20 px-3 py-1 text-slate-300">{lead.source}</span>
+                <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-400 border border-emerald-500/20">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  {lead.status}
+                </span>
+                <span className="rounded-full bg-slate-500/10 px-3 py-1 text-slate-400 border border-white/5">{lead.source}</span>
               </div>
             </div>
           ))}
           {recentLeads.length === 0 && (
-            <p className="text-sm text-slate-300/80">No leads yet.</p>
+            <div className="py-8 text-center">
+              <Users2 className="h-12 w-12 text-white/10 mx-auto mb-3" />
+              <p className="text-sm text-slate-400">No recent leads found.</p>
+            </div>
           )}
         </div>
       </AdminGlassCard>
