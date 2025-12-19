@@ -219,240 +219,238 @@ const AdminProperties = () => {
         title={editingId ? "Edit property" : "Create property"}
         description="Update core information, pricing, media, and highlights."
       >
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium">Title</label>
-              <Input name="title" value={formState.title} onChange={handleChange} required />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Location</label>
-              <Input name="location" value={formState.location} onChange={handleChange} required />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Currency</label>
-              <Select
-                value={formState.currencyCode}
-                onValueChange={(value) =>
-                  setFormState((prev) => ({
-                    ...prev,
-                    currencyCode: value,
-                    priceLabel: formatPriceLabel(value, prev.priceValue),
-                  }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select currency" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CURRENCY_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Price Value</label>
-              <Input type="number" name="priceValue" value={formState.priceValue} onChange={handleChange} required />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Price Label</label>
-              <Input name="priceLabel" value={formState.priceLabel} readOnly required />
-              <p className="text-xs text-muted-foreground mt-1">Auto-generated from currency and price value.</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Beds</label>
-              <Input type="number" name="beds" value={formState.beds} onChange={handleChange} required />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Baths</label>
-              <Input type="number" name="baths" value={formState.baths} onChange={handleChange} required />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Sqft Label</label>
-              <Input name="sqftLabel" value={formState.sqftLabel} onChange={handleChange} required />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Sqft Value</label>
-              <Input type="number" name="sqftValue" value={formState.sqftValue} onChange={handleChange} required />
-            </div>
-            <div className="md:col-span-2 space-y-3">
-              <label className="text-sm font-medium">Cover Image</label>
-              <Input
-                name="coverImage"
-                value={formState.coverImage}
-                onChange={handleChange}
-                placeholder="Paste an image URL or upload a file"
-                required
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-medium">Title</label>
+            <Input name="title" value={formState.title} onChange={handleChange} required />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Location</label>
+            <Input name="location" value={formState.location} onChange={handleChange} required />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Currency</label>
+            <Select
+              value={formState.currencyCode}
+              onValueChange={(value) =>
+                setFormState((prev) => ({
+                  ...prev,
+                  currencyCode: value,
+                  priceLabel: formatPriceLabel(value, prev.priceValue),
+                }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select currency" />
+              </SelectTrigger>
+              <SelectContent>
+                {CURRENCY_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-sm font-medium">Price Value</label>
+            <Input type="number" name="priceValue" value={formState.priceValue} onChange={handleChange} required />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Price Label</label>
+            <Input name="priceLabel" value={formState.priceLabel} readOnly required />
+            <p className="text-xs text-muted-foreground mt-1">Auto-generated from currency and price value.</p>
+          </div>
+          <div>
+            <label className="text-sm font-medium">Beds</label>
+            <Input type="number" name="beds" value={formState.beds} onChange={handleChange} required />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Baths</label>
+            <Input type="number" name="baths" value={formState.baths} onChange={handleChange} required />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Sqft Label</label>
+            <Input name="sqftLabel" value={formState.sqftLabel} onChange={handleChange} required />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Sqft Value</label>
+            <Input type="number" name="sqftValue" value={formState.sqftValue} onChange={handleChange} required />
+          </div>
+          <div className="md:col-span-2 space-y-3">
+            <label className="text-sm font-medium">Cover Image</label>
+            <Input
+              name="coverImage"
+              value={formState.coverImage}
+              onChange={handleChange}
+              placeholder="Paste an image URL or upload a file"
+              required
+            />
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleCoverUpload}
+                disabled={uploadingCover}
+                className="text-sm"
               />
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleCoverUpload}
-                  disabled={uploadingCover}
-                  className="text-sm"
-                />
-                {uploadingCover && <p className="text-xs text-muted-foreground">Uploading...</p>}
-              </div>
-              {formState.coverImage && (
-                <img
-                  src={getMediaUrl(formState.coverImage)}
-                  alt="Cover preview"
-                  className="h-40 w-full object-cover rounded-md border border-border"
-                />
-              )}
+              {uploadingCover && <p className="text-xs text-muted-foreground">Uploading...</p>}
             </div>
-            <div className="md:col-span-2 space-y-3">
-              <label className="text-sm font-medium">Gallery</label>
-              <Textarea
-                name="gallery"
-                value={formState.gallery}
-                onChange={handleChange}
-                placeholder="Paste URLs or use the uploader below"
+            {formState.coverImage && (
+              <img
+                src={getMediaUrl(formState.coverImage)}
+                alt="Cover preview"
+                className="h-40 w-full object-cover rounded-md border border-border"
               />
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleGalleryUpload}
-                  disabled={uploadingGallery}
-                  className="text-sm"
-                />
-                {uploadingGallery && <p className="text-xs text-muted-foreground">Uploading...</p>}
-              </div>
-              {galleryItems.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  {galleryItems.map((item) => (
-                    <img
-                      key={item}
-                      src={getMediaUrl(item)}
-                      alt="Gallery preview"
-                      className="h-24 w-full object-cover rounded border border-border"
-                    />
-                  ))}
-                </div>
-              )}
+            )}
+          </div>
+          <div className="md:col-span-2 space-y-3">
+            <label className="text-sm font-medium">Gallery</label>
+            <Textarea
+              name="gallery"
+              value={formState.gallery}
+              onChange={handleChange}
+              placeholder="Paste URLs or use the uploader below"
+            />
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleGalleryUpload}
+                disabled={uploadingGallery}
+                className="text-sm"
+              />
+              {uploadingGallery && <p className="text-xs text-muted-foreground">Uploading...</p>}
             </div>
-            <div className="md:col-span-2">
-              <label className="text-sm font-medium">Description</label>
-              <Textarea name="description" value={formState.description} onChange={handleChange} required />
-            </div>
-            <div className="md:col-span-2">
-              <label className="text-sm font-medium">Features (comma separated)</label>
-              <Textarea name="features" value={formState.features} onChange={handleChange} />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Type</label>
-              <Input name="type" value={formState.type} onChange={handleChange} required />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Status</label>
-              <Select
-                value={formState.status}
-                onValueChange={(value) => setFormState((prev) => ({ ...prev, status: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPTIONS.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {formState.status === "For Rent" && (
-              <div>
-                <label className="text-sm font-medium">Rent paid by</label>
-                <Select
-                  value={formState.rentPayPeriod}
-                  onValueChange={(value) => setFormState((prev) => ({ ...prev, rentPayPeriod: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select period" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {RENT_PAY_PERIOD_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            {galleryItems.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {galleryItems.map((item) => (
+                  <img
+                    key={item}
+                    src={getMediaUrl(item)}
+                    alt="Gallery preview"
+                    className="h-24 w-full object-cover rounded border border-border"
+                  />
+                ))}
               </div>
             )}
+          </div>
+          <div className="md:col-span-2">
+            <label className="text-sm font-medium">Description</label>
+            <Textarea name="description" value={formState.description} onChange={handleChange} required />
+          </div>
+          <div className="md:col-span-2">
+            <label className="text-sm font-medium">Features (comma separated)</label>
+            <Textarea name="features" value={formState.features} onChange={handleChange} />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Type</label>
+            <Input name="type" value={formState.type} onChange={handleChange} required />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Status</label>
+            <Select
+              value={formState.status}
+              onValueChange={(value) => setFormState((prev) => ({ ...prev, status: value }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUS_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {formState.status === "For Rent" && (
             <div>
-              <label className="text-sm font-medium">Featured</label>
-              <div className="flex items-center space-x-3 mt-2">
-                <input type="checkbox" name="isFeatured" checked={formState.isFeatured} onChange={handleChange} />
-                <span className="text-sm text-muted-foreground">Show on homepage</span>
-              </div>
+              <label className="text-sm font-medium">Rent paid by</label>
+              <Select
+                value={formState.rentPayPeriod}
+                onValueChange={(value) => setFormState((prev) => ({ ...prev, rentPayPeriod: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select period" />
+                </SelectTrigger>
+                <SelectContent>
+                  {RENT_PAY_PERIOD_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="md:col-span-2 flex gap-3 justify-end">
-              {editingId && (
-                <Button type="button" variant="outline" onClick={() => {
-                  setFormState(initialFormState);
-                  setEditingId(null);
-                }}>
-                  Cancel
-                </Button>
-              )}
-              <Button type="submit" disabled={mutation.isPending}>
-                {editingId ? "Save Changes" : "Create Property"}
+          )}
+          <div>
+            <label className="text-sm font-medium">Featured</label>
+            <div className="flex items-center space-x-3 mt-2">
+              <input type="checkbox" name="isFeatured" checked={formState.isFeatured} onChange={handleChange} />
+              <span className="text-sm text-muted-foreground">Show on homepage</span>
+            </div>
+          </div>
+          <div className="md:col-span-2 flex gap-3 justify-end">
+            {editingId && (
+              <Button type="button" variant="outline" onClick={() => {
+                setFormState(initialFormState);
+                setEditingId(null);
+              }}>
+                Cancel
               </Button>
-            </div>
-          </form>
+            )}
+            <Button type="submit" disabled={mutation.isPending}>
+              {editingId ? "Save Changes" : "Create Property"}
+            </Button>
+          </div>
+        </form>
       </AdminGlassCard>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {isLoading && <p className="text-muted-foreground">Loading properties...</p>}
+        {isLoading && <p className="text-white/50">Loading properties...</p>}
         {data?.map((property) => (
-          <Card key={property._id}>
-            <CardContent className="p-5 space-y-3">
-              {property.coverImage ? (
-                <img
-                  src={getMediaUrl(property.coverImage)}
-                  alt={property.title}
-                  className="h-48 w-full object-cover rounded-md border border-border"
-                />
-              ) : null}
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-display font-semibold">{property.title}</h3>
-                  <p className="text-muted-foreground text-sm">{property.location}</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="secondary" onClick={() => handleEdit(property)}>
-                    Edit
+          <div key={property._id} className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-3 transition hover:bg-white/10">
+            {property.coverImage ? (
+              <img
+                src={getMediaUrl(property.coverImage)}
+                alt={property.title}
+                className="h-48 w-full object-cover rounded-xl border border-white/10"
+              />
+            ) : null}
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-display font-semibold text-white">{property.title}</h3>
+                <p className="text-white/60 text-sm">{property.location}</p>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="secondary" size="sm" onClick={() => handleEdit(property)} className="bg-white/10 text-white hover:bg-white/20 border border-white/10">
+                  Edit
+                </Button>
+                {canDelete ? (
+                  <Button variant="destructive" size="sm" onClick={() => deleteMutation.mutate(property._id)}>
+                    Delete
                   </Button>
-                  {canDelete ? (
-                    <Button variant="destructive" onClick={() => deleteMutation.mutate(property._id)}>
-                      Delete
-                    </Button>
-                  ) : null}
-                </div>
-              </div>
-              <p className="text-muted-foreground text-sm">{property.priceLabel}</p>
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
-                <span className="px-2 py-1 rounded-full bg-muted text-foreground">{property.status}</span>
-                {property.isFeatured ? (
-                  <span className="px-2 py-1 rounded-full bg-accent/10 text-accent">Featured</span>
-                ) : null}
-                {property.status === "For Rent" ? (
-                  <span className="px-2 py-1 rounded-full bg-luxury-gold/10 text-luxury-gold">
-                    Paid by {property.rentPayPeriod ?? "month"}
-                  </span>
                 ) : null}
               </div>
-              <p className="text-sm">{property.description.slice(0, 120)}...</p>
-            </CardContent>
-          </Card>
+            </div>
+            <p className="text-luxury-gold font-semibold text-sm">{property.priceLabel}</p>
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
+              <span className="px-2 py-1 rounded-full bg-white/10 text-white/80">{property.status}</span>
+              {property.isFeatured ? (
+                <span className="px-2 py-1 rounded-full bg-amber-500/10 text-amber-400">Featured</span>
+              ) : null}
+              {property.status === "For Rent" ? (
+                <span className="px-2 py-1 rounded-full bg-luxury-gold/10 text-luxury-gold">
+                  Paid by {property.rentPayPeriod ?? "month"}
+                </span>
+              ) : null}
+            </div>
+            <p className="text-sm text-white/60">{property.description.slice(0, 120)}...</p>
+          </div>
         ))}
       </div>
     </div>

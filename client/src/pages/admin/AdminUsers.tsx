@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
 import type { Role, User } from "@/types";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import AdminGlassCard from "@/components/admin/AdminGlassCard";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
@@ -85,35 +85,86 @@ const AdminUsers = () => {
         description="Administrators can provision or revoke access for teammates."
       />
 
-      <Card>
-        <CardContent className="p-6">
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium">Name</label>
-              <Input value={formState.name} onChange={(e) => setFormState((prev) => ({ ...prev, name: e.target.value }))} required />
+      <AdminGlassCard
+        title="Add User"
+        description="Create a new account for a team member or investor."
+      >
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div>
+            <label className="text-sm font-medium">Name</label>
+            <Input value={formState.name} onChange={(e) => setFormState((prev) => ({ ...prev, name: e.target.value }))} required />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Email</label>
+            <Input
+              type="email"
+              value={formState.email}
+              onChange={(e) => setFormState((prev) => ({ ...prev, email: e.target.value }))}
+              required
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Password</label>
+            <Input
+              type="password"
+              value={formState.password}
+              onChange={(e) => setFormState((prev) => ({ ...prev, password: e.target.value }))}
+              required
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Role</label>
+            <Select value={formState.role} onValueChange={(value: Role) => setFormState((prev) => ({ ...prev, role: value }))}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {roles.map((role) => (
+                  <SelectItem key={role} value={role} className="capitalize">
+                    {role}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="md:col-span-2 flex justify-end">
+            <Button type="submit" disabled={createMutation.isPending}>
+              Add User
+            </Button>
+          </div>
+        </form>
+      </AdminGlassCard>
+
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <h2 className="text-lg font-display font-semibold">Manage Users</h2>
+        <div className="w-full md:w-72">
+          <Input
+            placeholder="Search by name, email, or role"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="bg-white/5 border-white/10"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        {filteredUsers.map((user) => (
+          <div key={user.id} className="rounded-2xl border border-white/10 bg-white/5 p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 transition hover:bg-white/10">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white">
+                <UserRound className="h-5 w-5" />
+              </span>
+              <div>
+                <h3 className="font-semibold text-white">{user.name}</h3>
+                <p className="text-sm text-white/60 flex items-center gap-1">
+                  <Mail className="h-4 w-4" />
+                  {user.email}
+                </p>
+              </div>
             </div>
-            <div>
-              <label className="text-sm font-medium">Email</label>
-              <Input
-                type="email"
-                value={formState.email}
-                onChange={(e) => setFormState((prev) => ({ ...prev, email: e.target.value }))}
-                required
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Password</label>
-              <Input
-                type="password"
-                value={formState.password}
-                onChange={(e) => setFormState((prev) => ({ ...prev, password: e.target.value }))}
-                required
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Role</label>
-              <Select value={formState.role} onValueChange={(value: Role) => setFormState((prev) => ({ ...prev, role: value }))}>
-                <SelectTrigger>
+            <div className="flex items-center gap-4">
+              <Select value={user.role} onValueChange={(value: Role) => updateRole.mutate({ id: user.id, role: value })}>
+                <SelectTrigger className="w-[160px] capitalize bg-white/5 border-white/10 text-white">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -124,79 +175,26 @@ const AdminUsers = () => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            <div className="md:col-span-2 flex justify-end">
-              <Button type="submit" disabled={createMutation.isPending}>
-                Add User
+              <Button variant="outline" onClick={() => setLogUser(user)} className="border-white/20 hover:bg-white/10 text-white hover:text-white">
+                <Activity className="mr-2 h-4 w-4" />
+                View Logs
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (!window.confirm(`Delete user "${user.name || user.email}"? This cannot be undone.`)) return;
+                  deleteMutation.mutate(user.id);
+                }}
+              >
+                Remove
               </Button>
             </div>
-          </form>
-        </CardContent>
-      </Card>
-
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <h2 className="text-lg font-display font-semibold">Manage Users</h2>
-        <div className="w-full md:w-72">
-          <Input
-            placeholder="Search by name, email, or role"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4">
-        {filteredUsers.map((user) => (
-          <Card key={user.id} className="border-border/70">
-            <CardContent className="p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-muted/70">
-                  <UserRound className="h-5 w-5 text-primary" />
-                </span>
-                <div>
-                  <h3 className="font-semibold">{user.name}</h3>
-                  <p className="text-sm text-muted-foreground flex items-center gap-1">
-                    <Mail className="h-4 w-4" />
-                    {user.email}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <Select value={user.role} onValueChange={(value: Role) => updateRole.mutate({ id: user.id, role: value })}>
-                  <SelectTrigger className="w-[160px] capitalize">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles.map((role) => (
-                      <SelectItem key={role} value={role} className="capitalize">
-                        {role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button variant="outline" onClick={() => setLogUser(user)}>
-                  <Activity className="mr-2 h-4 w-4" />
-                  View Logs
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => {
-                    if (!window.confirm(`Delete user "${user.name || user.email}"? This cannot be undone.`)) return;
-                    deleteMutation.mutate(user.id);
-                  }}
-                >
-                  Remove
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          </div>
         ))}
         {filteredUsers.length === 0 && (
-          <Card className="border-dashed border-border/60">
-            <CardContent className="p-6 text-muted-foreground text-sm">
-              No users match your search.
-            </CardContent>
-          </Card>
+          <div className="rounded-2xl border border-dashed border-white/20 p-6 text-white/50 text-sm text-center">
+            No users match your search.
+          </div>
         )}
       </div>
 

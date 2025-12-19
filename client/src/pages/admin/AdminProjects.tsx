@@ -5,7 +5,7 @@ import type { TrendingProject } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
+import AdminGlassCard from "@/components/admin/AdminGlassCard";
 import { useToast } from "@/hooks/use-toast";
 import uploadImage from "@/lib/uploadImage";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
@@ -123,8 +123,8 @@ const AdminProjects = () => {
         description="Curate the homepage spotlight carousel with premium developments."
       />
 
-      <Card>
-        <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={(e) => e.preventDefault()}>
+      <AdminGlassCard title={editingId ? "Edit Project" : "Add Project"} description="Create or modify a trending project.">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <div>
             <label className="text-sm font-medium">Name</label>
             <Input name="name" value={formState.name} onChange={handleChange} />
@@ -169,6 +169,7 @@ const AdminProjects = () => {
               <Button
                 type="button"
                 variant="outline"
+                className="border-white/20 text-white hover:bg-white/10 hover:text-white"
                 onClick={() => imageInputRef.current?.click()}
                 disabled={uploadingImage}
               >
@@ -190,48 +191,46 @@ const AdminProjects = () => {
           </div>
           <div className="md:col-span-2 flex justify-end gap-3">
             {editingId && (
-              <Button variant="outline" onClick={() => {
+              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 hover:text-white" onClick={() => {
                 setEditingId(null);
                 setFormState(initialState);
               }}>
                 Cancel
               </Button>
             )}
-            <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+            <Button onClick={() => mutation.mutate()} disabled={mutation.isPending} className="bg-luxury-gold hover:bg-luxury-gold/90 text-black">
               {editingId ? "Update Project" : "Create Project"}
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </AdminGlassCard>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {data?.map((project) => (
-          <Card key={project._id}>
-            <CardContent className="p-5 space-y-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-display font-semibold">{project.name}</h3>
-                  <p className="text-muted-foreground text-sm">{project.location}</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="secondary" onClick={() => handleEdit(project)}>
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => {
-                      if (!window.confirm(`Delete project "${project.name}"? This cannot be undone.`)) return;
-                      deleteMutation.mutate(project._id);
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </div>
+          <div key={project._id} className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-2 transition hover:bg-white/10">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-display font-semibold text-white">{project.name}</h3>
+                <p className="text-white/60 text-sm">{project.location}</p>
               </div>
-              <p className="text-sm text-muted-foreground">{project.description.slice(0, 140)}...</p>
-            </CardContent>
-          </Card>
+              <div className="flex gap-2">
+                <Button size="sm" variant="secondary" className="bg-white/10 text-white hover:bg-white/20 border border-white/10" onClick={() => handleEdit(project)}>
+                  Edit
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => {
+                    if (!window.confirm(`Delete project "${project.name}"? This cannot be undone.`)) return;
+                    deleteMutation.mutate(project._id);
+                  }}
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
+            <p className="text-sm text-white/60">{project.description.slice(0, 140)}...</p>
+          </div>
         ))}
       </div>
     </div>

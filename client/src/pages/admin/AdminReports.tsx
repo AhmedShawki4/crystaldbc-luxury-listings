@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
 import type { AnalyticsSummary } from "@/types";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, X, BarChart3, Download, Building2, Users2, Mail, ClipboardList, Heart, CircleDollarSign, TrendingUp } from "lucide-react";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminGlassCard from "@/components/admin/AdminGlassCard";
 
 const fetchSummary = async () => {
   const { data } = await apiClient.get<AnalyticsSummary>("/analytics/summary");
@@ -80,98 +80,92 @@ const AdminReports = () => {
             if (!config) return null;
             const Icon = config.icon;
             return (
-              <Card key={key} className="border-border/70">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">{config.label}</p>
-                      <p className="text-3xl font-display font-semibold mt-2">{value}</p>
-                    </div>
-                    <span className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl ${config.accent}`}>
-                      <Icon className="h-5 w-5" />
-                    </span>
+              <div key={key} className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm text-white/60">{config.label}</p>
+                    <p className="text-3xl font-display font-semibold mt-2 text-white">{value}</p>
                   </div>
-                </CardContent>
-              </Card>
+                  <span className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl ${config.accent}`}>
+                    <Icon className="h-5 w-5" />
+                  </span>
+                </div>
+              </div>
             );
           })}
       </div>
 
-      <Card>
-        <CardContent className="p-6 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-display font-semibold">Recent Leads</h2>
-              <p className="text-sm text-muted-foreground">Top-of-funnel activity snapshot</p>
-            </div>
-            <Button variant="outline" className="gap-2" onClick={handleDownloadCsv} disabled={!recentLeads.length}>
-              <Download className="h-4 w-4" />
-              Download CSV
-            </Button>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-muted-foreground border-b border-border">
-                  <th className="py-2">Name</th>
-                  <th>Email</th>
-                  <th>Status</th>
-                  <th>Source</th>
+      <AdminGlassCard
+        title="Recent Leads"
+        description="Top-of-funnel activity snapshot"
+        rightSlot={
+          <Button variant="outline" className="gap-2 border-white/20 text-white hover:bg-white/10 hover:text-white" onClick={handleDownloadCsv} disabled={!recentLeads.length}>
+            <Download className="h-4 w-4" />
+            Download CSV
+          </Button>
+        }
+      >
+        <div className="overflow-x-auto mt-4">
+          <table className="w-full text-sm text-left">
+            <thead>
+              <tr className="text-white/40 border-b border-white/10">
+                <th className="py-2 font-medium">Name</th>
+                <th className="font-medium">Email</th>
+                <th className="font-medium">Status</th>
+                <th className="font-medium">Source</th>
+              </tr>
+            </thead>
+            <tbody className="text-white/80">
+              {recentLeads.map((lead) => (
+                <tr key={lead._id} className="border-b border-white/5 last:border-0 hover:bg-white/5 transition">
+                  <td className="py-2 font-medium text-white">{lead.fullName}</td>
+                  <td>{lead.email}</td>
+                  <td className="capitalize">{lead.status}</td>
+                  <td>{lead.source}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {recentLeads.map((lead) => (
-                  <tr key={lead._id} className="border-b border-border/80 last:border-0">
-                    <td className="py-2 font-medium">{lead.fullName}</td>
-                    <td>{lead.email}</td>
-                    <td className="capitalize">{lead.status}</td>
-                    <td>{lead.source}</td>
-                  </tr>
-                ))}
-                {recentLeads.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="py-4 text-center text-muted-foreground">
-                      No leads captured yet.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+              {recentLeads.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="py-8 text-center text-white/40">
+                    No leads captured yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminGlassCard>
 
-      <Card>
-        <CardContent className="p-6 space-y-4">
-          <h2 className="text-xl font-display font-semibold">Role capabilities</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-muted-foreground border-b border-border">
-                  <th className="py-2">Capability</th>
-                  <th>Admin</th>
-                  <th>Employee</th>
+      <AdminGlassCard
+        title="Role capabilities"
+      >
+        <div className="overflow-x-auto mt-4">
+          <table className="w-full text-sm text-left">
+            <thead>
+              <tr className="text-white/40 border-b border-white/10">
+                <th className="py-2 font-medium">Capability</th>
+                <th className="font-medium">Admin</th>
+                <th className="font-medium">Employee</th>
+              </tr>
+            </thead>
+            <tbody className="text-white/80">
+              {capabilities.map((row) => (
+                <tr key={row.label} className="border-b border-white/5 last:border-0 hover:bg-white/5 transition">
+                  <td className="py-2">
+                    {row.label} {row.note && <span className="text-white/40 text-xs">{row.note}</span>}
+                  </td>
+                  <td>
+                    {row.admin ? <Check className="h-4 w-4 text-emerald-400" /> : <X className="h-4 w-4 text-white/20" />}
+                  </td>
+                  <td>
+                    {row.employee ? <Check className="h-4 w-4 text-emerald-400" /> : <X className="h-4 w-4 text-white/20" />}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {capabilities.map((row) => (
-                  <tr key={row.label} className="border-b border-border/80 last:border-0">
-                    <td className="py-2">
-                      {row.label} {row.note && <span className="text-muted-foreground text-xs">{row.note}</span>}
-                    </td>
-                    <td>
-                      {row.admin ? <Check className="h-4 w-4 text-emerald-500" /> : <X className="h-4 w-4 text-destructive" />}
-                    </td>
-                    <td>
-                      {row.employee ? <Check className="h-4 w-4 text-emerald-500" /> : <X className="h-4 w-4 text-destructive" />}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </AdminGlassCard>
     </div>
   );
 };

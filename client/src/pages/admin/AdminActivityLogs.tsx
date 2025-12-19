@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
+import AdminGlassCard from "@/components/admin/AdminGlassCard";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { ClipboardList, ShieldCheck, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -55,47 +55,47 @@ const AdminActivityLogs = () => {
       </div>
 
       {!logs.length ? (
-        <div className="text-center py-12 border border-dashed border-border rounded-lg">
-          <p className="text-muted-foreground">No activity recorded matching your criteria.</p>
+        <div className="text-center py-12 border border-dashed border-white/10 rounded-2xl bg-white/5">
+          <p className="text-white/40">No activity recorded matching your criteria.</p>
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="mt-2 text-sm text-primary hover:underline"
+              className="mt-2 text-sm text-luxury-gold hover:underline"
             >
               Clear search
             </button>
           )}
         </div>
       ) : (
-        <div className="space-y-4">
-          {logs.map((log) => (
-            <Card key={log._id} className="border-border/70">
-              <CardContent className="p-5 space-y-2">
+        <AdminGlassCard title="Recent Activity" description="A chronological record of system events.">
+          <div className="space-y-4 mt-4">
+            {logs.map((log) => (
+              <div key={log._id} className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-2 transition hover:bg-white/10">
                 <div className="flex items-center justify-between gap-4 flex-wrap">
                   <div className="flex items-center gap-3">
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-muted/70">
+                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10">
                       <ShieldCheck className="h-5 w-5 text-luxury-gold" />
                     </span>
                     <div>
-                      <p className="font-semibold">{log.user?.name ?? "System"}</p>
-                      <p className="text-sm text-muted-foreground">{log.user?.email ?? "-"}</p>
+                      <p className="font-semibold text-white">{log.user?.name ?? "System"}</p>
+                      <p className="text-sm text-white/50">{log.user?.email ?? "-"}</p>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">{formatDate(log.createdAt)}</p>
+                  <p className="text-sm text-white/40">{formatDate(log.createdAt)}</p>
                 </div>
-                <p className="text-primary font-medium">{log.action}</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-white/90 font-medium">{log.action}</p>
+                <p className="text-sm text-white/50">
                   {log.entityType ? `${log.entityType} • ${log.entityId ?? "—"}` : "General"}
                 </p>
                 {log.metadata && (
-                  <pre className="bg-muted/40 rounded-lg p-3 text-xs text-muted-foreground overflow-x-auto">
+                  <pre className="bg-black/30 rounded-lg p-3 text-xs text-white/60 overflow-x-auto border border-white/5">
                     {JSON.stringify(log.metadata, null, 2)}
                   </pre>
                 )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              </div>
+            ))}
+          </div>
+        </AdminGlassCard>
       )}
     </div>
   );

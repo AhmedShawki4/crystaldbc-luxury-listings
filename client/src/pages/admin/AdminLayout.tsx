@@ -64,10 +64,9 @@ const AdminLayout = () => {
                 to={item.to}
                 end={item.exact}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all border border-transparent ${
-                    isActive
-                      ? "bg-white/10 text-white border-white/20 shadow-lg"
-                      : "text-white/70 hover:text-white hover:bg-white/5 border-white/5"
+                  `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all border border-transparent ${isActive
+                    ? "bg-white/10 text-white border-white/20 shadow-lg"
+                    : "text-white/70 hover:text-white hover:bg-white/5 border-white/5"
                   }`
                 }
               >
@@ -89,7 +88,7 @@ const AdminLayout = () => {
         </div>
       </aside>
 
-      <div className="flex-1 bg-muted/20 min-h-screen">
+      <div className="flex-1 bg-[#020617] min-h-screen">
         <header className="px-4 py-4 shadow-sm bg-background border-b border-border flex items-center justify-between md:hidden">
           <div>
             <p className="text-sm text-muted-foreground">Signed in as</p>
@@ -117,10 +116,9 @@ const AdminLayout = () => {
                         to={item.to}
                         end={item.exact}
                         className={({ isActive }) =>
-                          `flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all border border-transparent ${
-                            isActive
-                              ? "bg-white/10 text-white border-white/20 shadow-lg"
-                              : "text-white/70 hover:text-white hover:bg-white/5 border-white/5"
+                          `flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all border border-transparent ${isActive
+                            ? "bg-white/10 text-white border-white/20 shadow-lg"
+                            : "text-white/70 hover:text-white hover:bg-white/5 border-white/5"
                           }`
                         }
                       >

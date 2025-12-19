@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
 import type { Lead } from "@/types";
-import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -62,81 +61,79 @@ const AdminLeads = () => {
         className="grid grid-cols-1 md:grid-cols-2 gap-4"
       >
         {data?.map((lead) => (
-          <Card key={lead._id} className="border-border/70">
-            <CardContent className="p-5 space-y-4">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h3 className="text-lg font-display font-semibold text-primary">{lead.fullName}</h3>
-                  <div className="mt-2 space-y-1 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      <span>{lead.email}</span>
-                    </div>
-                    {lead.phoneNumber && (
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4" />
-                        <span>{lead.phoneNumber}</span>
-                      </div>
-                    )}
-                    {lead.interestedIn && (
-                      <div className="flex items-center gap-2">
-                        <UserRound className="h-4 w-4" />
-                        <span className="capitalize">{lead.interestedIn}</span>
-                      </div>
-                    )}
+          <div key={lead._id} className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-4 transition hover:bg-white/10">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-display font-semibold text-white">{lead.fullName}</h3>
+                <div className="mt-2 space-y-1 text-sm text-white/60">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    <span>{lead.email}</span>
                   </div>
-                </div>
-                <div className="flex flex-col items-end gap-3">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
-                      statusStyles[lead.status] ?? "bg-slate-500/10 text-slate-300"
-                    }`}
-                  >
-                    {lead.status}
-                  </span>
-                  {canDelete && (
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      onClick={() => {
-                        if (!window.confirm("Delete this lead? This cannot be undone.")) return;
-                        deleteMutation.mutate(lead._id);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  {lead.phoneNumber && (
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4" />
+                      <span>{lead.phoneNumber}</span>
+                    </div>
+                  )}
+                  {lead.interestedIn && (
+                    <div className="flex items-center gap-2">
+                      <UserRound className="h-4 w-4" />
+                      <span className="capitalize">{lead.interestedIn}</span>
+                    </div>
                   )}
                 </div>
               </div>
-              {lead.message && (
-                <p className="rounded-2xl bg-muted/50 p-3 text-sm text-muted-foreground">
-                  <span className="inline-flex items-center gap-2 font-medium text-primary">
-                    <MessageCircle className="h-4 w-4" />
-                    Message
-                  </span>
-                  : {lead.message}
-                </p>
-              )}
-
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-medium text-muted-foreground">Status</label>
-                <Select
-                  value={lead.status}
-                  onValueChange={(value) => updateMutation.mutate({ id: lead._id, status: value })}
+              <div className="flex flex-col items-end gap-3">
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${statusStyles[lead.status] ?? "bg-white/10 text-white/50"
+                    }`}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="new">New</SelectItem>
-                    <SelectItem value="contacted">Contacted</SelectItem>
-                    <SelectItem value="in-progress">In Progress</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
-                  </SelectContent>
-                </Select>
+                  {lead.status}
+                </span>
+                {canDelete && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-white/40 hover:text-red-400 hover:bg-red-500/10"
+                    onClick={() => {
+                      if (!window.confirm("Delete this lead? This cannot be undone.")) return;
+                      deleteMutation.mutate(lead._id);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            {lead.message && (
+              <p className="rounded-xl bg-black/20 p-3 text-sm text-white/70">
+                <span className="inline-flex items-center gap-2 font-medium text-luxury-gold">
+                  <MessageCircle className="h-4 w-4" />
+                  Message
+                </span>
+                : {lead.message}
+              </p>
+            )}
+
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-medium text-white/50">Status</label>
+              <Select
+                value={lead.status}
+                onValueChange={(value) => updateMutation.mutate({ id: lead._id, status: value })}
+              >
+                <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="new">New</SelectItem>
+                  <SelectItem value="contacted">Contacted</SelectItem>
+                  <SelectItem value="in-progress">In Progress</SelectItem>
+                  <SelectItem value="closed">Closed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         ))}
       </AdminGlassCard>
     </div>

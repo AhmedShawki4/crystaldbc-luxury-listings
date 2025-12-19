@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
 import type { CMSSection, HeroContent, ContactContent, FooterContent, AboutContent } from "@/types";
-import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getMediaUrl } from "@/lib/media";
 import uploadImage from "@/lib/uploadImage";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminGlassCard from "@/components/admin/AdminGlassCard";
 import { PenSquare } from "lucide-react";
 
 const fetchSections = async () => {
@@ -209,78 +209,74 @@ const HeroSectionEditor = ({ section, onSave, saving }: CmsEditorProps<HeroConte
   };
 
   return (
-    <Card>
-      <CardContent className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
+    <AdminGlassCard
+      title="Homepage Hero"
+      description="Update the main hero content and see a live preview."
+      rightSlot={
+        <Button onClick={() => onSave(section.key, draft)} disabled={saving}>
+          {saving ? "Saving..." : "Save Hero"}
+        </Button>
+      }
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+        <div className="space-y-4">
           <div>
-            <h3 className="text-xl font-display font-semibold">Homepage Hero</h3>
-            <p className="text-sm text-muted-foreground">Update the main hero content and see a live preview.</p>
+            <label className="text-sm font-medium">Heading</label>
+            <Input value={draft.heading} onChange={(e) => handleChange("heading", e.target.value)} />
           </div>
-          <Button onClick={() => onSave(section.key, draft)} disabled={saving}>
-            {saving ? "Saving..." : "Save Hero"}
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Heading</label>
-              <Input value={draft.heading} onChange={(e) => handleChange("heading", e.target.value)} />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Highlight</label>
-              <Input value={draft.highlight} onChange={(e) => handleChange("highlight", e.target.value)} />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Subheading</label>
-              <Textarea value={draft.subheading} onChange={(e) => handleChange("subheading", e.target.value)} rows={3} />
-            </div>
-            <ImageUploadField
-              label="Background Image URL"
-              value={draft.backgroundImage}
-              onChange={(value) => handleChange("backgroundImage", value)}
-              placeholder="Paste an image URL or upload one"
-            />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Primary CTA Label</label>
-                <Input value={draft.primaryCta.label} onChange={(e) => handleCtaChange("primaryCta", "label", e.target.value)} />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Primary CTA Link</label>
-                <Input value={draft.primaryCta.href} onChange={(e) => handleCtaChange("primaryCta", "href", e.target.value)} />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Secondary CTA Label</label>
-                <Input value={draft.secondaryCta.label} onChange={(e) => handleCtaChange("secondaryCta", "label", e.target.value)} />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Secondary CTA Link</label>
-                <Input value={draft.secondaryCta.href} onChange={(e) => handleCtaChange("secondaryCta", "href", e.target.value)} />
-              </div>
-            </div>
+          <div>
+            <label className="text-sm font-medium">Highlight</label>
+            <Input value={draft.highlight} onChange={(e) => handleChange("highlight", e.target.value)} />
           </div>
-
-          <div className="relative rounded-xl overflow-hidden border border-border min-h-[320px]">
-            {draft.backgroundImage ? (
-              <img src={getMediaUrl(draft.backgroundImage)} alt="Hero preview" className="absolute inset-0 w-full h-full object-cover" />
-            ) : (
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/70 to-accent/70" />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/30" />
-            <div className="relative h-full p-6 flex flex-col justify-end text-white space-y-3">
-              <p className="text-sm uppercase tracking-[0.3em] text-white/60">Preview</p>
-              <h4 className="text-3xl font-display font-bold">{draft.heading} <span className="text-accent block">{draft.highlight}</span></h4>
-              <p className="text-white/80">{draft.subheading}</p>
-              <div className="flex flex-wrap gap-3">
-                <span className="bg-accent text-accent-foreground px-4 py-2 rounded-full text-sm">{draft.primaryCta.label}</span>
-                <span className="border border-white/30 px-4 py-2 rounded-full text-sm">{draft.secondaryCta.label}</span>
-              </div>
+          <div>
+            <label className="text-sm font-medium">Subheading</label>
+            <Textarea value={draft.subheading} onChange={(e) => handleChange("subheading", e.target.value)} rows={3} />
+          </div>
+          <ImageUploadField
+            label="Background Image URL"
+            value={draft.backgroundImage}
+            onChange={(value) => handleChange("backgroundImage", value)}
+            placeholder="Paste an image URL or upload one"
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Primary CTA Label</label>
+              <Input value={draft.primaryCta.label} onChange={(e) => handleCtaChange("primaryCta", "label", e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Primary CTA Link</label>
+              <Input value={draft.primaryCta.href} onChange={(e) => handleCtaChange("primaryCta", "href", e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Secondary CTA Label</label>
+              <Input value={draft.secondaryCta.label} onChange={(e) => handleCtaChange("secondaryCta", "label", e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Secondary CTA Link</label>
+              <Input value={draft.secondaryCta.href} onChange={(e) => handleCtaChange("secondaryCta", "href", e.target.value)} />
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+
+        <div className="relative rounded-xl overflow-hidden border border-border min-h-[320px]">
+          {draft.backgroundImage ? (
+            <img src={getMediaUrl(draft.backgroundImage)} alt="Hero preview" className="absolute inset-0 w-full h-full object-cover" />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/70 to-accent/70" />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/30" />
+          <div className="relative h-full p-6 flex flex-col justify-end text-white space-y-3">
+            <p className="text-sm uppercase tracking-[0.3em] text-white/60">Preview</p>
+            <h4 className="text-3xl font-display font-bold">{draft.heading} <span className="text-accent block">{draft.highlight}</span></h4>
+            <p className="text-white/80">{draft.subheading}</p>
+            <div className="flex flex-wrap gap-3">
+              <span className="bg-accent text-accent-foreground px-4 py-2 rounded-full text-sm">{draft.primaryCta.label}</span>
+              <span className="border border-white/30 px-4 py-2 rounded-full text-sm">{draft.secondaryCta.label}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </AdminGlassCard>
   );
 };
 
@@ -304,66 +300,62 @@ const ContactSectionEditor = ({ section, onSave, saving }: CmsEditorProps<Contac
   };
 
   return (
-    <Card>
-      <CardContent className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
+    <AdminGlassCard
+      title="Contact Section"
+      description="Edit the contact block and preview what clients see."
+      rightSlot={
+        <Button onClick={() => onSave(section.key, draft)} disabled={saving}>
+          {saving ? "Saving..." : "Save Contact"}
+        </Button>
+      }
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+        <div className="space-y-4">
           <div>
-            <h3 className="text-xl font-display font-semibold">Contact Section</h3>
-            <p className="text-sm text-muted-foreground">Edit the contact block and preview what clients see.</p>
+            <label className="text-sm font-medium">Title</label>
+            <Input value={draft.title} onChange={(e) => updateField("title", e.target.value)} />
           </div>
-          <Button onClick={() => onSave(section.key, draft)} disabled={saving}>
-            {saving ? "Saving..." : "Save Contact"}
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Title</label>
-              <Input value={draft.title} onChange={(e) => updateField("title", e.target.value)} />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Subtitle</label>
-              <Textarea value={draft.subtitle} onChange={(e) => updateField("subtitle", e.target.value)} rows={3} />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Phone</label>
-              <Input value={draft.phone} onChange={(e) => updateField("phone", e.target.value)} />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Email</label>
-              <Input value={draft.email} onChange={(e) => updateField("email", e.target.value)} />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Office Address</label>
-              <Textarea value={draft.office} onChange={(e) => updateField("office", e.target.value)} />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Office Hours (one per line)</label>
-              <Textarea value={officeHoursText} onChange={(e) => handleOfficeHoursChange(e.target.value)} rows={4} />
-            </div>
+          <div>
+            <label className="text-sm font-medium">Subtitle</label>
+            <Textarea value={draft.subtitle} onChange={(e) => updateField("subtitle", e.target.value)} rows={3} />
           </div>
-
-          <div className="border border-border rounded-xl p-6 bg-muted/40 space-y-4">
-            <h4 className="text-2xl font-display font-semibold">{draft.title || "Contact us"}</h4>
-            <p className="text-muted-foreground">{draft.subtitle}</p>
-            <div className="space-y-3 text-sm">
-              <p><span className="font-semibold">Phone:</span> {draft.phone}</p>
-              <p><span className="font-semibold">Email:</span> {draft.email}</p>
-              <p><span className="font-semibold">Office:</span> {draft.office}</p>
-            </div>
-            <div className="pt-4 border-t border-border">
-              <p className="text-sm font-semibold mb-2">Office Hours</p>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                {draft.officeHours.map((line, index) => (
-                  <li key={`${line}-${index}`}>{line}</li>
-                ))}
-              </ul>
-            </div>
+          <div>
+            <label className="text-sm font-medium">Phone</label>
+            <Input value={draft.phone} onChange={(e) => updateField("phone", e.target.value)} />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Email</label>
+            <Input value={draft.email} onChange={(e) => updateField("email", e.target.value)} />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Office Address</label>
+            <Textarea value={draft.office} onChange={(e) => updateField("office", e.target.value)} />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Office Hours (one per line)</label>
+            <Textarea value={officeHoursText} onChange={(e) => handleOfficeHoursChange(e.target.value)} rows={4} />
           </div>
         </div>
-      </CardContent>
-    </Card>
+
+        <div className="border border-border rounded-xl p-6 bg-muted/40 space-y-4">
+          <h4 className="text-2xl font-display font-semibold">{draft.title || "Contact us"}</h4>
+          <p className="text-muted-foreground">{draft.subtitle}</p>
+          <div className="space-y-3 text-sm">
+            <p><span className="font-semibold">Phone:</span> {draft.phone}</p>
+            <p><span className="font-semibold">Email:</span> {draft.email}</p>
+            <p><span className="font-semibold">Office:</span> {draft.office}</p>
+          </div>
+          <div className="pt-4 border-t border-border">
+            <p className="text-sm font-semibold mb-2">Office Hours</p>
+            <ul className="text-sm text-muted-foreground space-y-1">
+              {draft.officeHours.map((line, index) => (
+                <li key={`${line}-${index}`}>{line}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </AdminGlassCard>
   );
 };
 
@@ -392,106 +384,102 @@ const FooterSectionEditor = ({ section, onSave, saving }: CmsEditorProps<FooterC
   };
 
   return (
-    <Card>
-      <CardContent className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
+    <AdminGlassCard
+      title="Footer Content"
+      description="Curate the footer copy, quick links, and social handles."
+      rightSlot={
+        <Button onClick={() => onSave(section.key, draft)} disabled={saving}>
+          {saving ? "Saving..." : "Save Footer"}
+        </Button>
+      }
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+        <div className="space-y-4">
           <div>
-            <h3 className="text-xl font-display font-semibold">Footer Content</h3>
-            <p className="text-sm text-muted-foreground">Curate the footer copy, quick links, and social handles.</p>
+            <label className="text-sm font-medium">Description</label>
+            <Textarea
+              value={draft.description}
+              onChange={(e) => setDraft((prev) => ({ ...prev, description: e.target.value }))}
+              rows={4}
+            />
           </div>
-          <Button onClick={() => onSave(section.key, draft)} disabled={saving}>
-            {saving ? "Saving..." : "Save Footer"}
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Description</label>
-              <Textarea
-                value={draft.description}
-                onChange={(e) => setDraft((prev) => ({ ...prev, description: e.target.value }))}
-                rows={4}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Phone</label>
-              <Input value={draft.contact.phone} onChange={(e) => updateContact("phone", e.target.value)} />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Email</label>
-              <Input value={draft.contact.email} onChange={(e) => updateContact("email", e.target.value)} />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Location</label>
-              <Input value={draft.contact.location} onChange={(e) => updateContact("location", e.target.value)} />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Quick Links (Label | /path)</label>
-              <Textarea
-                value={quickLinksText}
-                onChange={(e) => {
-                  setQuickLinksText(e.target.value);
-                  setDraft((prev) => ({ ...prev, quickLinks: parseLinks(e.target.value) }));
-                }}
-                rows={4}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Property Types</label>
-              <Textarea
-                value={propertyTypesText}
-                onChange={(e) => {
-                  setPropertyTypesText(e.target.value);
-                  setDraft((prev) => ({ ...prev, propertyTypes: fromMultiline(e.target.value) }));
-                }}
-                rows={3}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Social Links (Label | URL)</label>
-              <Textarea
-                value={socialText}
-                onChange={(e) => {
-                  setSocialText(e.target.value);
-                  setDraft((prev) => ({ ...prev, social: parseSocial(e.target.value) }));
-                }}
-                rows={3}
-              />
-            </div>
+          <div>
+            <label className="text-sm font-medium">Phone</label>
+            <Input value={draft.contact.phone} onChange={(e) => updateContact("phone", e.target.value)} />
           </div>
-
-          <div className="border border-border rounded-xl p-6 bg-muted/40 space-y-4">
-            <h4 className="text-lg font-display font-semibold">Footer Preview</h4>
-            <p className="text-sm text-muted-foreground">{draft.description}</p>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs uppercase text-muted-foreground">Contact</p>
-                <p className="text-sm">{draft.contact.phone}</p>
-                <p className="text-sm">{draft.contact.email}</p>
-                <p className="text-sm">{draft.contact.location}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase text-muted-foreground">Quick Links</p>
-                <ul className="text-sm space-y-1">
-                  {draft.quickLinks.slice(0, 4).map((link) => (
-                    <li key={link.href}>{link.label}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            <div>
-              <p className="text-xs uppercase text-muted-foreground">Property Types</p>
-              <p className="text-sm">{draft.propertyTypes.join(", ")}</p>
-            </div>
-            <div>
-              <p className="text-xs uppercase text-muted-foreground">Social</p>
-              <p className="text-sm">{draft.social.map((item) => item.label).join(" • ")}</p>
-            </div>
+          <div>
+            <label className="text-sm font-medium">Email</label>
+            <Input value={draft.contact.email} onChange={(e) => updateContact("email", e.target.value)} />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Location</label>
+            <Input value={draft.contact.location} onChange={(e) => updateContact("location", e.target.value)} />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Quick Links (Label | /path)</label>
+            <Textarea
+              value={quickLinksText}
+              onChange={(e) => {
+                setQuickLinksText(e.target.value);
+                setDraft((prev) => ({ ...prev, quickLinks: parseLinks(e.target.value) }));
+              }}
+              rows={4}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Property Types</label>
+            <Textarea
+              value={propertyTypesText}
+              onChange={(e) => {
+                setPropertyTypesText(e.target.value);
+                setDraft((prev) => ({ ...prev, propertyTypes: fromMultiline(e.target.value) }));
+              }}
+              rows={3}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Social Links (Label | URL)</label>
+            <Textarea
+              value={socialText}
+              onChange={(e) => {
+                setSocialText(e.target.value);
+                setDraft((prev) => ({ ...prev, social: parseSocial(e.target.value) }));
+              }}
+              rows={3}
+            />
           </div>
         </div>
-      </CardContent>
-    </Card>
+
+        <div className="border border-border rounded-xl p-6 bg-muted/40 space-y-4">
+          <h4 className="text-lg font-display font-semibold">Footer Preview</h4>
+          <p className="text-sm text-muted-foreground">{draft.description}</p>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs uppercase text-muted-foreground">Contact</p>
+              <p className="text-sm">{draft.contact.phone}</p>
+              <p className="text-sm">{draft.contact.email}</p>
+              <p className="text-sm">{draft.contact.location}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase text-muted-foreground">Quick Links</p>
+              <ul className="text-sm space-y-1">
+                {draft.quickLinks.slice(0, 4).map((link) => (
+                  <li key={link.href}>{link.label}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs uppercase text-muted-foreground">Property Types</p>
+            <p className="text-sm">{draft.propertyTypes.join(", ")}</p>
+          </div>
+          <div>
+            <p className="text-xs uppercase text-muted-foreground">Social</p>
+            <p className="text-sm">{draft.social.map((item) => item.label).join(" • ")}</p>
+          </div>
+        </div>
+      </div>
+    </AdminGlassCard>
   );
 };
 
@@ -510,125 +498,121 @@ const AboutSectionEditor = ({ section, onSave, saving }: CmsEditorProps<AboutCon
   }, [section.content]);
 
   return (
-    <Card>
-      <CardContent className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
+    <AdminGlassCard
+      title="About Page"
+      description="Edit the story, values, and hero preview for the About page."
+      rightSlot={
+        <Button onClick={() => onSave(section.key, draft)} disabled={saving}>
+          {saving ? "Saving..." : "Save About"}
+        </Button>
+      }
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+        <div className="space-y-4">
           <div>
-            <h3 className="text-xl font-display font-semibold">About Page</h3>
-            <p className="text-sm text-muted-foreground">Edit the story, values, and hero preview for the About page.</p>
+            <label className="text-sm font-medium">Hero Title</label>
+            <Input
+              value={draft.heroTitle}
+              onChange={(e) => setDraft((prev) => ({ ...prev, heroTitle: e.target.value }))}
+            />
           </div>
-          <Button onClick={() => onSave(section.key, draft)} disabled={saving}>
-            {saving ? "Saving..." : "Save About"}
-          </Button>
+          <div>
+            <label className="text-sm font-medium">Hero Subtitle</label>
+            <Input
+              value={draft.heroSubtitle}
+              onChange={(e) => setDraft((prev) => ({ ...prev, heroSubtitle: e.target.value }))}
+            />
+          </div>
+          <ImageUploadField
+            label="Hero Image URL"
+            value={draft.heroImage}
+            onChange={(value) => setDraft((prev) => ({ ...prev, heroImage: value }))}
+            placeholder="Paste an image URL or upload one"
+          />
+          <div>
+            <label className="text-sm font-medium">Story Paragraphs (one per line)</label>
+            <Textarea
+              value={storyText}
+              onChange={(e) => {
+                setStoryText(e.target.value);
+                setDraft((prev) => ({ ...prev, storyParagraphs: fromMultiline(e.target.value) }));
+              }}
+              rows={4}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Values (icon | title | description)</label>
+            <Textarea
+              value={valuesText}
+              onChange={(e) => {
+                setValuesText(e.target.value);
+                setDraft((prev) => ({ ...prev, values: parseAboutValues(e.target.value) }));
+              }}
+              rows={4}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Stats (label | value)</label>
+            <Textarea
+              value={statsText}
+              onChange={(e) => {
+                setStatsText(e.target.value);
+                setDraft((prev) => ({ ...prev, stats: parseAboutStats(e.target.value) }));
+              }}
+              rows={3}
+            />
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Hero Title</label>
-              <Input
-                value={draft.heroTitle}
-                onChange={(e) => setDraft((prev) => ({ ...prev, heroTitle: e.target.value }))}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Hero Subtitle</label>
-              <Input
-                value={draft.heroSubtitle}
-                onChange={(e) => setDraft((prev) => ({ ...prev, heroSubtitle: e.target.value }))}
-              />
-            </div>
-            <ImageUploadField
-              label="Hero Image URL"
-              value={draft.heroImage}
-              onChange={(value) => setDraft((prev) => ({ ...prev, heroImage: value }))}
-              placeholder="Paste an image URL or upload one"
-            />
-            <div>
-              <label className="text-sm font-medium">Story Paragraphs (one per line)</label>
-              <Textarea
-                value={storyText}
-                onChange={(e) => {
-                  setStoryText(e.target.value);
-                  setDraft((prev) => ({ ...prev, storyParagraphs: fromMultiline(e.target.value) }));
-                }}
-                rows={4}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Values (icon | title | description)</label>
-              <Textarea
-                value={valuesText}
-                onChange={(e) => {
-                  setValuesText(e.target.value);
-                  setDraft((prev) => ({ ...prev, values: parseAboutValues(e.target.value) }));
-                }}
-                rows={4}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Stats (label | value)</label>
-              <Textarea
-                value={statsText}
-                onChange={(e) => {
-                  setStatsText(e.target.value);
-                  setDraft((prev) => ({ ...prev, stats: parseAboutStats(e.target.value) }));
-                }}
-                rows={3}
-              />
+        <div className="space-y-4">
+          <div className="relative rounded-2xl overflow-hidden border border-border h-64">
+            {draft.heroImage ? (
+              <img src={getMediaUrl(draft.heroImage)} alt="About hero preview" className="absolute inset-0 w-full h-full object-cover" />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/70 to-accent/60" />
+            )}
+            <div className="absolute inset-0 bg-black/50" />
+            <div className="relative h-full w-full p-6 text-white flex flex-col justify-end space-y-2">
+              <p className="text-xs uppercase tracking-[0.3em] text-white/70">Preview</p>
+              <h4 className="text-3xl font-display font-bold">{draft.heroTitle}</h4>
+              <p className="text-white/80">{draft.heroSubtitle}</p>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="relative rounded-2xl overflow-hidden border border-border h-64">
-              {draft.heroImage ? (
-                <img src={getMediaUrl(draft.heroImage)} alt="About hero preview" className="absolute inset-0 w-full h-full object-cover" />
-              ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/70 to-accent/60" />
-              )}
-              <div className="absolute inset-0 bg-black/50" />
-              <div className="relative h-full w-full p-6 text-white flex flex-col justify-end space-y-2">
-                <p className="text-xs uppercase tracking-[0.3em] text-white/70">Preview</p>
-                <h4 className="text-3xl font-display font-bold">{draft.heroTitle}</h4>
-                <p className="text-white/80">{draft.heroSubtitle}</p>
-              </div>
+          <div className="bg-muted/40 border border-border rounded-xl p-5 space-y-4">
+            <h4 className="text-lg font-semibold">Story Highlights</h4>
+            <div className="space-y-2 text-sm text-muted-foreground max-h-32 overflow-y-auto">
+              {draft.storyParagraphs.map((paragraph, index) => (
+                <p key={`${paragraph}-${index}`}>{paragraph}</p>
+              ))}
             </div>
-
-            <div className="bg-muted/40 border border-border rounded-xl p-5 space-y-4">
-              <h4 className="text-lg font-semibold">Story Highlights</h4>
-              <div className="space-y-2 text-sm text-muted-foreground max-h-32 overflow-y-auto">
-                {draft.storyParagraphs.map((paragraph, index) => (
-                  <p key={`${paragraph}-${index}`}>{paragraph}</p>
+            <div>
+              <h5 className="text-sm font-semibold mb-2">Values</h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {draft.values.map((value) => (
+                  <div key={`${value.title}-${value.description}`} className="bg-background rounded-lg p-3 border border-border">
+                    <p className="text-xs uppercase text-muted-foreground">{value.iconKey}</p>
+                    <p className="text-sm font-semibold">{value.title}</p>
+                    <p className="text-xs text-muted-foreground">{value.description}</p>
+                  </div>
                 ))}
               </div>
-              <div>
-                <h5 className="text-sm font-semibold mb-2">Values</h5>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {draft.values.map((value) => (
-                    <div key={`${value.title}-${value.description}`} className="bg-background rounded-lg p-3 border border-border">
-                      <p className="text-xs uppercase text-muted-foreground">{value.iconKey}</p>
-                      <p className="text-sm font-semibold">{value.title}</p>
-                      <p className="text-xs text-muted-foreground">{value.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h5 className="text-sm font-semibold mb-2">Stats</h5>
-                <div className="flex flex-wrap gap-4">
-                  {draft.stats.map((stat) => (
-                    <div key={stat.label} className="min-w-[90px]">
-                      <p className="text-2xl font-display font-bold text-primary">{stat.value}</p>
-                      <p className="text-xs text-muted-foreground">{stat.label}</p>
-                    </div>
-                  ))}
-                </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-semibold mb-2">Stats</h5>
+              <div className="flex flex-wrap gap-4">
+                {draft.stats.map((stat) => (
+                  <div key={stat.label} className="min-w-[90px]">
+                    <p className="text-2xl font-display font-bold text-primary">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground">{stat.label}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </AdminGlassCard>
   );
 };
 
@@ -657,17 +641,16 @@ const JsonSectionEditor = ({ section, onSave, saving, onInvalidJson }: JsonSecti
   };
 
   return (
-    <Card>
-      <CardContent className="p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-xl font-display font-semibold">{section.key}</h3>
-            <p className="text-sm text-muted-foreground">Advanced section (JSON).</p>
-          </div>
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? "Saving..." : "Save"}
-          </Button>
-        </div>
+    <AdminGlassCard
+      title={section.key}
+      description="Advanced section (JSON)."
+      rightSlot={
+        <Button onClick={handleSave} disabled={saving}>
+          {saving ? "Saving..." : "Save"}
+        </Button>
+      }
+    >
+      <div className="space-y-4 mt-4">
         <Textarea
           className="font-mono text-xs min-h-[240px]"
           value={value}
@@ -677,8 +660,8 @@ const JsonSectionEditor = ({ section, onSave, saving, onInvalidJson }: JsonSecti
           <p>Preview</p>
           <pre className="bg-muted/40 rounded-lg p-3 overflow-auto max-h-[200px]">{value}</pre>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </AdminGlassCard>
   );
 };
 
