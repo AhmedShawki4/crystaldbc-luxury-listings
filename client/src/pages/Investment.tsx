@@ -63,50 +63,50 @@ const Investment = () => {
     // Download Brochure Function
     const handleDownloadBrochure = () => {
         const doc = new jsPDF();
-        
+
         // Header
         doc.setFillColor(26, 26, 26);
         doc.rect(0, 0, 210, 50, 'F');
-        
+
         doc.setTextColor(212, 175, 55);
         doc.setFontSize(28);
         doc.setFont("helvetica", "bold");
         doc.text("Crystal DBC", 105, 25, { align: "center" });
-        
+
         doc.setFontSize(12);
         doc.setTextColor(255, 255, 255);
         doc.text("Luxury Real Estate Investment", 105, 35, { align: "center" });
-        
+
         // Content Section
         doc.setTextColor(26, 26, 26);
         doc.setFontSize(20);
         doc.setFont("helvetica", "bold");
         doc.text("Investment Opportunities", 20, 70);
-        
+
         doc.setFontSize(11);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(80, 80, 80);
-        
+
         const introText = "Crystal DBC offers exclusive investment opportunities in premium real estate across Dubai and Egypt. Our carefully curated portfolio delivers exceptional returns while maintaining the highest standards of luxury and quality.";
         const splitIntro = doc.splitTextToSize(introText, 170);
         doc.text(splitIntro, 20, 85);
-        
+
         // Key Statistics
         doc.setFontSize(16);
         doc.setTextColor(26, 26, 26);
         doc.setFont("helvetica", "bold");
         doc.text("Key Investment Metrics", 20, 115);
-        
+
         doc.setFontSize(11);
         doc.setFont("helvetica", "normal");
-        
+
         const stats = [
             { label: "Average Annual ROI", value: "35%" },
             { label: "Assets Under Management", value: "$500M+" },
             { label: "Avg. Tenant Placement", value: "12 Days" },
             { label: "Premium Listings", value: "150+" },
         ];
-        
+
         let yPos = 128;
         stats.forEach((stat) => {
             doc.setTextColor(212, 175, 55);
@@ -117,13 +117,13 @@ const Investment = () => {
             doc.text(stat.label, 60, yPos);
             yPos += 10;
         });
-        
+
         // Investment Benefits
         doc.setFontSize(16);
         doc.setTextColor(26, 26, 26);
         doc.setFont("helvetica", "bold");
         doc.text("Why Invest With Us", 20, 180);
-        
+
         const benefits = [
             "✓ Expert market analysis and property selection",
             "✓ Transparent and secure investment process",
@@ -131,7 +131,7 @@ const Investment = () => {
             "✓ Regular performance reports and updates",
             "✓ Dedicated investor relations team",
         ];
-        
+
         doc.setFontSize(11);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(80, 80, 80);
@@ -140,31 +140,31 @@ const Investment = () => {
             doc.text(benefit, 20, yPos);
             yPos += 8;
         });
-        
+
         // Contact Section
         doc.setFillColor(245, 245, 245);
         doc.rect(0, 245, 210, 52, 'F');
-        
+
         doc.setFontSize(14);
         doc.setTextColor(26, 26, 26);
         doc.setFont("helvetica", "bold");
         doc.text("Contact Us", 20, 258);
-        
+
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(80, 80, 80);
         doc.text("Email: info@crystaldbc.com", 20, 270);
         doc.text("Phone: +1 (888) 555-1234", 20, 278);
         doc.text("Website: www.crystaldbc.com", 20, 286);
-        
+
         // Footer
         doc.setFontSize(8);
         doc.setTextColor(150, 150, 150);
         doc.text("© 2024 Crystal DBC. All rights reserved.", 105, 295, { align: "center" });
-        
+
         // Save the PDF
         doc.save("Crystal_DBC_Investment_Brochure.pdf");
-        
+
         toast({
             title: t("investment.toasts.brochureDownloaded") || "Brochure Downloaded",
             description: t("investment.toasts.brochureDownloadedDesc") || "Your investment brochure has been downloaded successfully.",
@@ -374,7 +374,7 @@ const Investment = () => {
                                 loading="eager"
                                 auto-rotate
                                 camera-controls
-                                camera-orbit="45deg 55deg 2.5m"
+                                camera-orbit="90deg 75deg 2.5m"
                                 rotation-per-second="45deg"
                                 interaction-prompt="none"
                                 disable-zoom
@@ -410,49 +410,49 @@ const Investment = () => {
                                 const isAlreadyInvested = isAuthenticated && isInvestor && investedBoxIds.has(box._id);
 
                                 return (
-                                <Card key={box._id} className="border-border/50 overflow-hidden">
-                                    <CardHeader className="bg-muted/30">
-                                        <CardTitle className="text-2xl font-display">{box.name}</CardTitle>
-                                        {box.description ? (
-                                            <p className="text-muted-foreground">{box.description}</p>
-                                        ) : null}
-                                    </CardHeader>
-                                    <CardContent className="p-6 space-y-6">
-                                        <div className="flex flex-wrap gap-2 text-sm font-semibold">
-                                            <span className="px-4 py-2 rounded-full bg-luxury-gold/15 text-luxury-gold">
-                                                {t("myInvestments.boxes.roiBadge", { value: box.roiPercentage })}
-                                            </span>
-                                            <span className="px-4 py-2 rounded-full bg-muted text-foreground">
-                                                {t("myInvestments.boxes.minInvestment", { amount: Math.round(box.minInvestmentAmount).toLocaleString() })}
-                                            </span>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <div className="rounded-xl border border-border/60 p-4">
-                                                <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("myInvestments.labels.roiPercent")}</p>
-                                                <p className="text-3xl font-display font-bold text-primary">{box.roiPercentage}%</p>
-                                            </div>
-                                            <div className="rounded-xl border border-border/60 p-4">
-                                                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                                    <Card key={box._id} className="border-border/50 overflow-hidden">
+                                        <CardHeader className="bg-muted/30">
+                                            <CardTitle className="text-2xl font-display">{box.name}</CardTitle>
+                                            {box.description ? (
+                                                <p className="text-muted-foreground">{box.description}</p>
+                                            ) : null}
+                                        </CardHeader>
+                                        <CardContent className="p-6 space-y-6">
+                                            <div className="flex flex-wrap gap-2 text-sm font-semibold">
+                                                <span className="px-4 py-2 rounded-full bg-luxury-gold/15 text-luxury-gold">
+                                                    {t("myInvestments.boxes.roiBadge", { value: box.roiPercentage })}
+                                                </span>
+                                                <span className="px-4 py-2 rounded-full bg-muted text-foreground">
                                                     {t("myInvestments.boxes.minInvestment", { amount: Math.round(box.minInvestmentAmount).toLocaleString() })}
-                                                </p>
-                                                <p className="text-3xl font-display font-bold text-primary">{Math.round(box.minInvestmentAmount).toLocaleString()}</p>
+                                                </span>
                                             </div>
-                                        </div>
 
-                                        <Button
-                                            className="w-full"
-                                            size="lg"
-                                            onClick={() => openInvestDialog(box)}
-                                            disabled={isAlreadyInvested}
-                                        >
-                                            {isAlreadyInvested
-                                                ? t("myInvestments.boxes.alreadyInvested")
-                                                : t("myInvestments.boxes.investCta")}
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-                            );
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div className="rounded-xl border border-border/60 p-4">
+                                                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("myInvestments.labels.roiPercent")}</p>
+                                                    <p className="text-3xl font-display font-bold text-primary">{box.roiPercentage}%</p>
+                                                </div>
+                                                <div className="rounded-xl border border-border/60 p-4">
+                                                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                                                        {t("myInvestments.boxes.minInvestment", { amount: Math.round(box.minInvestmentAmount).toLocaleString() })}
+                                                    </p>
+                                                    <p className="text-3xl font-display font-bold text-primary">{Math.round(box.minInvestmentAmount).toLocaleString()}</p>
+                                                </div>
+                                            </div>
+
+                                            <Button
+                                                className="w-full"
+                                                size="lg"
+                                                onClick={() => openInvestDialog(box)}
+                                                disabled={isAlreadyInvested}
+                                            >
+                                                {isAlreadyInvested
+                                                    ? t("myInvestments.boxes.alreadyInvested")
+                                                    : t("myInvestments.boxes.investCta")}
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
+                                );
                             })}
                         </div>
                     )}
