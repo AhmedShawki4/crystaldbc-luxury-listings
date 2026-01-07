@@ -46,6 +46,7 @@ gsap.registerPlugin(ScrollTrigger);
 const Home = () => {
   const { t } = useTranslation();
   const mainRef = useRef<HTMLDivElement>(null);
+  const globalVisionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -200,6 +201,7 @@ const Home = () => {
       {/* 2. Global Vision (3D Globe) */}
       <section
         className="py-24 bg-luxury-dark text-white relative overflow-hidden reveal-section"
+        ref={globalVisionRef}
         onMouseEnter={handleAntigravityEnter}
         onMouseLeave={handleAntigravityLeave}
         onTouchStart={handleAntigravityEnter}
@@ -207,6 +209,7 @@ const Home = () => {
       >
         <div className="absolute inset-0 -z-10 pointer-events-none">
           <Antigravity
+            eventSource={globalVisionRef}
             autoAnimate={antigravityAuto}
             rotationSpeed={0.22}
             ringRadius={14}

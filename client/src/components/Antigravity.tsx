@@ -18,6 +18,7 @@ interface AntigravityProps {
   pulseSpeed?: number;
   particleShape?: 'capsule' | 'sphere' | 'box' | 'tetrahedron';
   fieldStrength?: number;
+  eventSource?: HTMLElement | React.RefObject<HTMLElement | null> | null;
 }
 
 const AntigravityInner: React.FC<AntigravityProps> = ({
@@ -185,7 +186,7 @@ const AntigravityInner: React.FC<AntigravityProps> = ({
   );
 };
 
-const Antigravity: React.FC<AntigravityProps> = props => {
+const Antigravity: React.FC<AntigravityProps> = ({ eventSource, ...props }) => {
   const devicePixelRatio = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio, 2) : 1;
 
   return (
@@ -195,6 +196,7 @@ const Antigravity: React.FC<AntigravityProps> = props => {
       style={{ width: '100%', height: '100%' }}
       gl={{ alpha: true, antialias: true }}
       dpr={devicePixelRatio}
+      eventSource={eventSource ?? undefined}
     >
       <AntigravityInner {...props} />
     </Canvas>
