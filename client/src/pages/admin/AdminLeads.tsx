@@ -1,21 +1,29 @@
+import React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
 import type { Lead } from "@/types";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import useAuth from "@/hooks/useAuth";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminGlassCard from "@/components/admin/AdminGlassCard";
 import { Users2, Mail, Phone, UserRound, MessageCircle, Trash2 } from "lucide-react";
 
-const fetchLeads = async () => {
-  const { data } = await apiClient.get<{ leads: Lead[] }>("/leads");
+const fetchLeads = async ({ search, status }: { search: string; status: string }) => {
+  const params = new URLSearchParams();
+  if (search) params.set("search", search);
+  if (status && status !== "all") params.set("status", status);
+  const url = params.toString() ? `/leads?${params.toString()}` : "/leads";
+  const { data } = await apiClient.get<{ leads: Lead[] }>(url);
   return data.leads;
 };
 
 const AdminLeads = () => {
-  const { data } = useQuery({ queryKey: ["leads"], queryFn: fetchLeads });
+  const [search, setSearch] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState("all");
+  const { data } = useQuery({ queryKey: ["leads", search, statusFilter], queryFn: () => fetchLeads({ search, status: statusFilter }) });
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -60,6 +68,29 @@ const AdminLeads = () => {
         description="Review, triage, and update lead statuses."
         className="grid grid-cols-1 md:grid-cols-2 gap-4"
       >
+        <div className="md:col-span-2 flex flex-col md:flex-row gap-3 md:items-center md:justify-between mb-2">
+          <Input
+            placeholder="Search by name, email, phone, message"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full md:w-[420px]"
+          />
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-white/60">Status:</span>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full md:w-[200px] bg-white/5 border-white/10 text-white">
+                <SelectValue placeholder="All" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="new">New</SelectItem>
+                <SelectItem value="contacted">Contacted</SelectItem>
+                <SelectItem value="in-progress">In Progress</SelectItem>
+                <SelectItem value="closed">Closed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
         {data?.map((lead) => (
           <div key={lead._id} className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-4 transition hover:bg-white/10">
             <div className="flex items-start justify-between gap-4">

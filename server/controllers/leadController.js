@@ -11,9 +11,25 @@ exports.createLead = async (req, res) => {
   }
 };
 
-exports.getLeads = async (_req, res) => {
+exports.getLeads = async (req, res) => {
   try {
-    const leads = await Lead.find().sort({ createdAt: -1 });
+    const { search, status } = req.query;
+    const filters = {};
+    if (status) {
+      filters.status = status;
+    }
+    if (search) {
+      const regex = new RegExp(String(search), "i");
+      filters.$or = [
+        { fullName: regex },
+        { email: regex },
+        { phoneNumber: regex },
+        { message: regex },
+        { interestedIn: regex },
+      ];
+    }
+
+    const leads = await Lead.find(filters).sort({ createdAt: -1 });
     res.json({ leads });
   } catch (error) {
     console.error("Failed to fetch leads", error.message);

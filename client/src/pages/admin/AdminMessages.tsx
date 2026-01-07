@@ -1,7 +1,9 @@
+import React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
 import type { ContactMessage } from "@/types";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import useAuth from "@/hooks/useAuth";
@@ -9,13 +11,19 @@ import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminGlassCard from "@/components/admin/AdminGlassCard";
 import { Inbox, UserRound, Mail, Phone, MessageCircle, Trash2 } from "lucide-react";
 
-const fetchMessages = async () => {
-  const { data } = await apiClient.get<{ messages: ContactMessage[] }>("/messages");
+const fetchMessages = async ({ search, status }: { search: string; status: string }) => {
+  const params = new URLSearchParams();
+  if (search) params.set("search", search);
+  if (status && status !== "all") params.set("status", status);
+  const url = params.toString() ? `/messages?${params.toString()}` : "/messages";
+  const { data } = await apiClient.get<{ messages: ContactMessage[] }>(url);
   return data.messages;
 };
 
 const AdminMessages = () => {
-  const { data } = useQuery({ queryKey: ["messages"], queryFn: fetchMessages });
+  const [search, setSearch] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState("all");
+  const { data } = useQuery({ queryKey: ["messages", search, statusFilter], queryFn: () => fetchMessages({ search, status: statusFilter }) });
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -58,6 +66,28 @@ const AdminMessages = () => {
         description="Manage your incoming communications."
       >
         <div className="flex flex-col gap-4 mt-4">
+          <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+            <Input
+              placeholder="Search by name, email, phone, message"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full md:w-[420px]"
+            />
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-white/60">Status:</span>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full md:w-[180px] bg-white/5 border-white/10 text-white">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="new">New</SelectItem>
+                  <SelectItem value="responded">Responded</SelectItem>
+                  <SelectItem value="archived">Archived</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           {data?.map((message) => (
             <div
               key={message._id}

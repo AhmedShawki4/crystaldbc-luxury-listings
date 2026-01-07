@@ -1,7 +1,8 @@
 import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
-import type { TrendingProject } from "@/types";
+import type { TrendingProject, Property } from "@/types";
+import { useProperties } from "@/hooks/useProperties";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,6 +35,7 @@ const AdminProjects = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [formState, setFormState] = useState(initialState);
+  const { data: properties = [] } = useProperties();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
@@ -178,8 +180,20 @@ const AdminProjects = () => {
             </div>
           </div>
           <div>
-            <label className="text-sm font-medium">Linked Property ID</label>
-            <Input name="property" value={formState.property} onChange={handleChange} placeholder="Optional" />
+            <label className="text-sm font-medium">Linked Property</label>
+            <select
+              name="property"
+              value={formState.property}
+              onChange={handleChange}
+              className="w-full h-12 rounded-md border border-white/10 bg-background text-white px-3"
+            >
+              <option value="">None</option>
+              {properties.map((p: Property) => (
+                <option key={p._id} value={p._id}>
+                  {p.title} — {p.location}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="md:col-span-2">
             <label className="text-sm font-medium">Description</label>

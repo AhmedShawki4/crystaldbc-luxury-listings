@@ -11,9 +11,25 @@ exports.createMessage = async (req, res) => {
   }
 };
 
-exports.getMessages = async (_req, res) => {
+exports.getMessages = async (req, res) => {
   try {
-    const messages = await Message.find().sort({ createdAt: -1 });
+    const { search, status } = req.query;
+    const filters = {};
+    if (status) {
+      filters.status = status;
+    }
+    if (search) {
+      const regex = new RegExp(String(search), "i");
+      filters.$or = [
+        { name: regex },
+        { email: regex },
+        { phone: regex },
+        { message: regex },
+        { page: regex },
+      ];
+    }
+
+    const messages = await Message.find(filters).sort({ createdAt: -1 });
     res.json({ messages });
   } catch (error) {
     console.error("Failed to fetch messages", error.message);
