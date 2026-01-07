@@ -19,7 +19,7 @@ const AuthModal = ({
 }: AuthModalProps) => {
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-xl p-0 border-none bg-transparent shadow-none">
+            <DialogContent className="sm:max-w-xl p-0 border-none bg-transparent shadow-none [&>button]:hidden max-h-[90vh] sm:max-h-[95vh] overflow-y-auto">
                 <AuthCard
                     mode={initialMode}
                     onSuccess={() => {

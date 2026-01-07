@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import { Building2, User, Mail, Phone, Send } from "lucide-react";
 import {
@@ -44,6 +45,8 @@ const RegisterInterestDialog = ({
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  const { t } = useTranslation();
 
   // Show popup only for guests (not logged in)
   const isGuest = !user;
@@ -102,15 +105,19 @@ const RegisterInterestDialog = ({
       });
 
       toast({
-        title: "Registration received",
-        description: "Thank you for your interest. Our team will follow up shortly.",
+        title: t("registerInterest.toasts.successTitle"),
+        description: t("registerInterest.toasts.successDesc"),
       });
       setFormData(initialFormState);
       setCountryCode("+20");
       setIsOpen(false);
     } catch (error) {
       console.error("Register interest failed", error);
-      toast({ title: "Submission failed", description: "Please try again.", variant: "destructive" });
+      toast({
+        title: t("registerInterest.toasts.errorTitle"),
+        description: t("registerInterest.toasts.errorDesc"),
+        variant: "destructive"
+      });
     } finally {
       setSubmitting(false);
     }
@@ -129,19 +136,22 @@ const RegisterInterestDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="dialog-scroll w-[95vw] max-w-[520px] sm:max-w-[500px] max-h-[85vh] sm:max-h-[90vh] overflow-y-auto bg-luxury-dark text-white border-white/20 p-0 gap-0 rounded-2xl mx-auto my-6 [&>button]:text-white [&>button]:hover:text-white/80 [&>button]:top-3 [&>button]:right-3 sm:[&>button]:top-4 sm:[&>button]:right-4 [&>button>svg]:h-5 [&>button>svg]:w-5 [&>button]:z-10">
+      <DialogContent className="fixed bottom-0 left-0 right-0 top-auto w-full max-w-none rounded-t-2xl rounded-b-none border-t border-white/20 bg-luxury-dark p-0 dialog-scroll overflow-y-auto max-h-[85vh] sm:left-[50%] sm:top-[50%] sm:bottom-auto sm:right-auto sm:w-full sm:max-w-[500px] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-2xl sm:border [&>button]:text-white [&>button]:hover:text-white/80 [&>button]:top-3 [&>button]:right-3 sm:[&>button]:top-4 sm:[&>button]:right-4 [&>button>svg]:h-5 [&>button>svg]:w-5 [&>button]:z-10">
+        {/* Mobile Handle */}
+        <div className="sm:hidden absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-white/20 rounded-full" />
+
         {/* Header */}
-        <div className="px-4 sm:px-6 pt-5 pb-4 sm:pt-6 sm:pb-4 sticky top-0 z-10 border-b border-white/10 bg-luxury-dark/85 backdrop-blur">
+        <div className="px-4 sm:px-6 pt-8 pb-4 sm:pt-6 sm:pb-4 sticky top-0 z-10 border-b border-white/10 bg-luxury-dark/85 backdrop-blur">
           <div className="flex items-center gap-3 pr-8 sm:pr-10">
             <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0">
               <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
             </div>
             <div>
               <DialogTitle className="text-lg sm:text-xl font-display font-bold text-white mb-1">
-                Register Your Interest
+                {t("registerInterest.title")}
               </DialogTitle>
               <p className="text-xs sm:text-sm text-white/70 leading-relaxed">
-                Be first to access Egypt's best properties
+                {t("registerInterest.subtitle")}
               </p>
             </div>
           </div>
@@ -150,14 +160,13 @@ const RegisterInterestDialog = ({
         {/* Form */}
         <form onSubmit={handleSubmit} className="px-4 py-4 space-y-3 sm:px-6 sm:py-5 sm:space-y-4">
           <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
-            Join thousands of investors who trust our agency to navigate Egypt real estate.
-            Get tailored recommendations and market insights.
+            {t("registerInterest.description")}
           </p>
 
           {/* Full Name */}
           <div>
             <label htmlFor="fullName" className="block text-sm font-medium mb-2">
-              Full Name *
+              {t("registerInterest.fullName")}
             </label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/50" />
@@ -167,7 +176,7 @@ const RegisterInterestDialog = ({
                 required
                 value={formData.fullName}
                 onChange={(e) => handleChange("fullName", e.target.value)}
-                placeholder="Enter your full name"
+                placeholder={t("registerInterest.fullNamePlaceholder")}
                 className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-accent"
               />
             </div>
@@ -176,17 +185,17 @@ const RegisterInterestDialog = ({
           {/* Interested In */}
           <div>
             <label htmlFor="interestedIn" className="block text-sm font-medium mb-2">
-              I am interested in
+              {t("registerInterest.interestedIn")}
             </label>
             <Select value={formData.interestedIn} onValueChange={(value) => handleChange("interestedIn", value)}>
               <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                <SelectValue placeholder="Select one..." />
+                <SelectValue placeholder={t("registerInterest.selectOne")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="end-user">End User</SelectItem>
-                <SelectItem value="broker">Broker</SelectItem>
-                <SelectItem value="investor">Investor</SelectItem>
-                <SelectItem value="job-seeker">Job Seeker</SelectItem>
+                <SelectItem value="end-user">{t("registerInterest.options.endUser")}</SelectItem>
+                <SelectItem value="broker">{t("registerInterest.options.broker")}</SelectItem>
+                <SelectItem value="investor">{t("registerInterest.options.investor")}</SelectItem>
+                <SelectItem value="job-seeker">{t("registerInterest.options.jobSeeker")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -194,7 +203,7 @@ const RegisterInterestDialog = ({
           {/* Phone Number */}
           <div>
             <label htmlFor="phoneNumber" className="block text-sm font-medium mb-2">
-              Phone Number *
+              {t("registerInterest.phoneNumber")}
             </label>
             <div className="flex gap-2">
               <Select value={countryCode} onValueChange={setCountryCode}>
@@ -217,7 +226,7 @@ const RegisterInterestDialog = ({
                   required
                   value={formData.phoneNumber}
                   onChange={(e) => handleChange("phoneNumber", e.target.value)}
-                  placeholder="XX XXX XXXX"
+                  placeholder={t("registerInterest.phoneNumberPlaceholder")}
                   className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-accent"
                 />
               </div>
@@ -227,7 +236,7 @@ const RegisterInterestDialog = ({
           {/* Email Address */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium mb-2">
-              Email Address *
+              {t("registerInterest.email")}
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/50" />
@@ -237,7 +246,7 @@ const RegisterInterestDialog = ({
                 required
                 value={formData.email}
                 onChange={(e) => handleChange("email", e.target.value)}
-                placeholder="your.email@example.com"
+                placeholder={t("registerInterest.emailPlaceholder")}
                 className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-accent"
               />
             </div>
@@ -246,13 +255,13 @@ const RegisterInterestDialog = ({
           {/* Message */}
           <div>
             <label htmlFor="interest-message" className="block text-sm font-medium mb-2">
-              Tell us more
+              {t("registerInterest.tellUsMore")}
             </label>
             <Textarea
               id="interest-message"
               value={formData.message}
               onChange={(e) => handleChange("message", e.target.value)}
-              placeholder="Share preferences, budget, or the property you're eyeing"
+              placeholder={t("registerInterest.messagePlaceholder")}
               className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
               rows={4}
             />
@@ -265,11 +274,11 @@ const RegisterInterestDialog = ({
             disabled={submitting}
           >
             <Send className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-            {submitting ? "Submitting..." : "Register Interest"}
+            {submitting ? t("registerInterest.submitting") : t("registerInterest.submit")}
           </Button>
 
           <p className="text-[10px] sm:text-xs text-white/60 text-center leading-relaxed">
-            By registering, you agree to receive property updates from our agency.
+            {t("registerInterest.disclaimer")}
           </p>
         </form>
       </DialogContent>

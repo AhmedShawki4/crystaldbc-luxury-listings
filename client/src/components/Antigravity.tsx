@@ -1,5 +1,5 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 
 interface AntigravityProps {
@@ -39,8 +39,16 @@ const AntigravityInner: React.FC<AntigravityProps> = ({
   fieldStrength = 10
 }) => {
   const meshRef = useRef<THREE.InstancedMesh>(null);
-  const { viewport } = useThree();
+  const { viewport, size } = useThree();
   const dummy = useMemo(() => new THREE.Object3D(), []);
+
+  // Responsive adjustments
+  const isMobile = size.width < 768; // Threejs size is in pixels
+  const finalCount = isMobile ? Math.min(count, 80) : count;
+  const finalMagnetRadius = isMobile ? magnetRadius * 0.6 : magnetRadius;
+  const finalRingRadius = isMobile ? ringRadius * 0.6 : ringRadius;
+  const finalParticleSize = isMobile ? particleSize * 0.6 : particleSize;
+  const finalFieldStrength = isMobile ? fieldStrength * 0.8 : fieldStrength;
 
   const lastMousePos = useRef({ x: 0, y: 0 });
   const lastMouseMoveTime = useRef(0);
@@ -48,10 +56,11 @@ const AntigravityInner: React.FC<AntigravityProps> = ({
 
   const particles = useMemo(() => {
     const temp = [];
+    // Increase spread slightly to cover full reliable area
     const width = viewport.width || 100;
     const height = viewport.height || 100;
 
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < finalCount; i++) {
       const t = Math.random() * 100;
       const factor = 20 + Math.random() * 100;
       const speed = 0.01 + Math.random() / 200;
@@ -85,7 +94,7 @@ const AntigravityInner: React.FC<AntigravityProps> = ({
       });
     }
     return temp;
-  }, [count, viewport.width, viewport.height]);
+  }, [finalCount, viewport.width, viewport.height]);
 
   useFrame(state => {
     const mesh = meshRef.current;
@@ -93,6 +102,7 @@ const AntigravityInner: React.FC<AntigravityProps> = ({
 
     const { viewport: v, pointer: m } = state;
 
+    // Only update mouse tracking if user is actually interacting or sufficient movement
     const mouseDist = Math.sqrt(Math.pow(m.x - lastMousePos.current.x, 2) + Math.pow(m.y - lastMousePos.current.y, 2));
 
     if (mouseDist > 0.001) {
@@ -103,13 +113,14 @@ const AntigravityInner: React.FC<AntigravityProps> = ({
     let destX = (m.x * v.width) / 2;
     let destY = (m.y * v.height) / 2;
 
-    if (autoAnimate && Date.now() - lastMouseMoveTime.current > 2000) {
+    // Auto-animate fallback (idling)
+    if (autoAnimate) {
       const time = state.clock.getElapsedTime();
       destX = Math.sin(time * 0.5) * (v.width / 4);
       destY = Math.cos(time * 0.5 * 2) * (v.height / 4);
     }
 
-    const smoothFactor = 0.05;
+    const smoothFactor = 0.1; // Increased for snappier response
     virtualMouse.current.x += (destX - virtualMouse.current.x) * smoothFactor;
     virtualMouse.current.y += (destY - virtualMouse.current.y) * smoothFactor;
 
@@ -133,13 +144,11 @@ const AntigravityInner: React.FC<AntigravityProps> = ({
 
       let targetPos = { x: mx, y: my, z: mz * depthFactor };
 
-      if (dist < magnetRadius) {
+      if (dist < finalMagnetRadius) {
         const angle = Math.atan2(dy, dx) + globalRotation;
-
         const wave = Math.sin(t * waveSpeed + angle) * (0.5 * waveAmplitude);
-        const deviation = randomRadiusOffset * (5 / (fieldStrength + 0.1));
-
-        const currentRingRadius = ringRadius + wave + deviation;
+        const deviation = randomRadiusOffset * (5 / (finalFieldStrength + 0.1));
+        const currentRingRadius = finalRingRadius + wave + deviation;
 
         targetPos.x = projectedTargetX + currentRingRadius * Math.cos(angle);
         targetPos.y = projectedTargetY + currentRingRadius * Math.sin(angle);
@@ -151,7 +160,6 @@ const AntigravityInner: React.FC<AntigravityProps> = ({
       particle.cz += (targetPos.z - particle.cz) * lerpSpeed;
 
       dummy.position.set(particle.cx, particle.cy, particle.cz);
-
       dummy.lookAt(projectedTargetX, projectedTargetY, particle.cz);
       dummy.rotateX(Math.PI / 2);
 
@@ -159,16 +167,14 @@ const AntigravityInner: React.FC<AntigravityProps> = ({
         Math.pow(particle.cx - projectedTargetX, 2) + Math.pow(particle.cy - projectedTargetY, 2)
       );
 
-      const distFromRing = Math.abs(currentDistToMouse - ringRadius);
-      let scaleFactor = 1 - distFromRing / 10;
+      const distFromRing = Math.abs(currentDistToMouse - finalRingRadius);
+      let scaleFactor = 1 - distFromRing / finalMagnetRadius; // Use magnet radius for smoother falldown
 
       scaleFactor = Math.max(0, Math.min(1, scaleFactor));
 
-      const finalScale = scaleFactor * (0.8 + Math.sin(t * pulseSpeed) * 0.2 * particleVariance) * particleSize;
+      const finalScale = scaleFactor * (0.8 + Math.sin(t * pulseSpeed) * 0.2 * particleVariance) * finalParticleSize;
       dummy.scale.set(finalScale, finalScale, finalScale);
-
       dummy.updateMatrix();
-
       mesh.setMatrixAt(i, dummy.matrix);
     });
 
@@ -176,12 +182,12 @@ const AntigravityInner: React.FC<AntigravityProps> = ({
   });
 
   return (
-    <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
+    <instancedMesh ref={meshRef} args={[undefined, undefined, finalCount]}>
       {particleShape === 'capsule' && <capsuleGeometry args={[0.1, 0.4, 4, 8]} />}
       {particleShape === 'sphere' && <sphereGeometry args={[0.2, 16, 16]} />}
       {particleShape === 'box' && <boxGeometry args={[0.3, 0.3, 0.3]} />}
       {particleShape === 'tetrahedron' && <tetrahedronGeometry args={[0.3]} />}
-      <meshBasicMaterial color={color} />
+      <meshBasicMaterial color={color} transparent opacity={0.8} />
     </instancedMesh>
   );
 };
