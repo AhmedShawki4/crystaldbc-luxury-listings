@@ -27,6 +27,7 @@ export interface Property {
   features: string[];
   type: string;
   status: string;
+  constructionStatus?: "Finished Construction" | "Under Construction";
   companyName?: string;
   rentPayPeriod?: "day" | "month" | "year";
   isFeatured: boolean;

@@ -21,7 +21,8 @@ const Listings = () => {
   const [priceFilter, setPriceFilter] = useState("all");
   const [bedsFilter, setBedsFilter] = useState("all");
   const [bathsFilter, setBathsFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [listingType, setListingType] = useState<"sale" | "rent">("sale");
+  const [constructionStatusFilter, setConstructionStatusFilter] = useState("all");
   const [featuredOnly, setFeaturedOnly] = useState(false);
 
   const filters = useMemo<PropertyFilters>(() => {
@@ -29,7 +30,12 @@ const Listings = () => {
     if (searchQuery) params.search = searchQuery;
     if (locationFilter !== "all") params.location = locationFilter;
     if (typeFilter !== "all") params.type = typeFilter;
-    if (statusFilter !== "all") params.status = statusFilter;
+
+    params.status = listingType === "rent" ? "For Rent" : "For Sale";
+    if (listingType === "sale" && constructionStatusFilter !== "all") {
+      params.constructionStatus = constructionStatusFilter;
+    }
+
     if (bedsFilter !== "all") params.minBeds = Number(bedsFilter);
     if (bathsFilter !== "all") params.minBaths = Number(bathsFilter);
     if (featuredOnly) params.featured = true;
@@ -50,7 +56,7 @@ const Listings = () => {
     }
 
     return params;
-  }, [searchQuery, locationFilter, typeFilter, statusFilter, bedsFilter, bathsFilter, priceFilter, featuredOnly, sortBy]);
+  }, [searchQuery, locationFilter, typeFilter, listingType, constructionStatusFilter, bedsFilter, bathsFilter, priceFilter, featuredOnly, sortBy]);
 
   const { data: properties = [], isLoading } = useProperties(filters);
 
@@ -164,6 +170,32 @@ const Listings = () => {
                 />
               </div>
 
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant={listingType === "rent" ? "outline" : "default"}
+                  size="lg"
+                  className="h-14 px-8 text-base"
+                  onClick={() => {
+                    setListingType("sale");
+                  }}
+                >
+                  {t("listings.filterOptions.forSale")}
+                </Button>
+                <Button
+                  type="button"
+                  variant={listingType === "rent" ? "default" : "outline"}
+                  size="lg"
+                  className="h-14 px-8 text-base"
+                  onClick={() => {
+                    setListingType("rent");
+                    setConstructionStatusFilter("all");
+                  }}
+                >
+                  {t("listings.filterOptions.forRent")}
+                </Button>
+              </div>
+
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
                 <Select value={locationFilter} onValueChange={setLocationFilter}>
                   <SelectTrigger className="h-12">
@@ -243,19 +275,21 @@ const Listings = () => {
                   </SelectContent>
                 </Select>
 
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="h-12">
-                    <div className="flex items-center gap-2">
-                      <Tag className="h-4 w-4 text-muted-foreground" />
-                      <SelectValue placeholder={t("listings.filterOptions.anyStatus")} />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t("listings.filterOptions.anyStatus")}</SelectItem>
-                    <SelectItem value="For Sale">{t("listings.filterOptions.forSale")}</SelectItem>
-                    <SelectItem value="For Rent">{t("listings.filterOptions.forRent")}</SelectItem>
-                  </SelectContent>
-                </Select>
+                {listingType === "sale" ? (
+                  <Select value={constructionStatusFilter} onValueChange={setConstructionStatusFilter}>
+                    <SelectTrigger className="h-12">
+                      <div className="flex items-center gap-2">
+                        <Tag className="h-4 w-4 text-muted-foreground" />
+                        <SelectValue placeholder={t("listings.filterOptions.anyStatus")} />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">{t("listings.filterOptions.anyStatus")}</SelectItem>
+                      <SelectItem value="Finished Construction">{t("listings.filterOptions.finishedConstruction")}</SelectItem>
+                      <SelectItem value="Under Construction">{t("listings.filterOptions.underConstruction")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : null}
               </div>
 
               <div className="flex flex-wrap gap-3 items-center justify-between border-t border-white/10 pt-4">
@@ -291,7 +325,8 @@ const Listings = () => {
                     setPriceFilter("all");
                     setBedsFilter("all");
                     setBathsFilter("all");
-                    setStatusFilter("all");
+                    setListingType("sale");
+                    setConstructionStatusFilter("all");
                     setFeaturedOnly(false);
                     setSortBy("featured");
                   }}

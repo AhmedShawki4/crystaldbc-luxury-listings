@@ -18,6 +18,9 @@ const buildFilters = (query) => {
   if (query.status) {
     filters.status = query.status;
   }
+  if (query.constructionStatus) {
+    filters.constructionStatus = query.constructionStatus;
+  }
   if (query.minBeds) {
     filters.beds = { $gte: Number(query.minBeds) };
   }
@@ -92,7 +95,18 @@ exports.createProperty = async (req, res) => {
       }
     }
 
+    if (req.body.status === "For Sale") {
+      const allowed = ["Finished Construction", "Under Construction"];
+      if (!req.body.constructionStatus || !allowed.includes(req.body.constructionStatus)) {
+        return res.status(400).json({ message: "constructionStatus is required for For Sale properties" });
+      }
+    }
+
     if (req.body.status === "For Rent") {
+      // Rentals don't have construction status.
+      if (req.body.constructionStatus !== undefined && req.body.constructionStatus !== null && req.body.constructionStatus !== "") {
+        delete req.body.constructionStatus;
+      }
       const payPeriod = req.body.rentPayPeriod;
       if (!payPeriod || !["day", "month", "year"].includes(payPeriod)) {
         return res.status(400).json({ message: "rentPayPeriod is required for For Rent properties" });
@@ -132,7 +146,21 @@ exports.updateProperty = async (req, res) => {
       }
     }
 
+    const nextStatus = req.body.status;
+    if (nextStatus === "For Sale" || (nextStatus === undefined && req.body.constructionStatus !== undefined)) {
+      const allowed = ["Finished Construction", "Under Construction"];
+      if (req.body.constructionStatus !== undefined && !allowed.includes(req.body.constructionStatus)) {
+        return res.status(400).json({ message: "constructionStatus must be Finished Construction or Under Construction" });
+      }
+    }
+
     if (req.body.status === "For Rent" || req.body.rentPayPeriod !== undefined) {
+      if (req.body.status === "For Rent") {
+        // Rentals don't have construction status.
+        if (req.body.constructionStatus !== undefined) {
+          delete req.body.constructionStatus;
+        }
+      }
       const payPeriod = req.body.rentPayPeriod;
       if (req.body.status === "For Rent" && (!payPeriod || !["day", "month", "year"].includes(payPeriod))) {
         return res.status(400).json({ message: "rentPayPeriod is required for For Rent properties" });

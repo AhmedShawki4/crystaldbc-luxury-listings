@@ -36,12 +36,14 @@ const initialFormState = {
   features: "",
   type: "",
   status: "For Sale",
+  constructionStatus: "Finished Construction",
   companyName: "",
   rentPayPeriod: "month",
   isFeatured: false,
 };
 
 const STATUS_OPTIONS = ["For Sale", "For Rent"] as const;
+const CONSTRUCTION_STATUS_OPTIONS = ["Finished Construction", "Under Construction"] as const;
 const CURRENCY_OPTIONS = [
   { value: "EGP", label: "EGP (Egypt)" },
   { value: "SAR", label: "SAR (Saudi Arabia)" },
@@ -131,6 +133,7 @@ const AdminProperties = () => {
       features: property.features.join(", "),
       type: property.type,
       status: property.status,
+      constructionStatus: property.constructionStatus ?? "Finished Construction",
       companyName: property.companyName ?? "",
       rentPayPeriod: property.rentPayPeriod ?? "month",
       isFeatured: property.isFeatured,
@@ -359,7 +362,14 @@ const AdminProperties = () => {
             <label className="text-sm font-medium">Status</label>
             <Select
               value={formState.status}
-              onValueChange={(value) => setFormState((prev) => ({ ...prev, status: value }))}
+              onValueChange={(value) =>
+                setFormState((prev) => ({
+                  ...prev,
+                  status: value,
+                  constructionStatus:
+                    value === "For Sale" ? (prev.constructionStatus || "Finished Construction") : prev.constructionStatus,
+                }))
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select status" />
@@ -373,6 +383,27 @@ const AdminProperties = () => {
               </SelectContent>
             </Select>
           </div>
+
+          {formState.status === "For Sale" && (
+            <div>
+              <label className="text-sm font-medium">Construction Status</label>
+              <Select
+                value={formState.constructionStatus}
+                onValueChange={(value) => setFormState((prev) => ({ ...prev, constructionStatus: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select construction status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CONSTRUCTION_STATUS_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {formState.status === "For Rent" && (
             <div>
@@ -447,6 +478,9 @@ const AdminProperties = () => {
             <p className="text-luxury-gold font-semibold text-sm">{property.priceLabel}</p>
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
               <span className="px-2 py-1 rounded-full bg-white/10 text-white/80">{property.status}</span>
+              {property.status === "For Sale" && property.constructionStatus ? (
+                <span className="px-2 py-1 rounded-full bg-white/10 text-white/80">{property.constructionStatus}</span>
+              ) : null}
               {property.isFeatured ? (
                 <span className="px-2 py-1 rounded-full bg-amber-500/10 text-amber-400">Featured</span>
               ) : null}
