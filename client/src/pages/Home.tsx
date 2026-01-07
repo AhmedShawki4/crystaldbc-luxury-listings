@@ -3,6 +3,7 @@ import "@google/model-viewer";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLayoutEffect, useRef, useEffect, useState } from "react";
 import FloatingShapes from "@/components/FloatingShapes";
+import Antigravity from "@/components/Antigravity";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -184,13 +185,50 @@ const Home = () => {
     ? (testimonialItems as HomeTestimonial[])
     : [];
 
+  // State to control Antigravity autoAnimate
+  const [antigravityAuto, setAntigravityAuto] = useState(true);
+
+  // Handler for mouse enter/leave on the section
+  const handleAntigravityEnter = () => setAntigravityAuto(false);
+  const handleAntigravityLeave = () => setAntigravityAuto(true);
+
   return (
     <div ref={mainRef} className="min-h-screen">
       {/* 1. Hero Section */}
       <Hero />
 
       {/* 2. Global Vision (3D Globe) */}
-      <section className="py-24 bg-luxury-dark text-white relative overflow-hidden reveal-section">
+      <section
+        className="py-24 bg-luxury-dark text-white relative overflow-hidden reveal-section"
+        onMouseEnter={handleAntigravityEnter}
+        onMouseLeave={handleAntigravityLeave}
+        onTouchStart={handleAntigravityEnter}
+        onTouchEnd={handleAntigravityLeave}
+      >
+        <div className="absolute inset-0 -z-10 pointer-events-none">
+          <Antigravity
+            autoAnimate={antigravityAuto}
+            rotationSpeed={0.22}
+            ringRadius={14}
+            magnetRadius={12}
+            color="#3B7FF6"
+            particleSize={2.6}
+            particleVariance={1.4}
+            pulseSpeed={3.4}
+            depthFactor={1.05}
+            fieldStrength={7}
+            waveAmplitude={2}
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "radial-gradient(circle at 55% 35%, rgba(28,51,94,0.9) 0%, rgba(13,27,54,0.95) 45%, rgba(6,12,26,0.98) 78%, #04060d 100%), radial-gradient(circle at 20% 80%, rgba(212,175,55,0.15) 0%, transparent 55%)",
+              opacity: 0.95,
+              zIndex: -1,
+            }}
+            aria-hidden
+          />
+        </div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1 h-[300px] md:h-[400px] relative">
@@ -227,38 +265,38 @@ const Home = () => {
 
 
       {/* 4. Featured Properties Section - Premium Showcase */}
-      <section className="py-32 relative overflow-hidden reveal-section bg-gradient-to-b from-luxury-dark via-luxury-dark/95 to-luxury-dark">
+      <section className="py-16 md:py-20 relative overflow-hidden reveal-section bg-gradient-to-b from-luxury-dark via-luxury-dark/95 to-luxury-dark">
         {/* Decorative Background Elements */}
         <div className="absolute inset-0 z-0 overflow-hidden">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-luxury-gold/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-luxury-gold/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
-          <div className="absolute top-1/2 left-1/2 w-[800px] h-[800px] bg-luxury-gold/3 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute top-0 left-0 w-72 h-72 bg-luxury-gold/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute bottom-0 right-0 w-72 h-72 bg-luxury-gold/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
+          <div className="absolute top-1/2 left-1/2 w-[620px] h-[620px] bg-luxury-gold/3 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
         </div>
 
         <div className="relative z-10">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Premium Header */}
-            <div className="text-center mb-20">
-              <div className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/30 mb-8">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-luxury-gold/10 border border-luxury-gold/30 mb-6">
                 <Sparkles className="h-4 w-4 text-luxury-gold" />
                 <span className="text-luxury-gold uppercase tracking-[0.25em] text-xs font-semibold">{t("home.exquisiteEyebrow")}</span>
                 <Sparkles className="h-4 w-4 text-luxury-gold" />
               </div>
-              <h2 className="text-4xl md:text-6xl font-display font-medium text-white mb-6">
+              <h2 className="text-3xl md:text-5xl font-display font-medium text-white mb-5">
                 {t("home.featuredTitle")}
               </h2>
-              <div className="flex items-center justify-center gap-4 mb-8">
+              <div className="flex items-center justify-center gap-4 mb-6">
                 <div className="w-16 h-[1px] bg-gradient-to-r from-transparent to-luxury-gold/60" />
                 <div className="w-2 h-2 bg-luxury-gold rotate-45" />
                 <div className="w-16 h-[1px] bg-gradient-to-l from-transparent to-luxury-gold/60" />
               </div>
-              <p className="text-lg text-white/70 max-w-2xl mx-auto font-light leading-relaxed">
+              <p className="text-base md:text-lg text-white/70 max-w-2xl mx-auto font-light leading-relaxed">
                 {t("home.featuredSubtitle")}
               </p>
             </div>
 
             {/* Featured Properties Grid with Enhanced Styling */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16 stagger-grid">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10 stagger-grid">
               {isLoadingFeatured && <p className="text-white/60 text-center col-span-3">{t("common.loadingListings")}</p>}
               {!isLoadingFeatured && featuredProperties.length === 0 && (
                 <p className="text-white/60 text-center col-span-3">{t("listings.emptyTitle")}</p>
@@ -298,7 +336,7 @@ const Home = () => {
               <Button
                 asChild
                 size="lg"
-                className="bg-luxury-gold hover:bg-luxury-gold-light text-luxury-dark rounded-none px-14 py-7 text-lg font-semibold transition-all duration-300 shadow-xl shadow-luxury-gold/20 hover:shadow-2xl hover:shadow-luxury-gold/30"
+                className="bg-luxury-gold hover:bg-luxury-gold-light text-luxury-dark rounded-none px-10 py-6 text-base md:text-lg font-semibold transition-all duration-300 shadow-xl shadow-luxury-gold/20 hover:shadow-2xl hover:shadow-luxury-gold/30"
               >
                 <Link to="/listings" className="flex items-center gap-3">
                   {t("home.viewAll")}

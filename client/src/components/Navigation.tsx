@@ -73,9 +73,13 @@ const Navigation = () => {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-white/10 pt-[env(safe-area-inset-top)]",
         useDarkNav
-          ? "bg-gradient-to-r from-luxury-dark via-luxury-dark/95 to-[#111]/90 backdrop-blur-xl shadow-2xl"
+          ? "backdrop-blur-xl shadow-2xl"
           : "bg-transparent"
       )}
+      style={useDarkNav ? {
+        background: "linear-gradient(90deg, #0a0d1a 0%, #10182b 60%, #181f3a 100%)",
+        boxShadow: "0 8px 32px 0 rgba(10, 13, 26, 0.55)",
+      } : {}}
     >
       <div className="pointer-events-none absolute inset-x-1/2 top-3 hidden h-10 w-[60%] -translate-x-1/2 rounded-full bg-white/10 blur-3xl lg:block" aria-hidden />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

@@ -86,18 +86,24 @@ const About = () => {
       />
 
       {/* Our Legacy */}
-      <section className="py-24 bg-background overflow-hidden relative">
+      <section className="relative py-24 overflow-hidden bg-background min-h-[540px]">
+        <div className="absolute inset-0 -z-10 pointer-events-none">
+          <div
+            className="absolute inset-0 bg-gradient-to-b from-transparent via-background/15 to-background/85"
+            aria-hidden
+          />
+        </div>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-24 bg-gradient-to-b from-transparent to-luxury-gold/50" />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
-            <div className="relative order-2 lg:order-1">
+            <div className="relative order-2 lg:order-1 z-10">
               <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-white/10">
                 <img src={heroImage || "/backgroundphoto.jpg"} alt="Our Legacy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
               </div>
-              <div className="absolute -bottom-8 -left-8 bg-white p-8 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] max-w-xs hidden md:block border border-gray-100">
-                <p className="text-4xl font-display font-bold text-luxury-gold mb-2">20+</p>
-                <p className="text-sm text-gray-600 font-medium leading-relaxed">{t("about.heroSubtitle") || "Years of Excellence"}</p>
+              <div className="absolute -bottom-8 -left-8 hidden max-w-xs rounded-xl border border-white/10 bg-luxury-dark/80 p-8 backdrop-blur-md shadow-[0_20px_50px_rgba(0,0,0,0.35)] md:block">
+                <p className="mb-2 text-4xl font-display font-bold text-luxury-gold">20+</p>
+                <p className="text-sm font-medium leading-relaxed text-white/80">{t("about.heroSubtitle") || "Years of Excellence"}</p>
               </div>
             </div>
 
