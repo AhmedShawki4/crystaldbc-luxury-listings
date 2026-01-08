@@ -1,6 +1,10 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Suspense, lazy } from "react";
+
+// Lazy load the GlobeViewer for better initial page load
+const GlobeViewer = lazy(() => import("@/components/GlobeViewer"));
 
 interface PageHeroStat {
   label: string;
@@ -15,6 +19,7 @@ interface PageHeroProps {
   icon: LucideIcon;
   isPattern?: boolean;
   backgroundImage?: string;
+  use3DGlobe?: boolean;
   actions?: ReactNode;
   stats?: PageHeroStat[];
   className?: string;
@@ -27,6 +32,7 @@ const PageHero = ({
   icon: Icon,
   isPattern,
   backgroundImage,
+  use3DGlobe,
   actions,
   stats,
   className,
@@ -34,10 +40,23 @@ const PageHero = ({
   <section
     className={cn(
       "relative isolate overflow-hidden border-b border-white/10 bg-gradient-to-br from-luxury-dark via-luxury-dark/95 to-[#111] pt-28 pb-16 text-white",
+      use3DGlobe && "min-h-[500px] md:min-h-[550px]",
       className
     )}
   >
-    {backgroundImage ? (
+    {/* 3D Globe Background */}
+    {use3DGlobe ? (
+      <>
+        <Suspense fallback={
+          <div className="absolute inset-0 bg-gradient-to-br from-luxury-dark via-luxury-dark/95 to-[#111]" />
+        }>
+          <GlobeViewer className="z-0 opacity-90" />
+        </Suspense>
+        {/* Lighter gradient overlay for better globe visibility */}
+        <div className="absolute inset-0 bg-gradient-to-r from-luxury-dark/85 via-luxury-dark/40 to-transparent z-[1]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-luxury-dark/70 via-transparent to-luxury-dark/30 z-[1]" />
+      </>
+    ) : backgroundImage ? (
       <div className="absolute inset-0">
         {isPattern ? (
           <div

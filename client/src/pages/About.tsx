@@ -71,7 +71,7 @@ const About = () => {
         title={content.heroTitle || t("about.heroTitle")}
         description={content.heroSubtitle || t("about.heroSubtitle")}
         icon={Award}
-        backgroundImage="/crystalpattern.png"
+        use3DGlobe={true}
         stats={stats.map((stat) => ({ label: stat.label, value: stat.value }))}
         actions={(
           <>
