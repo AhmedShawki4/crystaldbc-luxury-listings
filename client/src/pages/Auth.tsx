@@ -134,7 +134,7 @@ export const AuthCard = ({
 
   return (
     <motion.div
-      className="w-full max-w-lg bg-background border border-border rounded-lg p-4 sm:p-8 shadow-lg"
+      className="w-full max-w-lg bg-background border-0 sm:border sm:border-border rounded-none sm:rounded-lg p-4 sm:p-8 shadow-none sm:shadow-lg"
       {...formMotion}
     >
       <motion.div
