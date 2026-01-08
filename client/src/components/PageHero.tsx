@@ -50,7 +50,9 @@ const PageHero = ({
         <Suspense fallback={
           <div className="absolute inset-0 bg-gradient-to-br from-luxury-dark via-luxury-dark/95 to-[#111]" />
         }>
-          <GlobeViewer className="z-0 opacity-90" />
+          <div className="absolute inset-0 z-0">
+            <GlobeViewer className="opacity-90" />
+          </div>
         </Suspense>
         {/* Lighter gradient overlay for better globe visibility */}
         <div className="absolute inset-0 bg-gradient-to-r from-luxury-dark/85 via-luxury-dark/40 to-transparent z-[1]" />

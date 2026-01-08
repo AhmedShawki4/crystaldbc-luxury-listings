@@ -34,33 +34,53 @@ interface GlobeViewerProps {
 
 const GlobeViewer = ({ className = '' }: GlobeViewerProps) => {
   const [isMobile, setIsMobile] = useState(false);
+  const [webGLSupported, setWebGLSupported] = useState(true);
 
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
     
+    // Check WebGL support
+    const checkWebGL = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        setWebGLSupported(!!gl);
+      } catch {
+        setWebGLSupported(false);
+      }
+    };
+    
     checkMobile();
+    checkWebGL();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Responsive settings
-  const scale = isMobile ? 1.8 : 2.5;
-  const cameraPosition: [number, number, number] = isMobile ? [0, 0, 5] : [0, 0, 4.5];
-  const rotationSpeed = isMobile ? 0.001 : 0.002;
+  // If WebGL is not supported, return null (fallback will be shown by parent)
+  if (!webGLSupported) {
+    return null;
+  }
+
+  // Responsive settings - larger scale for mobile visibility
+  const scale = isMobile ? 2.2 : 2.5;
+  const cameraPosition: [number, number, number] = isMobile ? [0, 0, 5.5] : [0, 0, 4.5];
+  const rotationSpeed = isMobile ? 0.0015 : 0.002;
 
   return (
-    <div className={`absolute inset-0 ${className}`}>
+    <div className={`absolute inset-0 w-full h-full ${className}`} style={{ minHeight: '100%' }}>
       <Canvas
         camera={{ position: cameraPosition, fov: 50 }}
         gl={{ 
-          antialias: true, 
+          antialias: !isMobile, 
           alpha: true,
-          powerPreference: 'high-performance'
+          powerPreference: isMobile ? 'low-power' : 'high-performance',
+          failIfMajorPerformanceCaveat: false
         }}
         dpr={isMobile ? 1 : Math.min(window.devicePixelRatio, 2)}
-        style={{ background: 'transparent' }}
+        style={{ background: 'transparent', width: '100%', height: '100%' }}
+        resize={{ scroll: false, debounce: { scroll: 50, resize: 0 } }}
       >
         <Suspense fallback={null}>
           {/* Strong ambient lighting for visibility */}
@@ -73,7 +93,7 @@ const GlobeViewer = ({ className = '' }: GlobeViewerProps) => {
             penumbra={1}
             intensity={3}
             color="#D4AF37"
-            castShadow
+            castShadow={!isMobile}
           />
           
           {/* Secondary bright spotlight */}
