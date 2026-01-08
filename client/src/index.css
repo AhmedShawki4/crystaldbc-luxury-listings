@@ -246,4 +246,27 @@ All colors MUST be HSL.
   .dialog-scroll::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(180deg, hsl(var(--luxury-gold-light)) 0%, hsl(var(--luxury-gold)) 100%);
   }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--luxury-gold) / 0.5) transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--luxury-gold) / 0.3);
+    border-radius: 10px;
+    transition: background 0.2s;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--luxury-gold) / 0.5);
+  }
 }

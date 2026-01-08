@@ -71,7 +71,7 @@ const AdminLayout = () => {
             <Link to="/">Back to Home</Link>
           </Button>
         </div>
-        <nav className="flex-1 px-4 py-6 space-y-1">
+        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto selection:bg-luxury-gold/30 custom-scrollbar">
           {NAV_ITEMS.filter((item) => !item.roles || (user?.role && item.roles.includes(user.role))).map((item) => {
             const Icon = item.icon;
             return (
@@ -101,9 +101,7 @@ const AdminLayout = () => {
           })}
         </nav>
         <div className="px-4 py-6 border-t-2 border-luxury-gold bg-gradient-to-r from-luxury-dark via-luxury-gold/10 to-luxury-dark/80 space-y-3 rounded-b-xl shadow-lg">
-          <Button asChild className="w-full bg-luxury-gold text-luxury-dark font-bold shadow-md hover:bg-luxury-gold/90 border border-luxury-dark">
-            <Link to="/">Go to Homepage</Link>
-          </Button>
+
           <Button variant="destructive" className="w-full" onClick={logout}>
             Sign out
           </Button>
@@ -111,12 +109,18 @@ const AdminLayout = () => {
       </aside>
 
       <div className="flex-1 bg-[#020617] min-h-screen">
-        <header className="px-4 py-4 shadow-sm bg-background border-b border-border flex items-center justify-between md:hidden">
+        <header className="sticky top-0 z-50 px-4 py-4 shadow-md bg-background/95 backdrop-blur-sm border-b border-border flex items-center justify-between md:hidden">
           <div>
             <p className="text-sm text-muted-foreground">Signed in as</p>
             <p className="font-semibold">{user?.name}</p>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" asChild className="mr-2 border-luxury-gold/30 text-luxury-gold hover:bg-luxury-gold/10 hover:text-luxury-gold hover:border-luxury-gold/60 transition-colors">
+              <Link to="/" title="Back to Home" className="flex items-center gap-2">
+                <Home className="h-4 w-4" />
+                <span className="hidden sm:inline">Home</span>
+              </Link>
+            </Button>
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="sm" className="flex items-center gap-2">
@@ -124,12 +128,12 @@ const AdminLayout = () => {
                   Menu
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[280px] bg-gradient-to-b from-[#030b14] via-luxury-dark to-[#0a1a2a] text-white p-0">
+              <SheetContent side="left" className="w-[280px] bg-gradient-to-b from-[#030b14] via-luxury-dark to-[#0a1a2a] text-white p-0 flex flex-col h-full">
                 <SheetHeader className="px-4 pt-5 pb-3 border-b border-white/10 text-left">
                   <SheetTitle className="text-lg font-display text-white">Admin Menu</SheetTitle>
                   <p className="text-xs text-white/60">{user?.name} · {user?.role}</p>
                 </SheetHeader>
-                <nav className="px-3 py-4 space-y-1">
+                <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
                   {NAV_ITEMS.filter((item) => !item.roles || (user?.role && item.roles.includes(user.role))).map((item) => {
                     const Icon = item.icon;
                     return (
@@ -153,12 +157,7 @@ const AdminLayout = () => {
                   })}
                 </nav>
                 <div className="px-3 py-4 border-t border-white/10 space-y-2">
-                  <Button asChild className="w-full bg-luxury-gold text-luxury-dark font-semibold" size="sm">
-                    <Link to="/">
-                      <Home className="h-4 w-4 mr-2" />
-                      Go to Homepage
-                    </Link>
-                  </Button>
+
                   <Button variant="outline" className="w-full border-white/30 text-white" size="sm" onClick={logout}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign out

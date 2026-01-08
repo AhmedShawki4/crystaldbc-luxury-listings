@@ -217,7 +217,7 @@ const resources = {
         cta: "Start Investing",
       },
       contact: {
-        heroEyebrow: "Concierge",
+        heroEyebrow: "Contact Us",
         heroTitle: "Get in Touch",
         heroDescription: "Ready to find your dream property? We're here to guide you every step of the way.",
         stats: {
@@ -543,15 +543,7 @@ const resources = {
         },
       },
       propertyDetail: {
-        validation: {
-          nameRequired: "الاسم مطلوب.",
-          emailRequired: "البريد الإلكتروني مطلوب.",
-          phoneRequired: "رقم الهاتف مطلوب.",
-          passwordMin: "يجب أن تكون كلمة المرور 6 أحرف على الأقل.",
-          passwordNumber: "يجب أن تتضمن كلمة المرور رقمًا واحدًا على الأقل.",
-          passwordMismatch: "كلمتا المرور غير متطابقتين.",
-          passwordHint: "استخدم 6 أحرف على الأقل وتضمّن رقمًا.",
-        },
+
         loading: "Loading property details...",
         backToListings: "Back to Listings",
         notFoundTitle: "Property Not Found",
@@ -1246,7 +1238,7 @@ const resources = {
         cta: "ابدأ الاستثمار",
       },
       contact: {
-        heroEyebrow: "الكونسيرج",
+        heroEyebrow: "تواصل معنا",
         heroTitle: "تواصل معنا",
         heroDescription: "جاهز للعثور على عقارك المثالي؟ نحن هنا لمساعدتك في كل خطوة.",
         stats: {
@@ -1515,6 +1507,15 @@ const resources = {
           phone: "الهاتف (اختياري)",
           password: "كلمة المرور",
           confirmPassword: "تأكيد كلمة المرور",
+        },
+        validation: {
+          nameRequired: "الاسم مطلوب.",
+          emailRequired: "البريد الإلكتروني مطلوب.",
+          phoneRequired: "رقم الهاتف مطلوب.",
+          passwordMin: "يجب أن تكون كلمة المرور 6 أحرف على الأقل.",
+          passwordNumber: "يجب أن تتضمن كلمة المرور رقمًا واحدًا على الأقل.",
+          passwordMismatch: "كلمتا المرور غير متطابقتين.",
+          passwordHint: "استخدم 6 أحرف على الأقل وتضمّن رقمًا.",
         },
         actions: {
           submitLogin: "تسجيل الدخول",
@@ -2177,7 +2178,7 @@ const resources = {
         cta: "Jetzt investieren",
       },
       contact: {
-        heroEyebrow: "Concierge",
+        heroEyebrow: "Kontakt",
         heroTitle: "Kontakt aufnehmen",
         heroDescription: "Bereit für Ihre Traumimmobilie? Wir begleiten Sie auf jedem Schritt.",
         stats: {
@@ -2446,6 +2447,15 @@ const resources = {
           phone: "Telefon (optional)",
           password: "Passwort",
           confirmPassword: "Passwort bestätigen",
+        },
+        validation: {
+          nameRequired: "Name ist erforderlich.",
+          emailRequired: "E-Mail ist erforderlich.",
+          phoneRequired: "Telefon ist erforderlich.",
+          passwordMin: "Mindestens 6 Zeichen.",
+          passwordNumber: "Mindestens eine Zahl.",
+          passwordMismatch: "Passwörter stimmen nicht überein.",
+          passwordHint: "Verwenden Sie mindestens 6 Zeichen und eine Zahl.",
         },
         actions: {
           submitLogin: "Anmelden",
@@ -3110,7 +3120,7 @@ const resources = {
         cta: "Начать инвестировать",
       },
       contact: {
-        heroEyebrow: "Консьерж",
+        heroEyebrow: "Свяжитесь с нами",
         heroTitle: "Свяжитесь с нами",
         heroDescription: "Готовы к дому мечты? Мы поможем на каждом шаге.",
         stats: {
@@ -3366,6 +3376,15 @@ const resources = {
           phone: "Телефон (необязательно)",
           password: "Пароль",
           confirmPassword: "Подтвердите пароль",
+        },
+        validation: {
+          nameRequired: "Имя обязательно.",
+          emailRequired: "Email обязателен.",
+          phoneRequired: "Телефон обязателен.",
+          passwordMin: "Пароль должен быть не короче 6 символов.",
+          passwordNumber: "Пароль должен содержать хотя бы одну цифру.",
+          passwordMismatch: "Пароли не совпадают.",
+          passwordHint: "Используйте минимум 6 символов и добавьте цифру.",
         },
         actions: {
           submitLogin: "Войти",

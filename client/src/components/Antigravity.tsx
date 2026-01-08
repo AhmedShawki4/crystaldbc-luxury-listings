@@ -39,6 +39,18 @@ const AntigravityInner: React.FC<AntigravityProps> = ({
   fieldStrength = 10
 }) => {
   const meshRef = useRef<THREE.InstancedMesh>(null);
+  const globalMouse = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const x = (e.clientX / window.innerWidth) * 2 - 1;
+      const y = -(e.clientY / window.innerHeight) * 2 + 1;
+      globalMouse.current = { x, y };
+    };
+    window.addEventListener('mousemove', handleMouseMove, { capture: true });
+    return () => window.removeEventListener('mousemove', handleMouseMove, { capture: true });
+  }, []);
+
   const { viewport, size } = useThree();
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
@@ -100,7 +112,9 @@ const AntigravityInner: React.FC<AntigravityProps> = ({
     const mesh = meshRef.current;
     if (!mesh) return;
 
-    const { viewport: v, pointer: m } = state;
+    const { viewport: v } = state;
+    // Use our global mouse tracker instead of state.pointer
+    const m = globalMouse.current;
 
     // Only update mouse tracking if user is actually interacting or sufficient movement
     const mouseDist = Math.sqrt(Math.pow(m.x - lastMousePos.current.x, 2) + Math.pow(m.y - lastMousePos.current.y, 2));
