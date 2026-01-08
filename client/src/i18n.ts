@@ -490,6 +490,7 @@ const resources = {
         validation: {
           nameRequired: "Name is required.",
           emailRequired: "Email is required.",
+          emailInvalid: "Please enter a valid email address.",
           phoneRequired: "Phone is required.",
           passwordMin: "Password must be at least 6 characters.",
           passwordNumber: "Password must include at least one number.",
@@ -1504,13 +1505,14 @@ const resources = {
         fields: {
           name: "الاسم الكامل",
           email: "البريد الإلكتروني",
-          phone: "الهاتف (اختياري)",
+          phone: "الهاتف",
           password: "كلمة المرور",
           confirmPassword: "تأكيد كلمة المرور",
         },
         validation: {
           nameRequired: "الاسم مطلوب.",
           emailRequired: "البريد الإلكتروني مطلوب.",
+          emailInvalid: "يرجى إدخال بريد إلكتروني صحيح.",
           phoneRequired: "رقم الهاتف مطلوب.",
           passwordMin: "يجب أن تكون كلمة المرور 6 أحرف على الأقل.",
           passwordNumber: "يجب أن تتضمن كلمة المرور رقمًا واحدًا على الأقل.",
@@ -2444,13 +2446,14 @@ const resources = {
         fields: {
           name: "Vollständiger Name",
           email: "E-Mail",
-          phone: "Telefon (optional)",
+          phone: "Telefon",
           password: "Passwort",
           confirmPassword: "Passwort bestätigen",
         },
         validation: {
           nameRequired: "Name ist erforderlich.",
           emailRequired: "E-Mail ist erforderlich.",
+          emailInvalid: "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
           phoneRequired: "Telefon ist erforderlich.",
           passwordMin: "Mindestens 6 Zeichen.",
           passwordNumber: "Mindestens eine Zahl.",
@@ -3373,13 +3376,14 @@ const resources = {
         fields: {
           name: "Полное имя",
           email: "Email",
-          phone: "Телефон (необязательно)",
+          phone: "Телефон",
           password: "Пароль",
           confirmPassword: "Подтвердите пароль",
         },
         validation: {
           nameRequired: "Имя обязательно.",
           emailRequired: "Email обязателен.",
+          emailInvalid: "Пожалуйста, введите действительный адрес электронной почты.",
           phoneRequired: "Телефон обязателен.",
           passwordMin: "Пароль должен быть не короче 6 символов.",
           passwordNumber: "Пароль должен содержать хотя бы одну цифру.",

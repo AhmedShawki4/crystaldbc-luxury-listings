@@ -54,6 +54,19 @@ export const AuthCard = ({
 
     try {
       if (mode === "login") {
+        // Validate email format for login
+        if (!formState.email.trim()) {
+          setErrors({ email: t("auth.validation.emailRequired") });
+          toast({ title: t("auth.meta.authFailed"), description: t("auth.validation.emailRequired"), variant: "destructive" });
+          setLoading(false);
+          return;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email)) {
+          setErrors({ email: t("auth.validation.emailInvalid") });
+          toast({ title: t("auth.meta.authFailed"), description: t("auth.validation.emailInvalid"), variant: "destructive" });
+          setLoading(false);
+          return;
+        }
         await login({ email: formState.email, password: formState.password });
         toast({ title: t("auth.meta.welcomeBack"), description: t("auth.meta.signedIn") });
       } else {
@@ -65,6 +78,8 @@ export const AuthCard = ({
 
         if (!formState.email.trim()) {
           newErrors.email = t("auth.validation.emailRequired");
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email)) {
+          newErrors.email = t("auth.validation.emailInvalid");
         }
 
         if (!formState.phone.trim()) {
@@ -119,16 +134,16 @@ export const AuthCard = ({
 
   return (
     <motion.div
-      className="w-full max-w-lg bg-background border border-border rounded-lg p-8 shadow-lg"
+      className="w-full max-w-lg bg-background border border-border rounded-lg p-4 sm:p-8 shadow-lg"
       {...formMotion}
     >
       <motion.div
-        className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-6"
+        className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4 sm:mb-6"
         {...formMotion}
         transition={{ duration: 0.35, delay: 0.05, ease: "easeOut" }}
       >
         <div>
-          <motion.h1 className="text-3xl font-display font-bold text-primary mb-2" {...formMotion} transition={{ duration: 0.35, delay: 0.05, ease: "easeOut" }}>
+          <motion.h1 className="text-2xl sm:text-3xl font-display font-bold text-primary mb-2" {...formMotion} transition={{ duration: 0.35, delay: 0.05, ease: "easeOut" }}>
             {mode === "login" ? t("auth.loginTitle") : t("auth.registerTitle")}
           </motion.h1>
           <motion.p className="text-muted-foreground" {...formMotion} transition={{ duration: 0.35, delay: 0.08, ease: "easeOut" }}>
@@ -137,7 +152,7 @@ export const AuthCard = ({
         </div>
       </motion.div>
 
-      <motion.form className="space-y-5" onSubmit={handleSubmit} {...formMotion} transition={{ duration: 0.4, delay: 0.12, ease: "easeOut" }}>
+      <motion.form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit} {...formMotion} transition={{ duration: 0.4, delay: 0.12, ease: "easeOut" }}>
         {mode === "register" && (
           <div>
             <label htmlFor="name" className="text-sm font-medium block mb-2">
@@ -257,7 +272,7 @@ export const AuthCard = ({
         </Button>
       </motion.form>
 
-      <p className="text-sm text-muted-foreground text-center mt-6">
+      <p className="text-sm text-muted-foreground text-center mt-4 sm:mt-6">
         {mode === "login" ? t("auth.meta.newUser") : t("auth.meta.haveAccount")} {" "}
         {onSwitchMode ? (
           <button
