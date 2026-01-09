@@ -1,18 +1,21 @@
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, OrbitControls, Environment } from '@react-three/drei';
-import { Suspense, useRef, useEffect, useState } from 'react';
+import { Suspense, useRef, useEffect, useState, memo, lazy } from 'react';
 import * as THREE from 'three';
+
+// Model path constant for caching
+const GLOBE_MODEL_PATH = '/city_globe3d_model.glb';
 
 interface GlobeModelProps {
   rotationSpeed?: number;
   scale?: number;
 }
 
-const GlobeModel = ({ rotationSpeed = 0.002, scale = 1 }: GlobeModelProps) => {
-  const { scene } = useGLTF('/city_globe3d_model.glb');
+const GlobeModel = memo(({ rotationSpeed = 0.002, scale = 1 }: GlobeModelProps) => {
+  const { scene } = useGLTF(GLOBE_MODEL_PATH);
   const groupRef = useRef<THREE.Group>(null);
 
-  // Clone the scene to avoid mutations
+  // Clone the scene to avoid mutations - memoize to prevent unnecessary clones
   const clonedScene = scene.clone();
 
   useFrame(() => {
@@ -26,15 +29,19 @@ const GlobeModel = ({ rotationSpeed = 0.002, scale = 1 }: GlobeModelProps) => {
       <primitive object={clonedScene} />
     </group>
   );
-};
+});
+
+GlobeModel.displayName = 'GlobeModel';
 
 interface GlobeViewerProps {
   className?: string;
 }
 
-const GlobeViewer = ({ className = '' }: GlobeViewerProps) => {
+const GlobeViewer = memo(({ className = '' }: GlobeViewerProps) => {
   const [isMobile, setIsMobile] = useState(false);
   const [webGLSupported, setWebGLSupported] = useState(true);
+  const [isInView, setIsInView] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -58,6 +65,27 @@ const GlobeViewer = ({ className = '' }: GlobeViewerProps) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Intersection Observer for lazy loading the 3D canvas
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsInView(true);
+            observer.disconnect();
+          }
+        });
+      },
+      { rootMargin: '100px', threshold: 0.1 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   // If WebGL is not supported, return null (fallback will be shown by parent)
   if (!webGLSupported) {
     return null;
@@ -69,17 +97,29 @@ const GlobeViewer = ({ className = '' }: GlobeViewerProps) => {
   const rotationSpeed = isMobile ? 0.0015 : 0.002;
 
   return (
-    <div className={`absolute inset-0 w-full h-full ${className}`} style={{ minHeight: '100%' }}>
-      <Canvas
-        camera={{ position: cameraPosition, fov: 50 }}
-        gl={{ 
-          antialias: !isMobile, 
-          alpha: true,
-          powerPreference: isMobile ? 'low-power' : 'high-performance',
-          failIfMajorPerformanceCaveat: false
-        }}
-        dpr={isMobile ? 1 : Math.min(window.devicePixelRatio, 2)}
-        style={{ background: 'transparent', width: '100%', height: '100%' }}
+    <div 
+      ref={containerRef}
+      className={`absolute inset-0 w-full h-full ${className}`} 
+      style={{ minHeight: '100%' }}
+    >
+      {/* Loading placeholder while not in view or loading */}
+      {!isInView && (
+        <div className="absolute inset-0 bg-gradient-to-br from-luxury-dark via-luxury-dark/95 to-[#111] flex items-center justify-center">
+          <div className="w-12 h-12 border-2 border-luxury-gold/30 border-t-luxury-gold rounded-full animate-spin" />
+        </div>
+      )}
+      
+      {isInView && (
+        <Canvas
+          camera={{ position: cameraPosition, fov: 50 }}
+          gl={{ 
+            antialias: !isMobile, 
+            alpha: true,
+            powerPreference: isMobile ? 'low-power' : 'high-performance',
+            failIfMajorPerformanceCaveat: false
+          }}
+          dpr={isMobile ? 1 : Math.min(window.devicePixelRatio, 2)}
+          style={{ background: 'transparent', width: '100%', height: '100%' }}
         resize={{ scroll: false, debounce: { scroll: 50, resize: 0 } }}
       >
         <Suspense fallback={null}>
@@ -133,12 +173,15 @@ const GlobeViewer = ({ className = '' }: GlobeViewerProps) => {
           enableRotate={false}
           autoRotate={false}
         />
-      </Canvas>
+        </Canvas>
+      )}
     </div>
   );
-};
+});
 
-// Preload the model
-useGLTF.preload('/city_globe3d_model.glb');
+GlobeViewer.displayName = 'GlobeViewer';
+
+// Preload the model for faster subsequent loads
+useGLTF.preload(GLOBE_MODEL_PATH);
 
 export default GlobeViewer;

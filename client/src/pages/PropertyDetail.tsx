@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import LazyImage from "@/components/LazyImage";
 
 type DetailedProperty = {
   id: string;
@@ -264,10 +265,12 @@ const PropertyDetail = () => {
       <section className="container mx-auto px-4 sm:px-6 lg:px-8 mb-12">
         <div className="grid grid-cols-1 gap-4">
           <div className="relative h-[500px] overflow-hidden rounded-lg">
-            <img
+            <LazyImage
               src={getMediaUrl(property.gallery[selectedImage])}
               alt={property.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full"
+              priority={selectedImage === 0}
+              blurUp={true}
             />
           </div>
           <div className="grid grid-cols-3 gap-4">
@@ -280,10 +283,12 @@ const PropertyDetail = () => {
                   : "border-transparent hover:border-border"
                   }`}
               >
-                <img
+                <LazyImage
                   src={getMediaUrl(image)}
                   alt={`${property.title} ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full"
+                  blurUp={true}
+                  rootMargin="100px"
                 />
               </button>
             ))}

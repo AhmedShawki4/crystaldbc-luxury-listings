@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getMediaUrl } from "@/lib/media";
 import { useTranslation } from "react-i18next";
 import PageHero from "@/components/PageHero";
+import LazyImage from "@/components/LazyImage";
 
 const fetchWishlist = async () => {
   const { data } = await apiClient.get<{ items: WishlistItem[] }>("/wishlist");
@@ -50,10 +51,12 @@ const Wishlist = () => {
             {data.map((item) => (
               <Card key={item._id} className="flex flex-col">
                 <CardHeader className="p-0">
-                  <img
+                  <LazyImage
                     src={getMediaUrl(item.property.coverImage)}
                     alt={item.property.title}
-                    className="h-56 w-full object-cover rounded-t-lg"
+                    className="h-56 w-full rounded-t-lg"
+                    blurUp={true}
+                    rootMargin="200px"
                   />
                 </CardHeader>
                 <CardContent className="p-5 flex-1 flex flex-col gap-3">

@@ -1,4 +1,3 @@
-import "@google/model-viewer";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, CheckCircle2, TrendingUp, Building2, BarChart3, PieChart, Download } from "lucide-react";
@@ -16,6 +15,8 @@ import useAuth from "@/hooks/useAuth";
 import type { AxiosError } from "axios";
 import AuthModal from "@/components/AuthModal";
 import { jsPDF } from "jspdf";
+import LazyModelViewer from "@/components/LazyModelViewer";
+import LazyImage from "@/components/LazyImage";
 
 type PendingAction = { type: "my-investments" } | { type: "invest"; box: InvestmentBox };
 
@@ -365,20 +366,19 @@ const Investment = () => {
                         </div>
 
                         <div className="h-[450px] md:h-[600px] w-full relative fade-in">
-                            {/* @ts-ignore */}
-                            <model-viewer
+                            <LazyModelViewer
                                 src="/base_basic_pbr.glb"
                                 poster="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
                                 alt="A 3D model of a luxury property"
-                                shadow-intensity="1"
-                                loading="eager"
-                                auto-rotate
-                                camera-controls
-                                camera-orbit="90deg 75deg 2.5m"
-                                rotation-per-second="45deg"
-                                interaction-prompt="none"
-                                disable-zoom
-                                style={{ width: '100%', height: '100%' }}
+                                shadowIntensity="1"
+                                autoRotate={true}
+                                cameraControls={true}
+                                cameraOrbit="90deg 75deg 2.5m"
+                                rotationPerSecond="45deg"
+                                interactionPrompt="none"
+                                disableZoom={true}
+                                className="w-full h-full"
+                                rootMargin="300px"
                             />
                         </div>
                     </div>
@@ -521,10 +521,12 @@ const Investment = () => {
                         </div>
                         <div className="order-1 lg:order-2 relative h-[500px] reveal-card">
                             <div className="absolute inset-0 bg-gradient-to-tr from-luxury-gold/20 to-transparent rounded-2xl transform rotate-3 z-0"></div>
-                            <img
+                            <LazyImage
                                 src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1200"
                                 alt="Market Analysis"
-                                className="relative z-10 w-full h-full object-cover rounded-2xl shadow-2xl hover:scale-[1.02] transition-transform duration-700"
+                                className="relative z-10 w-full h-full rounded-2xl shadow-2xl hover:scale-[1.02] transition-transform duration-700"
+                                blurUp={true}
+                                rootMargin="300px"
                             />
                             {/* Floating Stats Card */}
                             <div className="absolute -bottom-8 -left-8 z-20 bg-white p-6 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 max-w-xs animate-bounce-slow hidden md:block">
@@ -581,7 +583,12 @@ const Investment = () => {
             {/* CTA Section */}
             <section className="py-24 relative overflow-hidden">
                 <div className="absolute inset-0 bg-luxury-dark/95 z-0">
-                    <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000&auto=format&fit=crop" className="w-full h-full object-cover opacity-20 mix-blend-overlay" alt="Background" />
+                    <LazyImage 
+                        src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000&auto=format&fit=crop" 
+                        className="w-full h-full opacity-20 mix-blend-overlay" 
+                        alt="Background"
+                        rootMargin="400px"
+                    />
                     <div className="absolute inset-0 bg-gradient-to-r from-luxury-dark via-luxury-dark/90 to-transparent" />
                 </div>
 

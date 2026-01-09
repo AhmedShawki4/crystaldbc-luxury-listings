@@ -7,6 +7,7 @@ import type { HeroContent } from "@/types";
 import { getMediaUrl } from "@/lib/media";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import LazyImage, { preloadCriticalImages } from "@/components/LazyImage";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -28,6 +29,13 @@ const Hero = () => {
   const bgRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+
+  // Preload hero image as it's critical above-the-fold content
+  useLayoutEffect(() => {
+    if (heroImage) {
+      preloadCriticalImages([heroImage]);
+    }
+  }, [heroImage]);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -71,10 +79,12 @@ const Hero = () => {
     <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Layer */}
       <div ref={bgRef} className="absolute inset-0 z-0 h-[120%] -top-[10%]">
-        <img
+        <LazyImage
           src={heroImage}
-          alt="Luxury PropertyBackground"
-          className="w-full h-full object-cover"
+          alt="Luxury Property Background"
+          className="w-full h-full"
+          priority={true}
+          blurUp={true}
         />
       </div>
 

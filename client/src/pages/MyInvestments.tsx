@@ -37,6 +37,7 @@ import apiClient from "@/lib/apiClient";
 import type { Investment, InvestmentBox } from "@/types";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import LazyImage from "@/components/LazyImage";
 
 const fetchMyInvestments = async () => {
   const { data } = await apiClient.get<{ investments: Investment[] }>("/investments/my");
@@ -200,7 +201,12 @@ const MyInvestments = () => {
       <div className="relative overflow-hidden py-20 pb-32">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-[#020617]/90 z-10" />
-          <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=2000" className="w-full h-full object-cover" alt="Background" />
+          <LazyImage 
+            src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=2000" 
+            className="w-full h-full" 
+            alt="Background"
+            priority={true}
+          />
         </div>
         <div className="container relative z-20 mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-md mb-6 animate-fade-in-up">

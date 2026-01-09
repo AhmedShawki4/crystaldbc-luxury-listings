@@ -1,5 +1,4 @@
 import gsap from "gsap";
-import "@google/model-viewer";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLayoutEffect, useRef, useEffect, useState } from "react";
 import FloatingShapes from "@/components/FloatingShapes";
@@ -40,6 +39,7 @@ import useProperties from "@/hooks/useProperties";
 import apiClient from "@/lib/apiClient";
 import { useCmsSection } from "@/hooks/useCmsSection";
 import type { ContactContent } from "@/types";
+import LazyModelViewer from "@/components/LazyModelViewer";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -235,20 +235,19 @@ const Home = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1 h-[300px] md:h-[400px] relative">
-              {/* @ts-ignore */}
-              <model-viewer
+              <LazyModelViewer
                 src="/base_basic_pbr.glb"
                 alt="3D City Model"
-                loading="eager"
-                auto-rotate
-                rotation-per-second="45deg"
-                camera-controls
-                disable-zoom
-                interaction-prompt="none"
-                camera-orbit="90deg 75deg 2.5m"
-                shadow-intensity="1"
-                shadow-softness="1"
-                style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
+                autoRotate={true}
+                rotationPerSecond="45deg"
+                cameraControls={true}
+                disableZoom={true}
+                interactionPrompt="none"
+                cameraOrbit="90deg 75deg 2.5m"
+                shadowIntensity="1"
+                shadowSoftness="1"
+                className="w-full h-full"
+                rootMargin="400px"
               />
             </div>
             <div className="order-1 lg:order-2">

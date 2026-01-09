@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Suspense, lazy } from "react";
+import LazyImage from "@/components/LazyImage";
 
 // Lazy load the GlobeViewer for better initial page load
 const GlobeViewer = lazy(() => import("@/components/GlobeViewer"));
@@ -69,7 +70,13 @@ const PageHero = ({
             }}
           />
         ) : (
-          <img src={backgroundImage} alt="Section background" className="h-full w-full object-cover" />
+          <LazyImage 
+            src={backgroundImage} 
+            alt="Section background" 
+            className="h-full w-full" 
+            priority={true}
+            blurUp={true}
+          />
         )}
         <div className="absolute inset-0 bg-luxury-dark/90" />
       </div>

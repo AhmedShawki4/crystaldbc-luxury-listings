@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getMediaUrl } from "@/lib/media";
 import { Button } from "@/components/ui/button";
 import useWishlistActions from "@/hooks/useWishlistActions";
+import LazyImage from "@/components/LazyImage";
 
 interface PropertyCardProps {
   id: number | string;
@@ -52,10 +53,12 @@ const PropertyCard = ({
     <Link to={`/property/${id}`} className="block group">
       <Card className="overflow-hidden border-border hover-lift bg-card">
         <div className="relative h-64 overflow-hidden">
-          <img
+          <LazyImage
             src={getMediaUrl(image)}
             alt={title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="w-full h-full"
+            blurUp={true}
+            rootMargin="300px"
           />
           {status ? (
             <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold shadow ${statusClass}`}>

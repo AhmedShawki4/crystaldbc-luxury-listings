@@ -8,6 +8,7 @@ import PageHero from "@/components/PageHero";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import InvestmentBox from "@/components/InvestmentBox";
+import LazyImage from "@/components/LazyImage";
 
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&q=80&w=2000";
 
@@ -99,7 +100,13 @@ const About = () => {
 
             <div className="relative order-2 lg:order-1 z-10">
               <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-                <img src={heroImage || "/backgroundphoto.jpg"} alt="Our Legacy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
+                <LazyImage 
+                  src={heroImage || "/backgroundphoto.jpg"} 
+                  alt="Our Legacy" 
+                  className="w-full h-full hover:scale-105 transition-transform duration-1000" 
+                  blurUp={true}
+                  rootMargin="200px"
+                />
               </div>
               <div className="absolute -bottom-8 -left-8 hidden max-w-xs rounded-xl border border-white/10 bg-luxury-dark/80 p-8 backdrop-blur-md shadow-[0_20px_50px_rgba(0,0,0,0.35)] md:block">
                 <p className="mb-2 text-4xl font-display font-bold text-luxury-gold">20+</p>

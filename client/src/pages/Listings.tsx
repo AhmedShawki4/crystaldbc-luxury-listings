@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import useProperties, { type PropertyFilters } from "@/hooks/useProperties";
 import PageHero from "@/components/PageHero";
 import { useTranslation } from "react-i18next";
+import LazyImage from "@/components/LazyImage";
 
 const Listings = () => {
   const { t } = useTranslation();
@@ -77,10 +78,11 @@ const Listings = () => {
     <div className="min-h-screen">
       {/* Unified Background */}
       <div className="fixed inset-0 z-[-1]">
-        <img
+        <LazyImage
           src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=2000"
           alt="Background"
-          className="w-full h-full object-cover opacity-[0.03]"
+          className="w-full h-full opacity-[0.03]"
+          priority={true}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/50 to-background" />
       </div>
