@@ -83,8 +83,9 @@ const FloatingShapes = () => {
 
         // Determine screen width for responsive scattering
         const isMobile = window.innerWidth < 768;
-        const spreadX = isMobile ? 6 : 18; // Tighter spread on mobile
-        const spreadY = 22; // Slightly taller column so content extends below text
+        const spreadX = isMobile ? 5 : 14; // Keep shapes closer to center
+        const spreadY = isMobile ? 10 : 14; // Center cluster vertically
+        const centerOffsetY = isMobile ? -0.4 : -0.2;
 
         // Create Image Planes (Background Layer)
         // Slightly different counts for mobile vs desktop
@@ -118,8 +119,8 @@ const FloatingShapes = () => {
 
                 // Position scattered in background
                 mesh.position.x = (Math.random() - 0.5) * spreadX;
-                // Extended Y range for scrolling and pushed a bit lower
-                mesh.position.y = (Math.random() - 0.5) * spreadY - 2.5;
+                // Centered Y range so shapes remain in the section
+                mesh.position.y = (Math.random() - 0.5) * spreadY + centerOffsetY;
                 mesh.position.z = -2 - (Math.random() * 8); // Deep depth
 
                 mesh.rotation.z = (Math.random() - 0.5) * 0.4; // Slight tilt
@@ -134,6 +135,9 @@ const FloatingShapes = () => {
                     speedY: (Math.random() * 0.003) + 0.001,
                     initialY: mesh.position.y,
                     basePosition: mesh.position.clone(),
+                    floatAmplitude: Math.random() * 0.35 + 0.15,
+                    floatSpeed: Math.random() * 0.6 + 0.25,
+                    floatPhase: Math.random() * Math.PI * 2,
                     baseScale,
                     baseOpacity: mat.opacity,
                     isHighlight: false,
@@ -155,8 +159,8 @@ const FloatingShapes = () => {
             const mesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
             mesh.position.x = (Math.random() - 0.5) * 12;
-            // Push cubes a touch lower as well so some are visible beneath copy
-            mesh.position.y = (Math.random() - 0.5) * 12 - 2;
+            // Keep cubes centered in the section
+            mesh.position.y = (Math.random() - 0.5) * 10 + centerOffsetY;
             mesh.position.z = (Math.random() - 0.5) * 8 + 2; // Closer to camera
 
             mesh.rotation.x = Math.random() * Math.PI;
@@ -168,6 +172,9 @@ const FloatingShapes = () => {
             mesh.userData = {
                 type: "cube",
                 rotationSpeed: (Math.random() * 0.005) + 0.001,
+                floatAmplitude: Math.random() * 0.35 + 0.15,
+                floatSpeed: Math.random() * 0.6 + 0.25,
+                floatPhase: Math.random() * Math.PI * 2,
                 baseScale: mesh.scale.clone(),
                 basePosition: mesh.position.clone(),
             };
@@ -310,12 +317,28 @@ const FloatingShapes = () => {
                 if ((mesh.material as THREE.Material).type === 'MeshStandardMaterial') {
                     mesh.rotation.x += mesh.userData.rotationSpeed;
                     mesh.rotation.y += mesh.userData.rotationSpeed;
-                    mesh.position.y += Math.sin(time + mesh.position.x) * 0.002;
+                    if (!isDragging || mesh !== draggedObject) {
+                        const basePos = mesh.userData.basePosition as THREE.Vector3 | undefined;
+                        if (basePos) {
+                            const amp = mesh.userData.floatAmplitude ?? 0.3;
+                            const speed = mesh.userData.floatSpeed ?? 0.4;
+                            const phase = mesh.userData.floatPhase ?? 0;
+                            mesh.position.y = basePos.y + Math.sin(time * speed + phase) * amp;
+                        }
+                    }
                 } else {
                     // Floating images
                     // Don't override highlight position too much
                     if (!mesh.userData.isHighlight) {
-                        mesh.position.y += Math.sin(time * 0.5 + mesh.position.x) * 0.001;
+                        if (!isDragging || mesh !== draggedObject) {
+                            const basePos = mesh.userData.basePosition as THREE.Vector3 | undefined;
+                            if (basePos) {
+                                const amp = mesh.userData.floatAmplitude ?? 0.25;
+                                const speed = mesh.userData.floatSpeed ?? 0.35;
+                                const phase = mesh.userData.floatPhase ?? 0;
+                                mesh.position.y = basePos.y + Math.sin(time * speed + phase) * amp;
+                            }
+                        }
                     }
                 }
             });
@@ -479,15 +502,6 @@ const FloatingShapes = () => {
         // Only pin and drive the camera on larger screens to keep
         // mobile behavior simpler and avoid long blank sections.
         if (!isMobile) {
-            const pin = ScrollTrigger.create({
-                trigger: containerRef.current,
-                start: "top top",
-                end: "bottom top",
-                pin: canvasRef.current,
-                scrub: 1,
-            });
-            triggers.push(pin);
-
             const cameraTrigger = ScrollTrigger.create({
                 trigger: containerRef.current,
                 start: "top top",
@@ -506,6 +520,41 @@ const FloatingShapes = () => {
             });
             triggers.push(cameraTrigger);
         }
+
+        if (canvasRef.current) {
+            gsap.set(canvasRef.current, { autoAlpha: 1 });
+        }
+
+        const visibilityTrigger = ScrollTrigger.create({
+            trigger: containerRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            onEnter: () => {
+                if (canvasRef.current) {
+                    gsap.to(canvasRef.current, { autoAlpha: 1, duration: 0.2 });
+                    canvasRef.current.style.pointerEvents = "auto";
+                }
+            },
+            onEnterBack: () => {
+                if (canvasRef.current) {
+                    gsap.to(canvasRef.current, { autoAlpha: 1, duration: 0.2 });
+                    canvasRef.current.style.pointerEvents = "auto";
+                }
+            },
+            onLeave: () => {
+                if (canvasRef.current) {
+                    gsap.to(canvasRef.current, { autoAlpha: 0, duration: 0.2 });
+                    canvasRef.current.style.pointerEvents = "none";
+                }
+            },
+            onLeaveBack: () => {
+                if (canvasRef.current) {
+                    gsap.to(canvasRef.current, { autoAlpha: 0, duration: 0.2 });
+                    canvasRef.current.style.pointerEvents = "none";
+                }
+            },
+        });
+        triggers.push(visibilityTrigger);
 
         // Animate only the main headline lines, not every span
         const spans = contentRef.current?.querySelectorAll("[data-animate='headline']");
@@ -570,7 +619,7 @@ const FloatingShapes = () => {
     }, []);
 
         return (
-        <div ref={containerRef} className="relative min-h-[105vh] md:min-h-[125vh] bg-gradient-to-b from-luxury-dark via-[#0a0a0a] to-luxury-dark border-t border-white/5">
+        <div ref={containerRef} className="relative min-h-[105vh] md:min-h-[125vh] overflow-hidden bg-gradient-to-b from-luxury-dark via-[#0a0a0a] to-luxury-dark border-t border-white/5">
             {/* Sticky Canvas Container */}
             <div
                 ref={canvasRef}
