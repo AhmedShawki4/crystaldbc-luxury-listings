@@ -586,10 +586,28 @@ const FloatingShapes = () => {
             // Update pixel ratio on resize just in case (e.g. moving between screens)
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         };
+        const refreshScroll = () => ScrollTrigger.refresh();
+
         window.addEventListener("resize", handleResize);
+        window.addEventListener("load", refreshScroll);
+
+        const resizeObserver = new ResizeObserver(() => {
+            handleResize();
+            refreshScroll();
+        });
+
+        if (document.body) {
+            resizeObserver.observe(document.body);
+        }
+
+        // Initial sizing + refresh to align triggers after first paint
+        handleResize();
+        requestAnimationFrame(refreshScroll);
 
         return () => {
             window.removeEventListener("resize", handleResize);
+            window.removeEventListener("load", refreshScroll);
+            resizeObserver.disconnect();
             if (canvasRef.current) {
                 canvasRef.current.removeEventListener("mousemove", handlePointerMove);
                 canvasRef.current.removeEventListener("mousedown", handlePointerDown);
