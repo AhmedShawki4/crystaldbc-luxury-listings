@@ -6,9 +6,16 @@ export function useCmsSection<TContent = unknown>(key: string, fallback?: TConte
   return useQuery({
     queryKey: ["cms", key],
     queryFn: async () => {
-      const { data } = await apiClient.get<{ section: CMSSection<TContent> }>(`/cms/${key}`);
-      return data.section.content;
+      try {
+        const { data } = await apiClient.get<{ section: CMSSection<TContent> }>(`/cms/${key}`);
+        return data.section.content;
+      } catch (error) {
+        // If section not found, return fallback
+        return fallback as TContent;
+      }
     },
-    initialData: fallback,
+    placeholderData: fallback,
+    staleTime: 1000 * 30, // Cache for 30 seconds
+    refetchOnWindowFocus: true, // Refetch when user comes back to the page
   });
 }

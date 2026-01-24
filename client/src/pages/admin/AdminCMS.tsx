@@ -1,17 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import apiClient from "@/lib/apiClient";
-import type { CMSSection, HeroContent, ContactContent, FooterContent, AboutContent } from "@/types";
+import type { CMSSection, HeroContent, ContactContent, FooterContent, AboutContent, SiteSettingsContent } from "@/types";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { getMediaUrl } from "@/lib/media";
 import uploadImage from "@/lib/uploadImage";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminGlassCard from "@/components/admin/AdminGlassCard";
-import { PenSquare } from "lucide-react";
+import { PenSquare, Settings, DollarSign } from "lucide-react";
 
 const fetchSections = async () => {
   const { data } = await apiClient.get<{ sections: CMSSection[] }>("/cms");
@@ -61,6 +62,10 @@ const normalizeFooter = (content?: Partial<FooterContent>): FooterContent => ({
   quickLinks: content?.quickLinks ?? [],
   propertyTypes: content?.propertyTypes ?? [],
   social: content?.social ?? [],
+});
+
+const normalizeSiteSettings = (content?: Partial<SiteSettingsContent>): SiteSettingsContent => ({
+  rentButtonEnabled: content?.rentButtonEnabled ?? true,
 });
 
 const toMultiline = (items: string[]) => items.join("\n");
@@ -622,6 +627,68 @@ const AboutSectionEditor = ({ section, onSave, saving }: CmsEditorProps<AboutCon
   );
 };
 
+const SiteSettingsEditor = ({ section, onSave, saving }: CmsEditorProps<SiteSettingsContent>) => {
+  const { t } = useTranslation();
+  const [draft, setDraft] = useState<SiteSettingsContent>(normalizeSiteSettings(section.content as SiteSettingsContent));
+
+  useEffect(() => {
+    setDraft(normalizeSiteSettings(section.content as SiteSettingsContent));
+  }, [section.content]);
+
+  return (
+    <AdminGlassCard
+      title={t("admin.cms.siteSettings.title")}
+      description={t("admin.cms.siteSettings.description")}
+      rightSlot={
+        <Button onClick={() => onSave(section.key, draft)} disabled={saving}>
+          {saving ? t("admin.cms.actions.saving") : t("admin.cms.actions.save")}
+        </Button>
+      }
+    >
+      <div className="mt-4 space-y-6">
+        <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-muted/30">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-luxury-gold/20 to-luxury-gold/5 flex items-center justify-center">
+              <DollarSign className="h-6 w-6 text-luxury-gold" />
+            </div>
+            <div>
+              <p className="font-medium">{t("admin.cms.siteSettings.rentButton.label")}</p>
+              <p className="text-sm text-muted-foreground">{t("admin.cms.siteSettings.rentButton.description")}</p>
+            </div>
+          </div>
+          <Switch
+            checked={draft.rentButtonEnabled}
+            onCheckedChange={(checked) => setDraft((prev) => ({ ...prev, rentButtonEnabled: checked }))}
+          />
+        </div>
+
+        <div className="p-4 rounded-xl border border-border bg-muted/20">
+          <p className="text-sm font-medium mb-2">{t("admin.cms.siteSettings.preview")}</p>
+          <div className="flex items-center gap-3">
+            <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              draft.rentButtonEnabled
+                ? "bg-gradient-to-r from-luxury-gold to-luxury-gold-dark text-luxury-dark"
+                : "bg-muted text-muted-foreground line-through opacity-50"
+            }`}>
+              <DollarSign className="h-4 w-4" />
+              {t("admin.cms.siteSettings.rentButton.previewText")}
+            </span>
+            <span className={`text-xs px-2 py-1 rounded-full ${
+              draft.rentButtonEnabled
+                ? "bg-green-500/20 text-green-400"
+                : "bg-red-500/20 text-red-400"
+            }`}>
+              {draft.rentButtonEnabled
+                ? t("admin.cms.siteSettings.status.visible")
+                : t("admin.cms.siteSettings.status.hidden")}
+            </span>
+          </div>
+        </div>
+      </div>
+    </AdminGlassCard>
+  );
+};
+
 interface JsonSectionEditorProps {
   section: CMSSection;
   onSave: (key: string, content: unknown) => Promise<void>;
@@ -674,6 +741,7 @@ const JsonSectionEditor = ({ section, onSave, saving, onInvalidJson }: JsonSecti
 
 const AdminCMS = () => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const { data, isLoading, refetch } = useQuery({ queryKey: ["cms", "all"], queryFn: fetchSections });
   const { toast } = useToast();
   const [savingKey, setSavingKey] = useState<string | null>(null);
@@ -683,6 +751,8 @@ const AdminCMS = () => {
       setSavingKey(key);
       await apiClient.put(`/cms/${key}`, { content });
       toast({ title: t("admin.cms.toasts.saved", { section: key }) });
+      // Invalidate both the "all sections" query and the specific section query
+      await queryClient.invalidateQueries({ queryKey: ["cms", key] });
       await refetch();
     } catch (error) {
       console.error("Failed to save CMS", error);
@@ -696,6 +766,11 @@ const AdminCMS = () => {
     return <p className="text-muted-foreground">{t("admin.cms.loading")}</p>;
   }
 
+  // Ensure siteSettings section exists (if not in DB, show with defaults)
+  const sections = data.some((s) => s.key === "siteSettings")
+    ? data
+    : [...data, { _id: "siteSettings-default", key: "siteSettings", content: normalizeSiteSettings() }];
+
   return (
     <div className="space-y-6">
       <AdminPageHeader
@@ -705,7 +780,7 @@ const AdminCMS = () => {
       />
 
       <div className="space-y-6">
-        {data.map((section) => {
+        {sections.map((section) => {
           if (section.key === "hero") {
             return (
               <HeroSectionEditor
@@ -744,6 +819,17 @@ const AdminCMS = () => {
               <FooterSectionEditor
                 key={section._id}
                 section={section as CMSSection<FooterContent>}
+                onSave={handleSave}
+                saving={savingKey === section.key}
+              />
+            );
+          }
+
+          if (section.key === "siteSettings") {
+            return (
+              <SiteSettingsEditor
+                key={section._id}
+                section={section as CMSSection<SiteSettingsContent>}
                 onSave={handleSave}
                 saving={savingKey === section.key}
               />

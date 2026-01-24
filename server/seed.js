@@ -279,6 +279,12 @@ const seed = async () => {
           ],
         },
       },
+      {
+        key: "siteSettings",
+        content: {
+          rentButtonEnabled: true,
+        },
+      },
     ];
 
     await CMSSection.insertMany(cmsPayloads);

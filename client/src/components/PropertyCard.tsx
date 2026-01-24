@@ -5,6 +5,8 @@ import { getMediaUrl } from "@/lib/media";
 import { Button } from "@/components/ui/button";
 import useWishlistActions from "@/hooks/useWishlistActions";
 import LazyImage from "@/components/LazyImage";
+import { useCmsSection } from "@/hooks/useCmsSection";
+import type { SiteSettingsContent } from "@/types";
 
 interface PropertyCardProps {
   id: number | string;
@@ -34,6 +36,8 @@ const PropertyCard = ({
   const { addToWishlist, activeId, isAdding } = useWishlistActions();
   const rawId = id?.toString();
   const propertyId = rawId && /^[a-f\d]{24}$/i.test(rawId) ? rawId : undefined;
+  const { data: siteSettings } = useCmsSection<SiteSettingsContent>("siteSettings", { rentButtonEnabled: true });
+  const rentButtonEnabled = siteSettings?.rentButtonEnabled ?? true;
 
   const statusStyle: Record<string, string> = {
     "For Rent": "bg-emerald-500 text-white",
@@ -41,6 +45,7 @@ const PropertyCard = ({
   };
 
   const statusClass = status ? statusStyle[status] || "bg-muted text-foreground" : "";
+  const shouldShowStatus = Boolean(status) && (status !== "For Rent" || rentButtonEnabled);
 
   const handleWishlist = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -60,7 +65,7 @@ const PropertyCard = ({
             blurUp={true}
             rootMargin="300px"
           />
-          {status ? (
+          {shouldShowStatus ? (
             <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold shadow ${statusClass}`}>
               {status}
             </div>

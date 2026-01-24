@@ -8,8 +8,8 @@ import AdminGlassCard from "@/components/admin/AdminGlassCard";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
-import { Shield, UserRound, Mail, Activity } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Shield, UserRound, Mail, Activity, Info, Check, X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { fetchActivityLogs } from "@/lib/activityLogs";
 import { useTranslation } from "react-i18next";
 
@@ -20,6 +20,57 @@ const fetchUsers = async () => {
 
 const roles: Role[] = ["admin", "employee", "property-handler", "investor", "user", "guest"];
 
+// Define capabilities for each role based on AdminLayout NAV_ITEMS
+const ROLE_CAPABILITIES: Record<Role, string[]> = {
+  admin: [
+    "overview",
+    "properties",
+    "rentals",
+    "trendingProjects",
+    "cms",
+    "leads",
+    "messages",
+    "reports",
+    "activityLogs",
+    "users",
+    "investments",
+    "investmentBoxes",
+  ],
+  employee: [
+    "overview",
+    "properties",
+    "rentals",
+    "trendingProjects",
+    "cms",
+    "leads",
+    "messages",
+    "reports",
+  ],
+  "property-handler": [
+    "overview",
+    "properties",
+    "rentals",
+  ],
+  investor: [],
+  user: [],
+  guest: [],
+};
+
+const ALL_CAPABILITIES = [
+  "overview",
+  "properties",
+  "rentals",
+  "trendingProjects",
+  "cms",
+  "leads",
+  "messages",
+  "reports",
+  "activityLogs",
+  "users",
+  "investments",
+  "investmentBoxes",
+] as const;
+
 const AdminUsers = () => {
   const { data } = useQuery({ queryKey: ["users"], queryFn: fetchUsers });
   const queryClient = useQueryClient();
@@ -28,6 +79,8 @@ const AdminUsers = () => {
   const [formState, setFormState] = useState({ name: "", email: "", password: "", role: "user" as Role, country: "" });
   const [logUser, setLogUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showCapabilities, setShowCapabilities] = useState(false);
+  const [capabilitiesUser, setCapabilitiesUser] = useState<User | null>(null);
 
   const selectedUserId = logUser?.id ?? null;
   const { data: selectedLogs, isLoading: loadingLogs } = useQuery({
@@ -81,11 +134,21 @@ const AdminUsers = () => {
 
   return (
     <div className="space-y-8">
-      <AdminPageHeader
-        icon={Shield}
-        title={t("admin.users.title")}
-        description={t("admin.users.description")}
-      />
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <AdminPageHeader
+          icon={Shield}
+          title={t("admin.users.title")}
+          description={t("admin.users.description")}
+        />
+        <Button
+          variant="outline"
+          onClick={() => setShowCapabilities(true)}
+          className="border-white/20 hover:bg-white/10 text-white hover:text-white shrink-0"
+        >
+          <Info className="mr-2 h-4 w-4" />
+          {t("admin.users.roleCapabilities.button")}
+        </Button>
+      </div>
 
       <AdminGlassCard
         title={t("admin.users.addTitle")}
@@ -185,6 +248,10 @@ const AdminUsers = () => {
                   ))}
                 </SelectContent>
               </Select>
+              <Button variant="outline" onClick={() => setCapabilitiesUser(user)} className="border-white/20 hover:bg-white/10 text-white hover:text-white">
+                <Shield className="mr-2 h-4 w-4" />
+                {t("admin.users.actions.capabilities")}
+              </Button>
               <Button variant="outline" onClick={() => setLogUser(user)} className="border-white/20 hover:bg-white/10 text-white hover:text-white">
                 <Activity className="mr-2 h-4 w-4" />
                 {t("admin.users.actions.viewLogs")}
@@ -231,6 +298,135 @@ const AdminUsers = () => {
           ) : (
             <p className="text-sm text-muted-foreground">{t("admin.users.noActivity")}</p>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Individual User Capabilities Dialog */}
+      <Dialog open={Boolean(capabilitiesUser)} onOpenChange={(open) => !open && setCapabilitiesUser(null)}>
+        <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-display flex items-center gap-2">
+              <Shield className="h-5 w-5 text-luxury-gold" />
+              {capabilitiesUser?.name || capabilitiesUser?.email}
+            </DialogTitle>
+            <DialogDescription>
+              {t("admin.users.userCapabilities.description", { role: capabilitiesUser ? t(`admin.roles.${capabilitiesUser.role}`) : "" })}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {capabilitiesUser && (
+            <div className="mt-4 space-y-3">
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-muted/30 border border-border">
+                <span className="text-sm font-medium text-muted-foreground">{t("admin.users.labels.role")}:</span>
+                <span className="text-sm font-semibold capitalize">{t(`admin.roles.${capabilitiesUser.role}`)}</span>
+              </div>
+              
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold">{t("admin.users.userCapabilities.canAccess")}</h4>
+                {ROLE_CAPABILITIES[capabilitiesUser.role].length > 0 ? (
+                  <div className="grid gap-2">
+                    {ALL_CAPABILITIES.map((capability) => {
+                      const hasCapability = ROLE_CAPABILITIES[capabilitiesUser.role].includes(capability);
+                      return (
+                        <div
+                          key={capability}
+                          className={`flex items-center gap-3 p-2 rounded-lg border transition-colors ${
+                            hasCapability
+                              ? "bg-green-500/10 border-green-500/30"
+                              : "bg-muted/20 border-border/50 opacity-50"
+                          }`}
+                        >
+                          {hasCapability ? (
+                            <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-green-500/20">
+                              <Check className="h-3 w-3 text-green-400" />
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-red-500/10">
+                              <X className="h-3 w-3 text-red-400/50" />
+                            </span>
+                          )}
+                          <span className={`text-sm ${hasCapability ? "font-medium" : "text-muted-foreground"}`}>
+                            {t(`admin.users.roleCapabilities.capabilities.${capability}`)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground p-3 rounded-lg bg-muted/20 border border-border/50">
+                    {t("admin.users.userCapabilities.noAccess")}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Role Capabilities Dialog */}
+      <Dialog open={showCapabilities} onOpenChange={setShowCapabilities}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-display flex items-center gap-2">
+              <Shield className="h-5 w-5 text-luxury-gold" />
+              {t("admin.users.roleCapabilities.title")}
+            </DialogTitle>
+            <DialogDescription>
+              {t("admin.users.roleCapabilities.description")}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground">
+                    {t("admin.users.roleCapabilities.capability")}
+                  </th>
+                  {(["admin", "employee", "property-handler", "investor", "user", "guest"] as Role[]).map((role) => (
+                    <th key={role} className="text-center py-3 px-2 font-semibold text-muted-foreground min-w-[80px]">
+                      {t(`admin.roles.${role}`)}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {ALL_CAPABILITIES.map((capability) => (
+                  <tr key={capability} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                    <td className="py-3 px-4 font-medium">
+                      {t(`admin.users.roleCapabilities.capabilities.${capability}`)}
+                    </td>
+                    {(["admin", "employee", "property-handler", "investor", "user", "guest"] as Role[]).map((role) => {
+                      const hasCapability = ROLE_CAPABILITIES[role].includes(capability);
+                      return (
+                        <td key={role} className="text-center py-3 px-2">
+                          {hasCapability ? (
+                            <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-green-500/20">
+                              <Check className="h-4 w-4 text-green-400" />
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-red-500/10">
+                              <X className="h-4 w-4 text-red-400/50" />
+                            </span>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-6 p-4 rounded-xl bg-muted/30 border border-border">
+            <h4 className="font-semibold mb-2 text-sm">{t("admin.users.roleCapabilities.notes.title")}</h4>
+            <ul className="text-xs text-muted-foreground space-y-1">
+              <li>• {t("admin.users.roleCapabilities.notes.admin")}</li>
+              <li>• {t("admin.users.roleCapabilities.notes.employee")}</li>
+              <li>• {t("admin.users.roleCapabilities.notes.propertyHandler")}</li>
+              <li>• {t("admin.users.roleCapabilities.notes.others")}</li>
+            </ul>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -8,6 +8,8 @@ import useProperties, { type PropertyFilters } from "@/hooks/useProperties";
 import PageHero from "@/components/PageHero";
 import { useTranslation } from "react-i18next";
 import LazyImage from "@/components/LazyImage";
+import { useCmsSection } from "@/hooks/useCmsSection";
+import type { SiteSettingsContent } from "@/types";
 
 const Listings = () => {
   const { t } = useTranslation();
@@ -26,14 +28,25 @@ const Listings = () => {
   const [constructionStatusFilter, setConstructionStatusFilter] = useState("all");
   const [featuredOnly, setFeaturedOnly] = useState(false);
 
+  const { data: siteSettings } = useCmsSection<SiteSettingsContent>("siteSettings", { rentButtonEnabled: true });
+  const rentButtonEnabled = siteSettings?.rentButtonEnabled ?? true;
+  const effectiveListingType = rentButtonEnabled ? listingType : "sale";
+
+  useEffect(() => {
+    if (!rentButtonEnabled && listingType === "rent") {
+      setListingType("sale");
+      setConstructionStatusFilter("all");
+    }
+  }, [rentButtonEnabled, listingType]);
+
   const filters = useMemo<PropertyFilters>(() => {
     const params: PropertyFilters = {};
     if (searchQuery) params.search = searchQuery;
     if (locationFilter !== "all") params.location = locationFilter;
     if (typeFilter !== "all") params.type = typeFilter;
 
-    params.status = listingType === "rent" ? "For Rent" : "For Sale";
-    if (listingType === "sale" && constructionStatusFilter !== "all") {
+    params.status = effectiveListingType === "rent" ? "For Rent" : "For Sale";
+    if (effectiveListingType === "sale" && constructionStatusFilter !== "all") {
       params.constructionStatus = constructionStatusFilter;
     }
 
@@ -57,7 +70,7 @@ const Listings = () => {
     }
 
     return params;
-  }, [searchQuery, locationFilter, typeFilter, listingType, constructionStatusFilter, bedsFilter, bathsFilter, priceFilter, featuredOnly, sortBy]);
+  }, [searchQuery, locationFilter, typeFilter, effectiveListingType, constructionStatusFilter, bedsFilter, bathsFilter, priceFilter, featuredOnly, sortBy]);
 
   const { data: properties = [], isLoading } = useProperties(filters);
 
@@ -175,7 +188,7 @@ const Listings = () => {
               <div className="flex gap-3">
                 <Button
                   type="button"
-                  variant={listingType === "rent" ? "outline" : "default"}
+                  variant={effectiveListingType === "rent" ? "outline" : "default"}
                   size="lg"
                   className="h-14 px-8 text-base"
                   onClick={() => {
@@ -184,18 +197,20 @@ const Listings = () => {
                 >
                   {t("listings.filterOptions.forSale")}
                 </Button>
-                <Button
-                  type="button"
-                  variant={listingType === "rent" ? "default" : "outline"}
-                  size="lg"
-                  className="h-14 px-8 text-base"
-                  onClick={() => {
-                    setListingType("rent");
-                    setConstructionStatusFilter("all");
-                  }}
-                >
-                  {t("listings.filterOptions.forRent")}
-                </Button>
+                {rentButtonEnabled && (
+                  <Button
+                    type="button"
+                    variant={effectiveListingType === "rent" ? "default" : "outline"}
+                    size="lg"
+                    className="h-14 px-8 text-base"
+                    onClick={() => {
+                      setListingType("rent");
+                      setConstructionStatusFilter("all");
+                    }}
+                  >
+                    {t("listings.filterOptions.forRent")}
+                  </Button>
+                )}
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">

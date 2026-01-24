@@ -7,11 +7,12 @@ import { useState, useEffect, useMemo } from "react";
 import RegisterInterestDialog from "@/components/RegisterInterestDialog";
 import PropertyCard from "@/components/PropertyCard";
 import apiClient from "@/lib/apiClient";
-import type { Property as ApiProperty } from "@/types";
+import type { Property as ApiProperty, SiteSettingsContent } from "@/types";
 import useProperties from "@/hooks/useProperties";
 import { getMediaUrl } from "@/lib/media";
 import useWishlistActions from "@/hooks/useWishlistActions";
 import useAuth from "@/hooks/useAuth";
+import { useCmsSection } from "@/hooks/useCmsSection";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -109,6 +110,11 @@ const PropertyDetail = () => {
   const { addToWishlist, activeId, isAdding } = useWishlistActions();
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  
+  // Fetch site settings to check if rent button is enabled
+  const { data: siteSettings } = useCmsSection<SiteSettingsContent>("siteSettings", { rentButtonEnabled: true });
+  const rentButtonEnabled = siteSettings?.rentButtonEnabled ?? true;
+  
   const fallbackSimilar = useMemo(
     () =>
       properties
@@ -314,7 +320,7 @@ const PropertyDetail = () => {
                 <span className="px-4 py-2 bg-muted text-foreground rounded-full text-sm font-semibold">
                   {property.type}
                 </span>
-                {property.status === "For Rent" && (
+                {rentButtonEnabled && property.status === "For Rent" && (
                   <span className="px-4 py-2 rounded-full text-sm font-semibold border border-white/10 bg-white/5 text-foreground">
                     {t("propertyDetail.rent.payPeriodBadge", {
                       period: t(`propertyDetail.rent.payPeriods.${property.rentPayPeriod ?? "month"}`),
@@ -416,7 +422,7 @@ const PropertyDetail = () => {
                   </Button>
                 )}
 
-                {property.status === "For Rent" && (
+                {rentButtonEnabled && property.status === "For Rent" && (
                   <>
                     <Button
                       onClick={() => setIsRentDialogOpen(true)}
@@ -456,55 +462,57 @@ const PropertyDetail = () => {
                   />
                 )}
 
-                <Dialog open={isRentDialogOpen} onOpenChange={setIsRentDialogOpen}>
-                  <DialogContent className="max-w-lg">
-                    <DialogHeader>
-                      <DialogTitle className="text-2xl font-display flex items-center gap-2">
-                        <DollarSign className="h-5 w-5 text-luxury-gold" />
-                        {t("propertyDetail.rent.dialogTitle", { title: property.title })}
-                      </DialogTitle>
-                      <DialogDescription>{t("propertyDetail.rent.dialogDescription")}</DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleRentSubmit} className="space-y-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">{t("propertyDetail.rent.payPeriod")}</label>
-                        <Select value={rentPayPeriod} onValueChange={(v) => setRentPayPeriod(v as "day" | "month" | "year")}>
-                          <SelectTrigger className="h-11">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="day">{t("propertyDetail.rent.payPeriods.day")}</SelectItem>
-                            <SelectItem value="month">{t("propertyDetail.rent.payPeriods.month")}</SelectItem>
-                            <SelectItem value="year">{t("propertyDetail.rent.payPeriods.year")}</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                {rentButtonEnabled && (
+                  <Dialog open={isRentDialogOpen} onOpenChange={setIsRentDialogOpen}>
+                    <DialogContent className="max-w-lg">
+                      <DialogHeader>
+                        <DialogTitle className="text-2xl font-display flex items-center gap-2">
+                          <DollarSign className="h-5 w-5 text-luxury-gold" />
+                          {t("propertyDetail.rent.dialogTitle", { title: property.title })}
+                        </DialogTitle>
+                        <DialogDescription>{t("propertyDetail.rent.dialogDescription")}</DialogDescription>
+                      </DialogHeader>
+                      <form onSubmit={handleRentSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">{t("propertyDetail.rent.payPeriod")}</label>
+                          <Select value={rentPayPeriod} onValueChange={(v) => setRentPayPeriod(v as "day" | "month" | "year")}>
+                            <SelectTrigger className="h-11">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="day">{t("propertyDetail.rent.payPeriods.day")}</SelectItem>
+                              <SelectItem value="month">{t("propertyDetail.rent.payPeriods.month")}</SelectItem>
+                              <SelectItem value="year">{t("propertyDetail.rent.payPeriods.year")}</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">{t("propertyDetail.rent.startDate")}</label>
-                        <Input type="date" value={rentStartDate} onChange={(e) => setRentStartDate(e.target.value)} />
-                      </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">{t("propertyDetail.rent.startDate")}</label>
+                          <Input type="date" value={rentStartDate} onChange={(e) => setRentStartDate(e.target.value)} />
+                        </div>
 
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">{t("propertyDetail.rent.notesOptional")}</label>
-                        <Textarea
-                          value={rentNotes}
-                          onChange={(e) => setRentNotes(e.target.value)}
-                          placeholder={t("propertyDetail.rent.notesPlaceholder")}
-                        />
-                      </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">{t("propertyDetail.rent.notesOptional")}</label>
+                          <Textarea
+                            value={rentNotes}
+                            onChange={(e) => setRentNotes(e.target.value)}
+                            placeholder={t("propertyDetail.rent.notesPlaceholder")}
+                          />
+                        </div>
 
-                      <div className="flex items-center justify-end gap-3">
-                        <Button type="button" variant="ghost" onClick={() => setIsRentDialogOpen(false)}>
-                          {t("propertyDetail.cancel")}
-                        </Button>
-                        <Button type="submit" disabled={submittingRent}>
-                          {submittingRent ? t("propertyDetail.submitting") : t("propertyDetail.rent.submitRequest")}
-                        </Button>
-                      </div>
-                    </form>
-                  </DialogContent>
-                </Dialog>
+                        <div className="flex items-center justify-end gap-3">
+                          <Button type="button" variant="ghost" onClick={() => setIsRentDialogOpen(false)}>
+                            {t("propertyDetail.cancel")}
+                          </Button>
+                          <Button type="submit" disabled={submittingRent}>
+                            {submittingRent ? t("propertyDetail.submitting") : t("propertyDetail.rent.submitRequest")}
+                          </Button>
+                        </div>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                )}
               </div>
             </div>
 

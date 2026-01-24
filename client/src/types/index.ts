@@ -142,6 +142,10 @@ export interface FooterContent {
   social: { label: string; href: string }[];
 }
 
+export interface SiteSettingsContent {
+  rentButtonEnabled: boolean;
+}
+
 export interface Lead {
   _id: string;
   fullName: string;
