@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import apiClient from "@/lib/apiClient";
 import type { CMSSection, HeroContent, ContactContent, FooterContent, AboutContent } from "@/types";
 import { Textarea } from "@/components/ui/textarea";
@@ -127,6 +128,7 @@ interface ImageUploadFieldProps {
 }
 
 const ImageUploadField = ({ label, value, onChange, placeholder }: ImageUploadFieldProps) => {
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
@@ -141,10 +143,10 @@ const ImageUploadField = ({ label, value, onChange, placeholder }: ImageUploadFi
     try {
       const url = await uploadImage(file);
       onChange(url);
-      toast({ title: "Image uploaded" });
+      toast({ title: t("admin.cms.toasts.imageUploaded") });
     } catch (error) {
       console.error("CMS image upload failed", error);
-      toast({ title: "Upload failed", description: "Please try again.", variant: "destructive" });
+      toast({ title: t("admin.cms.toasts.uploadFailed"), description: t("admin.cms.toasts.uploadFailedDesc"), variant: "destructive" });
     } finally {
       setUploading(false);
       event.target.value = "";
@@ -174,7 +176,7 @@ const ImageUploadField = ({ label, value, onChange, placeholder }: ImageUploadFi
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
         >
-          {uploading ? "Uploading..." : "Upload"}
+          {uploading ? t("admin.cms.actions.uploading") : t("admin.cms.actions.upload")}
         </Button>
       </div>
     </div>
@@ -188,6 +190,7 @@ interface CmsEditorProps<T> {
 }
 
 const HeroSectionEditor = ({ section, onSave, saving }: CmsEditorProps<HeroContent>) => {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState<HeroContent>(normalizeHero(section.content as HeroContent));
 
   useEffect(() => {
@@ -210,49 +213,49 @@ const HeroSectionEditor = ({ section, onSave, saving }: CmsEditorProps<HeroConte
 
   return (
     <AdminGlassCard
-      title="Homepage Hero"
-      description="Update the main hero content and see a live preview."
+      title={t("admin.cms.hero.title")}
+      description={t("admin.cms.hero.description")}
       rightSlot={
         <Button onClick={() => onSave(section.key, draft)} disabled={saving}>
-          {saving ? "Saving..." : "Save Hero"}
+          {saving ? t("admin.cms.actions.saving") : t("admin.cms.actions.save") + " Hero"}
         </Button>
       }
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium">Heading</label>
+            <label className="text-sm font-medium">{t("admin.cms.hero.labels.heading")}</label>
             <Input value={draft.heading} onChange={(e) => handleChange("heading", e.target.value)} />
           </div>
           <div>
-            <label className="text-sm font-medium">Highlight</label>
+            <label className="text-sm font-medium">{t("admin.cms.hero.labels.highlight")}</label>
             <Input value={draft.highlight} onChange={(e) => handleChange("highlight", e.target.value)} />
           </div>
           <div>
-            <label className="text-sm font-medium">Subheading</label>
+            <label className="text-sm font-medium">{t("admin.cms.hero.labels.subheading")}</label>
             <Textarea value={draft.subheading} onChange={(e) => handleChange("subheading", e.target.value)} rows={3} />
           </div>
           <ImageUploadField
-            label="Background Image URL"
+            label={t("admin.cms.hero.labels.backgroundImage")}
             value={draft.backgroundImage}
             onChange={(value) => handleChange("backgroundImage", value)}
-            placeholder="Paste an image URL or upload one"
+            placeholder={t("admin.cms.hero.placeholders.backgroundImage")}
           />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium">Primary CTA Label</label>
+              <label className="text-sm font-medium">{t("admin.cms.hero.labels.primaryCtaLabel")}</label>
               <Input value={draft.primaryCta.label} onChange={(e) => handleCtaChange("primaryCta", "label", e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Primary CTA Link</label>
+              <label className="text-sm font-medium">{t("admin.cms.hero.labels.primaryCtaLink")}</label>
               <Input value={draft.primaryCta.href} onChange={(e) => handleCtaChange("primaryCta", "href", e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Secondary CTA Label</label>
+              <label className="text-sm font-medium">{t("admin.cms.hero.labels.secondaryCtaLabel")}</label>
               <Input value={draft.secondaryCta.label} onChange={(e) => handleCtaChange("secondaryCta", "label", e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Secondary CTA Link</label>
+              <label className="text-sm font-medium">{t("admin.cms.hero.labels.secondaryCtaLink")}</label>
               <Input value={draft.secondaryCta.href} onChange={(e) => handleCtaChange("secondaryCta", "href", e.target.value)} />
             </div>
           </div>
@@ -266,7 +269,7 @@ const HeroSectionEditor = ({ section, onSave, saving }: CmsEditorProps<HeroConte
           )}
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/30" />
           <div className="relative h-full p-6 flex flex-col justify-end text-white space-y-3">
-            <p className="text-sm uppercase tracking-[0.3em] text-white/60">Preview</p>
+            <p className="text-sm uppercase tracking-[0.3em] text-white/60">{t("admin.cms.hero.preview")}</p>
             <h4 className="text-3xl font-display font-bold">{draft.heading} <span className="text-accent block">{draft.highlight}</span></h4>
             <p className="text-white/80">{draft.subheading}</p>
             <div className="flex flex-wrap gap-3">
@@ -281,6 +284,7 @@ const HeroSectionEditor = ({ section, onSave, saving }: CmsEditorProps<HeroConte
 };
 
 const ContactSectionEditor = ({ section, onSave, saving }: CmsEditorProps<ContactContent>) => {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState<ContactContent>(normalizeContact(section.content as ContactContent));
   const [officeHoursText, setOfficeHoursText] = useState(toMultiline(draft.officeHours));
 
@@ -301,52 +305,52 @@ const ContactSectionEditor = ({ section, onSave, saving }: CmsEditorProps<Contac
 
   return (
     <AdminGlassCard
-      title="Contact Section"
-      description="Edit the contact block and preview what clients see."
+      title={t("admin.cms.contact.title")}
+      description={t("admin.cms.contact.description")}
       rightSlot={
         <Button onClick={() => onSave(section.key, draft)} disabled={saving}>
-          {saving ? "Saving..." : "Save Contact"}
+          {saving ? t("admin.cms.actions.saving") : t("admin.cms.actions.save") + " Contact"}
         </Button>
       }
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium">Title</label>
+            <label className="text-sm font-medium">{t("admin.cms.contact.labels.title")}</label>
             <Input value={draft.title} onChange={(e) => updateField("title", e.target.value)} />
           </div>
           <div>
-            <label className="text-sm font-medium">Subtitle</label>
+            <label className="text-sm font-medium">{t("admin.cms.contact.labels.subtitle")}</label>
             <Textarea value={draft.subtitle} onChange={(e) => updateField("subtitle", e.target.value)} rows={3} />
           </div>
           <div>
-            <label className="text-sm font-medium">Phone</label>
+            <label className="text-sm font-medium">{t("admin.cms.contact.labels.phone")}</label>
             <Input value={draft.phone} onChange={(e) => updateField("phone", e.target.value)} />
           </div>
           <div>
-            <label className="text-sm font-medium">Email</label>
+            <label className="text-sm font-medium">{t("admin.cms.contact.labels.email")}</label>
             <Input value={draft.email} onChange={(e) => updateField("email", e.target.value)} />
           </div>
           <div>
-            <label className="text-sm font-medium">Office Address</label>
+            <label className="text-sm font-medium">{t("admin.cms.contact.labels.office")}</label>
             <Textarea value={draft.office} onChange={(e) => updateField("office", e.target.value)} />
           </div>
           <div>
-            <label className="text-sm font-medium">Office Hours (one per line)</label>
+            <label className="text-sm font-medium">{t("admin.cms.contact.labels.officeHours")}</label>
             <Textarea value={officeHoursText} onChange={(e) => handleOfficeHoursChange(e.target.value)} rows={4} />
           </div>
         </div>
 
         <div className="border border-border rounded-xl p-6 bg-muted/40 space-y-4">
-          <h4 className="text-2xl font-display font-semibold">{draft.title || "Contact us"}</h4>
+          <h4 className="text-2xl font-display font-semibold">{draft.title || t("admin.cms.contact.defaultTitle")}</h4>
           <p className="text-muted-foreground">{draft.subtitle}</p>
           <div className="space-y-3 text-sm">
-            <p><span className="font-semibold">Phone:</span> {draft.phone}</p>
-            <p><span className="font-semibold">Email:</span> {draft.email}</p>
-            <p><span className="font-semibold">Office:</span> {draft.office}</p>
+            <p><span className="font-semibold">{t("admin.cms.contact.labels.phone")}:</span> {draft.phone}</p>
+            <p><span className="font-semibold">{t("admin.cms.contact.labels.email")}:</span> {draft.email}</p>
+            <p><span className="font-semibold">{t("admin.cms.contact.labels.office")}:</span> {draft.office}</p>
           </div>
           <div className="pt-4 border-t border-border">
-            <p className="text-sm font-semibold mb-2">Office Hours</p>
+            <p className="text-sm font-semibold mb-2">{t("admin.cms.contact.labels.officeHours")}</p>
             <ul className="text-sm text-muted-foreground space-y-1">
               {draft.officeHours.map((line, index) => (
                 <li key={`${line}-${index}`}>{line}</li>
@@ -360,6 +364,7 @@ const ContactSectionEditor = ({ section, onSave, saving }: CmsEditorProps<Contac
 };
 
 const FooterSectionEditor = ({ section, onSave, saving }: CmsEditorProps<FooterContent>) => {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState<FooterContent>(normalizeFooter(section.content as FooterContent));
   const [quickLinksText, setQuickLinksText] = useState(formatLinks(draft.quickLinks));
   const [propertyTypesText, setPropertyTypesText] = useState(toMultiline(draft.propertyTypes));
@@ -385,18 +390,18 @@ const FooterSectionEditor = ({ section, onSave, saving }: CmsEditorProps<FooterC
 
   return (
     <AdminGlassCard
-      title="Footer Content"
-      description="Curate the footer copy, quick links, and social handles."
+      title={t("admin.cms.footer.title")}
+      description={t("admin.cms.footer.description")}
       rightSlot={
         <Button onClick={() => onSave(section.key, draft)} disabled={saving}>
-          {saving ? "Saving..." : "Save Footer"}
+          {saving ? t("admin.cms.actions.saving") : t("admin.cms.actions.save") + " Footer"}
         </Button>
       }
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium">Description</label>
+            <label className="text-sm font-medium">{t("admin.cms.footer.labels.description")}</label>
             <Textarea
               value={draft.description}
               onChange={(e) => setDraft((prev) => ({ ...prev, description: e.target.value }))}
@@ -404,19 +409,19 @@ const FooterSectionEditor = ({ section, onSave, saving }: CmsEditorProps<FooterC
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Phone</label>
+            <label className="text-sm font-medium">{t("admin.cms.footer.labels.phone")}</label>
             <Input value={draft.contact.phone} onChange={(e) => updateContact("phone", e.target.value)} />
           </div>
           <div>
-            <label className="text-sm font-medium">Email</label>
+            <label className="text-sm font-medium">{t("admin.cms.footer.labels.email")}</label>
             <Input value={draft.contact.email} onChange={(e) => updateContact("email", e.target.value)} />
           </div>
           <div>
-            <label className="text-sm font-medium">Location</label>
+            <label className="text-sm font-medium">{t("admin.cms.footer.labels.location")}</label>
             <Input value={draft.contact.location} onChange={(e) => updateContact("location", e.target.value)} />
           </div>
           <div>
-            <label className="text-sm font-medium">Quick Links (Label | /path)</label>
+            <label className="text-sm font-medium">{t("admin.cms.footer.labels.quickLinks")}</label>
             <Textarea
               value={quickLinksText}
               onChange={(e) => {
@@ -427,7 +432,7 @@ const FooterSectionEditor = ({ section, onSave, saving }: CmsEditorProps<FooterC
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Property Types</label>
+            <label className="text-sm font-medium">{t("admin.cms.footer.labels.propertyTypes")}</label>
             <Textarea
               value={propertyTypesText}
               onChange={(e) => {
@@ -438,7 +443,7 @@ const FooterSectionEditor = ({ section, onSave, saving }: CmsEditorProps<FooterC
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Social Links (Label | URL)</label>
+            <label className="text-sm font-medium">{t("admin.cms.footer.labels.socialLinks")}</label>
             <Textarea
               value={socialText}
               onChange={(e) => {
@@ -451,17 +456,17 @@ const FooterSectionEditor = ({ section, onSave, saving }: CmsEditorProps<FooterC
         </div>
 
         <div className="border border-border rounded-xl p-6 bg-muted/40 space-y-4">
-          <h4 className="text-lg font-display font-semibold">Footer Preview</h4>
+          <h4 className="text-lg font-display font-semibold">{t("admin.cms.footer.preview.title")}</h4>
           <p className="text-sm text-muted-foreground">{draft.description}</p>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs uppercase text-muted-foreground">Contact</p>
+              <p className="text-xs uppercase text-muted-foreground">{t("admin.cms.footer.preview.contact")}</p>
               <p className="text-sm">{draft.contact.phone}</p>
               <p className="text-sm">{draft.contact.email}</p>
               <p className="text-sm">{draft.contact.location}</p>
             </div>
             <div>
-              <p className="text-xs uppercase text-muted-foreground">Quick Links</p>
+              <p className="text-xs uppercase text-muted-foreground">{t("admin.cms.footer.preview.quickLinks")}</p>
               <ul className="text-sm space-y-1">
                 {draft.quickLinks.slice(0, 4).map((link) => (
                   <li key={link.href}>{link.label}</li>
@@ -470,11 +475,11 @@ const FooterSectionEditor = ({ section, onSave, saving }: CmsEditorProps<FooterC
             </div>
           </div>
           <div>
-            <p className="text-xs uppercase text-muted-foreground">Property Types</p>
+            <p className="text-xs uppercase text-muted-foreground">{t("admin.cms.footer.labels.propertyTypes")}</p>
             <p className="text-sm">{draft.propertyTypes.join(", ")}</p>
           </div>
           <div>
-            <p className="text-xs uppercase text-muted-foreground">Social</p>
+            <p className="text-xs uppercase text-muted-foreground">{t("admin.cms.footer.preview.social")}</p>
             <p className="text-sm">{draft.social.map((item) => item.label).join(" • ")}</p>
           </div>
         </div>
@@ -484,6 +489,7 @@ const FooterSectionEditor = ({ section, onSave, saving }: CmsEditorProps<FooterC
 };
 
 const AboutSectionEditor = ({ section, onSave, saving }: CmsEditorProps<AboutContent>) => {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState<AboutContent>(normalizeAbout(section.content as AboutContent));
   const [storyText, setStoryText] = useState(toMultiline(draft.storyParagraphs));
   const [valuesText, setValuesText] = useState(formatAboutValues(draft.values));
@@ -499,38 +505,38 @@ const AboutSectionEditor = ({ section, onSave, saving }: CmsEditorProps<AboutCon
 
   return (
     <AdminGlassCard
-      title="About Page"
-      description="Edit the story, values, and hero preview for the About page."
+      title={t("admin.cms.about.title")}
+      description={t("admin.cms.about.description")}
       rightSlot={
         <Button onClick={() => onSave(section.key, draft)} disabled={saving}>
-          {saving ? "Saving..." : "Save About"}
+          {saving ? t("admin.cms.actions.saving") : t("admin.cms.actions.save") + " About"}
         </Button>
       }
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium">Hero Title</label>
+            <label className="text-sm font-medium">{t("admin.cms.about.labels.heroTitle")}</label>
             <Input
               value={draft.heroTitle}
               onChange={(e) => setDraft((prev) => ({ ...prev, heroTitle: e.target.value }))}
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Hero Subtitle</label>
+            <label className="text-sm font-medium">{t("admin.cms.about.labels.heroSubtitle")}</label>
             <Input
               value={draft.heroSubtitle}
               onChange={(e) => setDraft((prev) => ({ ...prev, heroSubtitle: e.target.value }))}
             />
           </div>
           <ImageUploadField
-            label="Hero Image URL"
+            label={t("admin.cms.about.labels.heroImage")}
             value={draft.heroImage}
             onChange={(value) => setDraft((prev) => ({ ...prev, heroImage: value }))}
-            placeholder="Paste an image URL or upload one"
+            placeholder={t("admin.cms.hero.placeholders.backgroundImage")}
           />
           <div>
-            <label className="text-sm font-medium">Story Paragraphs (one per line)</label>
+            <label className="text-sm font-medium">{t("admin.cms.about.labels.storyParagraphs")}</label>
             <Textarea
               value={storyText}
               onChange={(e) => {
@@ -541,7 +547,7 @@ const AboutSectionEditor = ({ section, onSave, saving }: CmsEditorProps<AboutCon
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Values (icon | title | description)</label>
+            <label className="text-sm font-medium">{t("admin.cms.about.labels.values")}</label>
             <Textarea
               value={valuesText}
               onChange={(e) => {
@@ -552,7 +558,7 @@ const AboutSectionEditor = ({ section, onSave, saving }: CmsEditorProps<AboutCon
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Stats (label | value)</label>
+            <label className="text-sm font-medium">{t("admin.cms.about.labels.stats")}</label>
             <Textarea
               value={statsText}
               onChange={(e) => {
@@ -624,6 +630,7 @@ interface JsonSectionEditorProps {
 }
 
 const JsonSectionEditor = ({ section, onSave, saving, onInvalidJson }: JsonSectionEditorProps) => {
+  const { t } = useTranslation();
   const [value, setValue] = useState(JSON.stringify(section.content, null, 2));
 
   useEffect(() => {
@@ -646,7 +653,7 @@ const JsonSectionEditor = ({ section, onSave, saving, onInvalidJson }: JsonSecti
       description="Advanced section (JSON)."
       rightSlot={
         <Button onClick={handleSave} disabled={saving}>
-          {saving ? "Saving..." : "Save"}
+          {saving ? t("admin.cms.actions.saving") : t("admin.cms.actions.save")}
         </Button>
       }
     >
@@ -666,6 +673,7 @@ const JsonSectionEditor = ({ section, onSave, saving, onInvalidJson }: JsonSecti
 };
 
 const AdminCMS = () => {
+  const { t } = useTranslation();
   const { data, isLoading, refetch } = useQuery({ queryKey: ["cms", "all"], queryFn: fetchSections });
   const { toast } = useToast();
   const [savingKey, setSavingKey] = useState<string | null>(null);
@@ -674,26 +682,26 @@ const AdminCMS = () => {
     try {
       setSavingKey(key);
       await apiClient.put(`/cms/${key}`, { content });
-      toast({ title: `${key} saved` });
+      toast({ title: t("admin.cms.toasts.saved", { section: key }) });
       await refetch();
     } catch (error) {
       console.error("Failed to save CMS", error);
-      toast({ title: "Save failed", description: "Please try again.", variant: "destructive" });
+      toast({ title: t("admin.cms.toasts.saveFailed"), description: t("admin.cms.toasts.saveFailedDesc"), variant: "destructive" });
     } finally {
       setSavingKey(null);
     }
   };
 
   if (isLoading || !data) {
-    return <p className="text-muted-foreground">Loading CMS...</p>;
+    return <p className="text-muted-foreground">{t("admin.cms.loading")}</p>;
   }
 
   return (
     <div className="space-y-6">
       <AdminPageHeader
         icon={PenSquare}
-        title="Content Management"
-        description="Edit homepage content blocks with friendly forms and instant previews."
+        title={t("admin.cms.headerTitle")}
+        description={t("admin.cms.headerDescription")}
       />
 
       <div className="space-y-6">

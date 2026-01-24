@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
       default: ROLES.USER,
     },
     phone: { type: String },
+    country: { type: String, trim: true },
     avatarUrl: { type: String },
     isActive: { type: Boolean, default: true },
   },

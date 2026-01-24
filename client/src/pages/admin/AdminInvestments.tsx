@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import apiClient from "@/lib/apiClient";
 import type { Investment } from "@/types";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
@@ -25,6 +26,7 @@ const fetchInvestments = async (filters: { search?: string; status?: string; pay
 };
 
 const AdminInvestments = () => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [search, setSearch] = useState("");
@@ -43,29 +45,29 @@ const AdminInvestments = () => {
   const mutation = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: Partial<Investment> }) => apiClient.put(`/investments/${id}`, payload),
     onSuccess: () => {
-      toast({ title: "Investment updated" });
+      toast({ title: t("admin.investments.toasts.investmentUpdated") });
       queryClient.invalidateQueries({ queryKey: ["investments"] });
     },
-    onError: () => toast({ title: "Update failed", variant: "destructive" }),
+    onError: () => toast({ title: t("admin.investments.toasts.updateFailed"), variant: "destructive" }),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => apiClient.delete(`/investments/${id}`),
     onSuccess: () => {
-      toast({ title: "Investment deleted" });
+      toast({ title: t("admin.investments.toasts.investmentDeleted") });
       queryClient.invalidateQueries({ queryKey: ["investments"] });
     },
-    onError: () => toast({ title: "Delete failed", variant: "destructive" }),
+    onError: () => toast({ title: t("admin.investments.toasts.deleteFailed"), variant: "destructive" }),
   });
 
   const increaseReviewMutation = useMutation({
     mutationFn: ({ id, decision }: { id: string; decision: "approve" | "reject" }) =>
       apiClient.post(`/investments/${id}/increase-request/review`, { decision }),
     onSuccess: () => {
-      toast({ title: "Increase request updated" });
+      toast({ title: t("admin.investments.toasts.increaseRequestUpdated") });
       queryClient.invalidateQueries({ queryKey: ["investments"] });
     },
-    onError: () => toast({ title: "Failed to update increase request", variant: "destructive" }),
+    onError: () => toast({ title: t("admin.investments.toasts.increaseRequestFailed"), variant: "destructive" }),
   });
 
   const summary = useMemo(() => {
@@ -126,42 +128,42 @@ const AdminInvestments = () => {
     <div className="space-y-8">
       <AdminPageHeader
         icon={CircleDollarSign}
-        title="Investments"
-        description="Manage user investment requests, approvals, and funding."
+        title={t("admin.investments.title")}
+        description={t("admin.investments.description")}
       />
 
       <AdminGlassCard
-        eyebrow="Filters"
-        title="Refine investments"
-        description="Search and segment by status and payment state."
+        eyebrow={t("admin.investments.filters.eyebrow")}
+        title={t("admin.investments.filters.title")}
+        description={t("admin.investments.filters.description")}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end"
       >
         <div className="md:col-span-2 space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Search</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("admin.investments.filters.search")}</p>
           <Input
-            placeholder="Search by investment box, property, user, or notes"
+            placeholder={t("admin.investments.filters.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-10 bg-background"
           />
         </div>
         <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("admin.investments.filters.status")}</p>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="h-10 bg-background"><SelectValue placeholder="All" /></SelectTrigger>
+            <SelectTrigger className="h-10 bg-background"><SelectValue placeholder={t("admin.investments.filters.all")} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              {STATUS_OPTIONS.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+              <SelectItem value="all">{t("admin.investments.filters.allStatuses")}</SelectItem>
+              {STATUS_OPTIONS.map((opt) => <SelectItem key={opt} value={opt}>{t(`admin.investments.statusOptions.${opt}`)}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Payment</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("admin.investments.filters.payment")}</p>
           <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-            <SelectTrigger className="h-10 bg-background"><SelectValue placeholder="All" /></SelectTrigger>
+            <SelectTrigger className="h-10 bg-background"><SelectValue placeholder={t("admin.investments.filters.all")} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Payments</SelectItem>
-              {PAYMENT_OPTIONS.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+              <SelectItem value="all">{t("admin.investments.filters.allPayments")}</SelectItem>
+              {PAYMENT_OPTIONS.map((opt) => <SelectItem key={opt} value={opt}>{t(`admin.investments.paymentOptions.${opt}`)}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -169,31 +171,31 @@ const AdminInvestments = () => {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">Total Requests</p>
+          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">{t("admin.investments.summary.totalRequests")}</p>
           <p className="text-2xl font-bold text-white">{summary.total}</p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">Pending</p>
+          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">{t("admin.investments.summary.pending")}</p>
           <p className="text-2xl font-bold text-white flex items-center gap-2"><ShieldAlert className="h-5 w-5 text-amber-500" />{summary.pending}</p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">Approved</p>
+          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">{t("admin.investments.summary.approved")}</p>
           <p className="text-2xl font-bold text-white flex items-center gap-2"><CheckCircle className="h-5 w-5 text-emerald-500" />{summary.approved}</p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">Fully Paid</p>
+          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">{t("admin.investments.summary.fullyPaid")}</p>
           <p className="text-2xl font-bold text-white flex items-center gap-2"><BadgeDollarSign className="h-5 w-5 text-luxury-gold" />{summary.paid}</p>
         </div>
       </div>
 
       {isLoading && <div className="flex justify-center p-12"><Loader2 className="h-8 w-8 animate-spin text-white" /></div>}
-      {!isLoading && !data?.length && <div className="text-center p-12 text-white/40 bg-white/5 rounded-2xl border border-dashed border-white/10">No investment requests found matching your filters.</div>}
+      {!isLoading && !data?.length && <div className="text-center p-12 text-white/40 bg-white/5 rounded-2xl border border-dashed border-white/10">{t("admin.investments.noResults")}</div>}
 
       <div className="space-y-6">
         {data?.map((investment) => (
           (() => {
             const isIncreasePending = investment.increaseRequest?.status === "Pending";
-            const requestLabel = isIncreasePending ? "Request to increase" : "New investment";
+            const requestLabel = isIncreasePending ? t("admin.investments.card.requestToIncrease") : t("admin.investments.card.newInvestment");
             const requestedAdditional = Number(investment.increaseRequest?.additionalAmount) || 0;
             return (
               <div key={investment._id} className={`rounded-3xl overflow-hidden transition hover:bg-white/5 ${investment.status === "Pending"
@@ -208,7 +210,7 @@ const AdminInvestments = () => {
                         {new Date(investment.createdAt).toLocaleDateString()}
                       </div>
                       <h3 className="text-xl font-display text-white">
-                        {investment.investmentBox?.name ?? investment.property?.title ?? "Unknown Investment"}
+                        {investment.investmentBox?.name ?? investment.property?.title ?? t("admin.investments.card.unknownInvestment")}
                       </h3>
                       {investment.property?.location ? (
                         <p className="text-sm text-white/60 flex items-center gap-1">
@@ -227,10 +229,10 @@ const AdminInvestments = () => {
                         {requestLabel}
                       </span>
                       <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/10 text-white border border-white/20">
-                        Inv: EGP {investment.investmentAmount.toLocaleString()}
+                        {t("admin.investments.card.inv")}: EGP {investment.investmentAmount.toLocaleString()}
                       </span>
                       <span className="px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        Exp: EGP {Math.round(investment.expectedProfit || investment.investmentAmount * (investment.roiPercentage / 100)).toLocaleString()}
+                        {t("admin.investments.card.exp")}: EGP {Math.round(investment.expectedProfit || investment.investmentAmount * (investment.roiPercentage / 100)).toLocaleString()}
                       </span>
                       {isIncreasePending && requestedAdditional > 0 ? (
                         <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
@@ -241,7 +243,7 @@ const AdminInvestments = () => {
                   </div>
 
                   <div className="mt-4 pt-4 border-t border-white/10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/60">
-                    <span className="inline-flex items-center gap-2"><User className="h-4 w-4 text-white/40" /> {investment.user?.name ?? "Unknown"}</span>
+                    <span className="inline-flex items-center gap-2"><User className="h-4 w-4 text-white/40" /> {investment.user?.name ?? t("admin.investments.card.unknown")}</span>
                     {investment.user?.email && (
                       <a className="inline-flex items-center gap-2 hover:text-white transition-colors" href={`mailto:${investment.user.email}`}>
                         <Mail className="h-4 w-4 text-white/40" /> {investment.user.email}
@@ -260,12 +262,12 @@ const AdminInvestments = () => {
                     <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
                       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                         <div className="space-y-1">
-                          <div className="text-sm font-semibold text-amber-400">Increase request</div>
+                          <div className="text-sm font-semibold text-amber-400">{t("admin.investments.increase.title")}</div>
                           <div className="text-sm text-white/70">
-                            Requested additional: <span className="font-medium text-white">EGP {Math.round(requestedAdditional).toLocaleString()}</span>
+                            {t("admin.investments.increase.requestedAdditional")}: <span className="font-medium text-white">EGP {Math.round(requestedAdditional).toLocaleString()}</span>
                           </div>
                           {investment.increaseRequest?.note ? (
-                            <div className="text-sm text-white/60">Note: {investment.increaseRequest.note}</div>
+                            <div className="text-sm text-white/60">{t("admin.investments.increase.note")}: {investment.increaseRequest.note}</div>
                           ) : null}
                         </div>
                         <div className="flex gap-2">
@@ -274,23 +276,23 @@ const AdminInvestments = () => {
                             size="sm"
                             className="border-white/20 text-white hover:bg-white/10 hover:text-white"
                             onClick={() => {
-                              if (!window.confirm("Approve this increase request?")) return;
+                              if (!window.confirm(t("admin.investments.increase.approveConfirm"))) return;
                               increaseReviewMutation.mutate({ id: investment._id, decision: "approve" });
                             }}
                             disabled={increaseReviewMutation.isPending}
                           >
-                            Approve Increase
+                            {t("admin.investments.increase.approveBtn")}
                           </Button>
                           <Button
                             variant="destructive"
                             size="sm"
                             onClick={() => {
-                              if (!window.confirm("Reject this increase request?")) return;
+                              if (!window.confirm(t("admin.investments.increase.rejectConfirm"))) return;
                               increaseReviewMutation.mutate({ id: investment._id, decision: "reject" });
                             }}
                             disabled={increaseReviewMutation.isPending}
                           >
-                            Reject
+                            {t("admin.investments.increase.rejectBtn")}
                           </Button>
                         </div>
                       </div>
@@ -300,10 +302,10 @@ const AdminInvestments = () => {
 
                     {/* Investment Details Group */}
                     <div className="space-y-4 p-4 rounded-xl bg-black/20 border border-white/5">
-                      <h4 className="text-sm font-semibold uppercase tracking-wider text-white/40 mb-2">Financials</h4>
+                      <h4 className="text-sm font-semibold uppercase tracking-wider text-white/40 mb-2">{t("admin.investments.financials.title")}</h4>
 
                       <div className="space-y-1">
-                        <label className="text-xs text-white/60">Investment Amount</label>
+                        <label className="text-xs text-white/60">{t("admin.investments.financials.investmentAmount")}</label>
                         <div className="flex gap-2">
                           <Input
                             type="number"
@@ -311,12 +313,12 @@ const AdminInvestments = () => {
                             value={amountInputs[investment._id] ?? investment.investmentAmount.toString()}
                             onChange={(e) => setAmountInputs((prev) => ({ ...prev, [investment._id]: e.target.value }))}
                           />
-                          <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 hover:text-white" onClick={() => handleInvestmentAmountSave(investment)} disabled={mutation.isPending}>Save</Button>
+                          <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 hover:text-white" onClick={() => handleInvestmentAmountSave(investment)} disabled={mutation.isPending}>{t("admin.investments.actions.save")}</Button>
                         </div>
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-xs text-white/60">ROI %</label>
+                        <label className="text-xs text-white/60">{t("admin.investments.financials.roiPercent")}</label>
                         <div className="flex gap-2">
                           <Input
                             type="number"
@@ -324,12 +326,12 @@ const AdminInvestments = () => {
                             value={roiInputs[investment._id] ?? investment.roiPercentage.toString()}
                             onChange={(e) => setRoiInputs((prev) => ({ ...prev, [investment._id]: e.target.value }))}
                           />
-                          <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 hover:text-white" onClick={() => handleRoiSave(investment)} disabled={mutation.isPending}>Save</Button>
+                          <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 hover:text-white" onClick={() => handleRoiSave(investment)} disabled={mutation.isPending}>{t("admin.investments.actions.save")}</Button>
                         </div>
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-xs text-white/60">Amount Received</label>
+                        <label className="text-xs text-white/60">{t("admin.investments.financials.amountReceived")}</label>
                         <div className="flex gap-2">
                           <Input
                             type="number"
@@ -337,37 +339,37 @@ const AdminInvestments = () => {
                             value={receivedInputs[investment._id] ?? investment.amountReceived.toString()}
                             onChange={(e) => setReceivedInputs((prev) => ({ ...prev, [investment._id]: e.target.value }))}
                           />
-                          <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 hover:text-white" onClick={() => handleReceivedSave(investment)} disabled={mutation.isPending}>Save</Button>
+                          <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 hover:text-white" onClick={() => handleReceivedSave(investment)} disabled={mutation.isPending}>{t("admin.investments.actions.save")}</Button>
                         </div>
                       </div>
                     </div>
 
                     {/* Status Group */}
                     <div className="space-y-4 p-4 rounded-xl bg-black/20 border border-white/5">
-                      <h4 className="text-sm font-semibold uppercase tracking-wider text-white/40 mb-2">Status & Schedule</h4>
+                      <h4 className="text-sm font-semibold uppercase tracking-wider text-white/40 mb-2">{t("admin.investments.statusSchedule.title")}</h4>
 
                       <div className="space-y-1">
-                        <label className="text-xs text-white/60">Approval Status</label>
+                        <label className="text-xs text-white/60">{t("admin.investments.statusSchedule.approvalStatus")}</label>
                         <Select value={investment.status} onValueChange={(val) => handleStatusChange(investment, val as Investment["status"])}>
                           <SelectTrigger className="h-9 bg-white/5 border-white/10 text-white"><SelectValue /></SelectTrigger>
                           <SelectContent>
-                            {STATUS_OPTIONS.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                            {STATUS_OPTIONS.map((opt) => <SelectItem key={opt} value={opt}>{t(`admin.investments.statusOptions.${opt}`)}</SelectItem>)}
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-xs text-white/60">Payment Status</label>
+                        <label className="text-xs text-white/60">{t("admin.investments.statusSchedule.paymentStatus")}</label>
                         <Select value={investment.paymentStatus} onValueChange={(val) => handlePaymentStatusChange(investment, val as Investment["paymentStatus"])}>
                           <SelectTrigger className="h-9 bg-white/5 border-white/10 text-white"><SelectValue /></SelectTrigger>
                           <SelectContent>
-                            {PAYMENT_OPTIONS.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                            {PAYMENT_OPTIONS.map((opt) => <SelectItem key={opt} value={opt}>{t(`admin.investments.paymentOptions.${opt}`)}</SelectItem>)}
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-xs text-white/60">Payout Date</label>
+                        <label className="text-xs text-white/60">{t("admin.investments.statusSchedule.payoutDate")}</label>
                         <div className="flex gap-2">
                           <Input
                             type="date"
@@ -375,19 +377,19 @@ const AdminInvestments = () => {
                             value={payoutInputs[investment._id] ?? (investment.payoutDate ? investment.payoutDate.slice(0, 10) : "")}
                             onChange={(e) => setPayoutInputs((prev) => ({ ...prev, [investment._id]: e.target.value }))}
                           />
-                          <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 hover:text-white" onClick={() => handlePayoutDateSave(investment)} disabled={mutation.isPending}>Save</Button>
+                          <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 hover:text-white" onClick={() => handlePayoutDateSave(investment)} disabled={mutation.isPending}>{t("admin.investments.actions.save")}</Button>
                         </div>
                       </div>
                     </div>
 
                     {/* Notes Group */}
                     <div className="space-y-4 p-4 rounded-xl bg-black/20 border border-white/5 flex flex-col">
-                      <h4 className="text-sm font-semibold uppercase tracking-wider text-white/40 mb-2">Notes & Actions</h4>
+                      <h4 className="text-sm font-semibold uppercase tracking-wider text-white/40 mb-2">{t("admin.investments.notesActions.title")}</h4>
                       <div className="flex-1 space-y-1">
                         <Textarea
                           value={notesInputs[investment._id] ?? investment.notes ?? ""}
                           onChange={(e) => setNotesInputs((prev) => ({ ...prev, [investment._id]: e.target.value }))}
-                          placeholder="Add internal notes..."
+                          placeholder={t("admin.investments.notesActions.placeholder")}
                           className="min-h-[120px] resize-none bg-white/5 border-white/10 text-white"
                         />
                       </div>
@@ -397,12 +399,12 @@ const AdminInvestments = () => {
                           size="sm"
                           className="h-8 px-2"
                           onClick={() => {
-                            if (!window.confirm("Delete this investment? This cannot be undone.")) return;
+                            if (!window.confirm(t("admin.investments.notesActions.deleteConfirm"))) return;
                             deleteMutation.mutate(investment._id);
                           }}
                           disabled={deleteMutation.isPending}
                         >
-                          <Trash2 className="h-3 w-3 mr-1" /> Delete
+                          <Trash2 className="h-3 w-3 mr-1" /> {t("admin.investments.actions.delete")}
                         </Button>
                         <Button
                           variant="ghost"
@@ -411,7 +413,7 @@ const AdminInvestments = () => {
                           onClick={() => handleNotesSave(investment)}
                           disabled={mutation.isPending}
                         >
-                          Save Notes
+                          {t("admin.investments.notesActions.saveNotes")}
                         </Button>
                       </div>
                     </div>
@@ -426,7 +428,7 @@ const AdminInvestments = () => {
       {(mutation.isPending || deleteMutation.isPending || increaseReviewMutation.isPending) && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground justify-center py-4">
           <Loader2 className="h-4 w-4 animate-spin" />
-          Saving changes...
+          {t("admin.investments.savingChanges")}
         </div>
       )}
     </div>

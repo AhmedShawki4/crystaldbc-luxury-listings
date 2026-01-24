@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import uploadImage from "@/lib/uploadImage";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const fetchProjects = async () => {
   const { data } = await apiClient.get<{ projects: TrendingProject[] }>("/projects");
@@ -34,6 +35,7 @@ const AdminProjects = () => {
   const { data } = useQuery({ queryKey: ["projects"], queryFn: fetchProjects });
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [formState, setFormState] = useState(initialState);
   const { data: properties = [] } = useProperties();
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -54,20 +56,20 @@ const AdminProjects = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
-      toast({ title: `Project ${editingId ? "updated" : "created"}` });
+      toast({ title: editingId ? t("admin.projects.toasts.updated") : t("admin.projects.toasts.created") });
       setEditingId(null);
       setFormState(initialState);
     },
-    onError: () => toast({ title: "Action failed", variant: "destructive" }),
+    onError: () => toast({ title: t("admin.projects.toasts.actionFailed"), variant: "destructive" }),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => apiClient.delete(`/projects/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
-      toast({ title: "Project removed" });
+      toast({ title: t("admin.projects.toasts.removed") });
     },
-    onError: () => toast({ title: "Failed to delete", variant: "destructive" }),
+    onError: () => toast({ title: t("admin.projects.toasts.deleteFailed"), variant: "destructive" }),
   });
 
   const handleEdit = (project: TrendingProject) => {
@@ -103,12 +105,12 @@ const AdminProjects = () => {
     try {
       const url = await uploadImage(file);
       setFormState((prev) => ({ ...prev, image: url }));
-      toast({ title: "Image uploaded" });
+      toast({ title: t("admin.projects.toasts.imageUploaded") });
     } catch (error) {
       console.error("Trending project image upload failed", error);
       toast({
-        title: "Upload failed",
-        description: "Please try again.",
+        title: t("admin.projects.toasts.uploadFailedTitle"),
+        description: t("admin.projects.toasts.uploadFailedDescription"),
         variant: "destructive",
       });
     } finally {
@@ -121,45 +123,45 @@ const AdminProjects = () => {
     <div className="space-y-8">
       <AdminPageHeader
         icon={Sparkles}
-        title="Trending Projects"
-        description="Curate the homepage spotlight carousel with premium developments."
+        title={t("admin.projects.title")}
+        description={t("admin.projects.description")}
       />
 
-      <AdminGlassCard title={editingId ? "Edit Project" : "Add Project"} description="Create or modify a trending project.">
+      <AdminGlassCard title={editingId ? t("admin.projects.editTitle") : t("admin.projects.addTitle")} description={t("admin.projects.formDescription")}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <div>
-            <label className="text-sm font-medium">Name</label>
+            <label className="text-sm font-medium">{t("admin.projects.labels.name")}</label>
             <Input name="name" value={formState.name} onChange={handleChange} />
           </div>
           <div>
-            <label className="text-sm font-medium">Location</label>
+            <label className="text-sm font-medium">{t("admin.projects.labels.location")}</label>
             <Input name="location" value={formState.location} onChange={handleChange} />
           </div>
           <div>
-            <label className="text-sm font-medium">Status</label>
+            <label className="text-sm font-medium">{t("admin.projects.labels.status")}</label>
             <Input name="status" value={formState.status} onChange={handleChange} />
           </div>
           <div>
-            <label className="text-sm font-medium">Completion</label>
+            <label className="text-sm font-medium">{t("admin.projects.labels.completion")}</label>
             <Input name="completion" value={formState.completion} onChange={handleChange} />
           </div>
           <div>
-            <label className="text-sm font-medium">Starting Price</label>
+            <label className="text-sm font-medium">{t("admin.projects.labels.startingPrice")}</label>
             <Input name="startingPrice" value={formState.startingPrice} onChange={handleChange} />
           </div>
           <div>
-            <label className="text-sm font-medium">Developer</label>
+            <label className="text-sm font-medium">{t("admin.projects.labels.developer")}</label>
             <Input name="developer" value={formState.developer} onChange={handleChange} />
           </div>
           <div>
-            <label className="text-sm font-medium">Hero Image URL</label>
+            <label className="text-sm font-medium">{t("admin.projects.labels.heroImage")}</label>
             <div className="flex gap-2">
               <Input
                 name="image"
                 value={formState.image}
                 onChange={handleChange}
                 className="flex-1"
-                placeholder="Paste an image URL or use upload"
+                placeholder={t("admin.projects.placeholders.image")}
               />
               <input
                 ref={imageInputRef}
@@ -175,19 +177,19 @@ const AdminProjects = () => {
                 onClick={() => imageInputRef.current?.click()}
                 disabled={uploadingImage}
               >
-                {uploadingImage ? "Uploading..." : "Upload"}
+                {uploadingImage ? t("admin.common.uploading") : t("admin.projects.actions.upload")}
               </Button>
             </div>
           </div>
           <div>
-            <label className="text-sm font-medium">Linked Property</label>
+            <label className="text-sm font-medium">{t("admin.projects.labels.linkedProperty")}</label>
             <select
               name="property"
               value={formState.property}
               onChange={handleChange}
               className="w-full h-12 rounded-md border border-white/10 bg-background text-white px-3"
             >
-              <option value="">None</option>
+              <option value="">{t("admin.projects.placeholders.none")}</option>
               {properties.map((p: Property) => (
                 <option key={p._id} value={p._id}>
                   {p.title} — {p.location}
@@ -196,11 +198,11 @@ const AdminProjects = () => {
             </select>
           </div>
           <div className="md:col-span-2">
-            <label className="text-sm font-medium">Description</label>
+            <label className="text-sm font-medium">{t("admin.projects.labels.description")}</label>
             <Textarea name="description" value={formState.description} onChange={handleChange} rows={3} />
           </div>
           <div className="md:col-span-2">
-            <label className="text-sm font-medium">Amenities (comma separated)</label>
+            <label className="text-sm font-medium">{t("admin.projects.labels.amenities")}</label>
             <Textarea name="amenities" value={formState.amenities} onChange={handleChange} rows={2} />
           </div>
           <div className="md:col-span-2 flex justify-end gap-3">
@@ -209,11 +211,11 @@ const AdminProjects = () => {
                 setEditingId(null);
                 setFormState(initialState);
               }}>
-                Cancel
+                {t("admin.projects.actions.cancel")}
               </Button>
             )}
             <Button onClick={() => mutation.mutate()} disabled={mutation.isPending} className="bg-luxury-gold hover:bg-luxury-gold/90 text-black">
-              {editingId ? "Update Project" : "Create Project"}
+              {editingId ? t("admin.projects.actions.update") : t("admin.projects.actions.create")}
             </Button>
           </div>
         </div>
@@ -229,17 +231,17 @@ const AdminProjects = () => {
               </div>
               <div className="flex gap-2">
                 <Button size="sm" variant="secondary" className="bg-white/10 text-white hover:bg-white/20 border border-white/10" onClick={() => handleEdit(project)}>
-                  Edit
+                  {t("admin.projects.actions.edit")}
                 </Button>
                 <Button
                   size="sm"
                   variant="destructive"
                   onClick={() => {
-                    if (!window.confirm(`Delete project "${project.name}"? This cannot be undone.`)) return;
+                    if (!window.confirm(t("admin.projects.confirmDelete", { name: project.name }))) return;
                     deleteMutation.mutate(project._id);
                   }}
                 >
-                  Delete
+                  {t("admin.projects.actions.delete")}
                 </Button>
               </div>
             </div>

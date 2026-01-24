@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar, Loader2, Mail, MapPin, Phone, User } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const STATUS_OPTIONS = ["Pending", "Approved", "Declined"] as const;
 const PAY_PERIODS = ["day", "month", "year"] as const;
@@ -40,6 +41,7 @@ const toDateInputValue = (value?: string) => {
 const AdminRentals = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
@@ -66,19 +68,19 @@ const AdminRentals = () => {
   const mutation = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: Partial<RentalRequest> }) => apiClient.put(`/rentals/requests/${id}`, payload),
     onSuccess: () => {
-      toast({ title: "Rental request updated" });
+      toast({ title: t("admin.rentals.toasts.updated") });
       queryClient.invalidateQueries({ queryKey: ["rental-requests"] });
     },
-    onError: () => toast({ title: "Update failed", variant: "destructive" }),
+    onError: () => toast({ title: t("admin.rentals.toasts.updateFailed"), variant: "destructive" }),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => apiClient.delete(`/rentals/requests/${id}`),
     onSuccess: () => {
-      toast({ title: "Rental request deleted" });
+      toast({ title: t("admin.rentals.toasts.deleted") });
       queryClient.invalidateQueries({ queryKey: ["rental-requests"] });
     },
-    onError: () => toast({ title: "Delete failed", variant: "destructive" }),
+    onError: () => toast({ title: t("admin.rentals.toasts.deleteFailed"), variant: "destructive" }),
   });
 
   const summary = useMemo(() => {
@@ -115,7 +117,7 @@ const AdminRentals = () => {
     if (draft.priceValue !== undefined) {
       const parsed = Number(draft.priceValue);
       if (Number.isNaN(parsed) || parsed < 0) {
-        toast({ title: "Price must be a valid number", variant: "destructive" });
+        toast({ title: t("admin.rentals.validation.priceInvalid"), variant: "destructive" });
         return;
       }
       payload.priceValue = parsed;
@@ -133,33 +135,33 @@ const AdminRentals = () => {
     <div className="space-y-8">
       <AdminPageHeader
         icon={Calendar}
-        title="Rent Requests"
-        description="Approve, decline, or schedule rent payments for For Rent properties."
+        title={t("admin.rentals.title")}
+        description={t("admin.rentals.description")}
       />
 
       <AdminGlassCard
-        eyebrow="Filters"
-        title="Refine rent requests"
-        description="Search and segment by status to focus follow-ups."
+        eyebrow={t("admin.rentals.filtersEyebrow")}
+        title={t("admin.rentals.filtersTitle")}
+        description={t("admin.rentals.filtersDescription")}
         className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"
       >
         <div className="md:col-span-2 space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Search</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("admin.common.search")}</p>
           <Input
-            placeholder="Search by property, user, or notes"
+            placeholder={t("admin.rentals.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-10 bg-background"
           />
         </div>
         <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("admin.common.status")}</p>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="h-10 bg-background"><SelectValue placeholder="All" /></SelectTrigger>
+            <SelectTrigger className="h-10 bg-background"><SelectValue placeholder={t("admin.common.all")} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="all">{t("admin.rentals.allStatuses")}</SelectItem>
               {STATUS_OPTIONS.map((opt) => (
-                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                <SelectItem key={opt} value={opt}>{t(`admin.rentals.status.${opt.toLowerCase()}`)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -168,19 +170,19 @@ const AdminRentals = () => {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">Total</p>
+          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">{t("admin.rentals.stats.total")}</p>
           <p className="text-2xl font-bold text-white">{summary.total}</p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">Pending</p>
+          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">{t("admin.rentals.status.pending")}</p>
           <p className="text-2xl font-bold text-white">{summary.pending}</p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">Approved</p>
+          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">{t("admin.rentals.status.approved")}</p>
           <p className="text-2xl font-bold text-white">{summary.approved}</p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">Declined</p>
+          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">{t("admin.rentals.status.declined")}</p>
           <p className="text-2xl font-bold text-white">{summary.declined}</p>
         </div>
       </div>
@@ -188,7 +190,7 @@ const AdminRentals = () => {
       {isLoading && <div className="flex justify-center p-12"><Loader2 className="h-8 w-8 animate-spin text-white" /></div>}
       {!isLoading && !data?.length && (
         <div className="text-center p-12 text-white/40 bg-white/5 rounded-2xl border border-dashed border-white/10">
-          No rent requests found matching your filters.
+          {t("admin.rentals.empty")}
         </div>
       )}
 
@@ -212,35 +214,35 @@ const AdminRentals = () => {
                       <Calendar className="h-3 w-3" />
                       {new Date(request.createdAt).toLocaleDateString()}
                     </div>
-                    <h3 className="text-xl font-display text-white">{request.property?.title ?? "Unknown property"}</h3>
+                    <h3 className="text-xl font-display text-white">{request.property?.title ?? t("admin.rentals.unknownProperty")}</h3>
                     <p className="text-sm text-white/60 flex items-center gap-1">
                       <MapPin className="h-3 w-3" /> {request.property?.location ?? "—"}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/10 text-white/80 border border-white/10">
-                      Price: EGP {Math.round(request.priceValue ?? 0).toLocaleString()}
+                      {t("admin.rentals.labels.price")}: EGP {Math.round(request.priceValue ?? 0).toLocaleString()}
                     </span>
                     <span className="px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                      Pay: {request.payPeriod}
+                      {t("admin.rentals.labels.pay")}: {t(`admin.rentals.payPeriods.${request.payPeriod}`)}
                     </span>
                     <Button
                       variant="destructive"
                       size="sm"
                       disabled={deleteMutation.isPending}
                       onClick={() => {
-                        const ok = window.confirm("Delete this rental request?");
+                        const ok = window.confirm(t("admin.rentals.confirmDelete"));
                         if (!ok) return;
                         deleteMutation.mutate(request._id);
                       }}
                     >
-                      Delete
+                      {t("admin.rentals.actions.delete")}
                     </Button>
                   </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-white/10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/60">
-                  <span className="inline-flex items-center gap-2"><User className="h-4 w-4 text-white/40" /> {request.user?.name ?? "Unknown"}</span>
+                  <span className="inline-flex items-center gap-2"><User className="h-4 w-4 text-white/40" /> {request.user?.name ?? t("admin.rentals.unknownUser")}</span>
                   {request.user?.email && (
                     <a className="inline-flex items-center gap-2 hover:text-white transition-colors" href={`mailto:${request.user.email}`}>
                       <Mail className="h-4 w-4 text-white/40" /> {request.user.email}
@@ -257,34 +259,34 @@ const AdminRentals = () => {
               <div className="p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   <div className="space-y-4 p-4 rounded-xl bg-black/20 border border-white/5">
-                    <h4 className="text-sm font-semibold uppercase tracking-wider text-white/40 mb-2">Approval</h4>
+                    <h4 className="text-sm font-semibold uppercase tracking-wider text-white/40 mb-2">{t("admin.rentals.sections.approval")}</h4>
 
                     <div className="space-y-1">
-                      <label className="text-xs text-white/60">Status</label>
+                      <label className="text-xs text-white/60">{t("admin.common.status")}</label>
                       <Select value={statusValue} onValueChange={(v) => updateDraft(request._id, { status: v as StatusOption })}>
                         <SelectTrigger className="h-10 bg-white/5 border-white/10 text-white"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {STATUS_OPTIONS.map((opt) => (
-                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                            <SelectItem key={opt} value={opt}>{t(`admin.rentals.status.${opt.toLowerCase()}`)}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs text-white/60">Pay period</label>
+                      <label className="text-xs text-white/60">{t("admin.rentals.labels.payPeriod")}</label>
                       <Select value={payPeriodValue} onValueChange={(v) => updateDraft(request._id, { payPeriod: v as PayPeriod })}>
                         <SelectTrigger className="h-10 bg-white/5 border-white/10 text-white"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {PAY_PERIODS.map((opt) => (
-                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                            <SelectItem key={opt} value={opt}>{t(`admin.rentals.payPeriods.${opt}`)}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs text-white/60">Price (EGP)</label>
+                      <label className="text-xs text-white/60">{t("admin.rentals.labels.priceEgp")}</label>
                       <Input
                         type="number"
                         className="h-10 bg-white/5 border-white/10 text-white"
@@ -298,34 +300,34 @@ const AdminRentals = () => {
                       onClick={() => saveRequest(request)}
                       disabled={mutation.isPending}
                     >
-                      {mutation.isPending ? "Saving..." : "Save"}
+                      {mutation.isPending ? t("admin.common.save") + "..." : t("admin.common.save")}
                     </Button>
                   </div>
 
                   <div className="space-y-4 p-4 rounded-xl bg-black/20 border border-white/5">
-                    <h4 className="text-sm font-semibold uppercase tracking-wider text-white/40 mb-2">Dates</h4>
+                    <h4 className="text-sm font-semibold uppercase tracking-wider text-white/40 mb-2">{t("admin.rentals.sections.dates")}</h4>
 
                     <div className="space-y-1">
-                      <label className="text-xs text-white/60">Start date</label>
+                      <label className="text-xs text-white/60">{t("admin.rentals.labels.startDate")}</label>
                       <Input type="date" className="h-10 bg-white/5 border-white/10 text-white" value={startDate} onChange={(e) => updateDraft(request._id, { startDate: e.target.value })} />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs text-white/60">Due date</label>
+                      <label className="text-xs text-white/60">{t("admin.rentals.labels.dueDate")}</label>
                       <Input type="date" className="h-10 bg-white/5 border-white/10 text-white" value={dueDate} onChange={(e) => updateDraft(request._id, { dueDate: e.target.value })} />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs text-white/60">End date</label>
+                      <label className="text-xs text-white/60">{t("admin.rentals.labels.endDate")}</label>
                       <Input type="date" className="h-10 bg-white/5 border-white/10 text-white" value={endDate} onChange={(e) => updateDraft(request._id, { endDate: e.target.value })} />
                     </div>
 
-                    <p className="text-xs text-white/40">Start ≤ Due ≤ End</p>
+                    <p className="text-xs text-white/40">{t("admin.rentals.validation.dateOrder")}</p>
                   </div>
 
                   <div className="space-y-4 p-4 rounded-xl bg-black/20 border border-white/5">
-                    <h4 className="text-sm font-semibold uppercase tracking-wider text-white/40 mb-2">Notes</h4>
+                    <h4 className="text-sm font-semibold uppercase tracking-wider text-white/40 mb-2">{t("admin.rentals.sections.notes")}</h4>
                     <Textarea value={notes} onChange={(e) => updateDraft(request._id, { notes: e.target.value })} className="min-h-[140px] bg-white/5 border-white/10 text-white" />
                     <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10 hover:text-white" onClick={() => saveRequest(request)} disabled={mutation.isPending}>
-                      {mutation.isPending ? "Saving..." : "Save Notes"}
+                      {mutation.isPending ? t("admin.common.save") + "..." : t("admin.rentals.actions.saveNotes")}
                     </Button>
                   </div>
                 </div>

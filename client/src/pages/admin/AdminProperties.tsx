@@ -14,6 +14,7 @@ import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminGlassCard from "@/components/admin/AdminGlassCard";
 import { Building2 } from "lucide-react";
 import useAuth from "@/hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 const fetchProperties = async () => {
   const { data } = await apiClient.get<{ properties: Property[] }>("/properties");
@@ -65,6 +66,7 @@ const formatPriceLabel = (currencyCode: string, priceValue: number) => {
 const AdminProperties = () => {
   const { data, isLoading } = useQuery({ queryKey: ["properties"], queryFn: fetchProperties });
   const { user } = useAuth();
+  const { t } = useTranslation();
   const canDelete = user?.role === "admin";
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -96,12 +98,12 @@ const AdminProperties = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["properties"] });
-      toast({ title: `Property ${editingId ? "updated" : "created"}` });
+      toast({ title: editingId ? t("admin.properties.toasts.updated") : t("admin.properties.toasts.created") });
       setFormState(initialFormState);
       setEditingId(null);
     },
     onError: () => {
-      toast({ title: "Operation failed", variant: "destructive" });
+      toast({ title: t("admin.properties.toasts.operationFailed"), variant: "destructive" });
     },
   });
 
@@ -109,9 +111,9 @@ const AdminProperties = () => {
     mutationFn: (id: string) => apiClient.delete(`/properties/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["properties"] });
-      toast({ title: "Property removed" });
+      toast({ title: t("admin.properties.toasts.removed") });
     },
-    onError: () => toast({ title: "Failed to delete", variant: "destructive" }),
+    onError: () => toast({ title: t("admin.properties.toasts.deleteFailed"), variant: "destructive" }),
   });
 
   const handleEdit = (property: Property) => {
@@ -175,10 +177,14 @@ const AdminProperties = () => {
     try {
       const url = await uploadImage(file);
       setFormState((prev) => ({ ...prev, coverImage: url }));
-      toast({ title: "Cover image uploaded" });
+      toast({ title: t("admin.properties.toasts.coverUploaded") });
     } catch (error) {
       console.error("Cover upload failed", error);
-      toast({ title: "Cover upload failed", description: "Please try again.", variant: "destructive" });
+      toast({
+        title: t("admin.properties.toasts.coverUploadFailedTitle"),
+        description: t("admin.properties.toasts.coverUploadFailedDescription"),
+        variant: "destructive",
+      });
     } finally {
       setUploadingCover(false);
       event.target.value = "";
@@ -201,10 +207,14 @@ const AdminProperties = () => {
         const combined = [...existing, ...urls];
         return { ...prev, gallery: combined.join(", ") };
       });
-      toast({ title: `${urls.length} gallery image${urls.length > 1 ? "s" : ""} uploaded` });
+      toast({ title: t("admin.properties.toasts.galleryUploaded", { count: urls.length }) });
     } catch (error) {
       console.error("Gallery upload failed", error);
-      toast({ title: "Gallery upload failed", description: "Please try again.", variant: "destructive" });
+      toast({
+        title: t("admin.properties.toasts.galleryUploadFailedTitle"),
+        description: t("admin.properties.toasts.galleryUploadFailedDescription"),
+        variant: "destructive",
+      });
     } finally {
       setUploadingGallery(false);
       event.target.value = "";
@@ -215,26 +225,33 @@ const AdminProperties = () => {
     <div className="space-y-8">
       <AdminPageHeader
         icon={Building2}
-        title="Manage Properties"
-        description="Create, update, or archive listings across the portfolio."
+        title={t("admin.properties.headerTitle")}
+        description={t("admin.properties.headerDescription")}
       />
 
       <AdminGlassCard
-        eyebrow="Listing details"
-        title={editingId ? "Edit property" : "Create property"}
-        description="Update core information, pricing, media, and highlights."
+        eyebrow={t("admin.properties.eyebrow")}
+        title={editingId ? t("admin.properties.actions.edit") : t("admin.properties.actions.createProperty")}
+        description={t("admin.properties.description")}
       >
+        {/* All fields optional notice */}
+        <div className="mb-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
+          <p className="text-amber-400 text-sm font-medium flex items-center gap-2">
+            <span className="text-lg">ℹ️</span>
+            {t("admin.properties.allFieldsOptional")}
+          </p>
+        </div>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium">Title</label>
-            <Input name="title" value={formState.title} onChange={handleChange} required />
+            <label className="text-sm font-medium">{t("admin.properties.labels.title")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
+            <Input name="title" value={formState.title} onChange={handleChange} />
           </div>
           <div>
-            <label className="text-sm font-medium">Location</label>
-            <Input name="location" value={formState.location} onChange={handleChange} required />
+            <label className="text-sm font-medium">{t("admin.properties.labels.location")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
+            <Input name="location" value={formState.location} onChange={handleChange} />
           </div>
           <div>
-            <label className="text-sm font-medium">Currency</label>
+            <label className="text-sm font-medium">{t("admin.properties.labels.currency")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
             <Select
               value={formState.currencyCode}
               onValueChange={(value) =>
@@ -246,7 +263,7 @@ const AdminProperties = () => {
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select currency" />
+                <SelectValue placeholder={t("admin.properties.placeholders.selectCurrency")} />
               </SelectTrigger>
               <SelectContent>
                 {CURRENCY_OPTIONS.map((option) => (
@@ -258,38 +275,37 @@ const AdminProperties = () => {
             </Select>
           </div>
           <div>
-            <label className="text-sm font-medium">Price Value</label>
-            <Input type="number" name="priceValue" value={formState.priceValue} onChange={handleChange} required />
+            <label className="text-sm font-medium">{t("admin.properties.labels.priceValue")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
+            <Input type="number" name="priceValue" value={formState.priceValue} onChange={handleChange} />
           </div>
           <div>
-            <label className="text-sm font-medium">Price Label</label>
-            <Input name="priceLabel" value={formState.priceLabel} readOnly required />
-            <p className="text-xs text-muted-foreground mt-1">Auto-generated from currency and price value.</p>
+            <label className="text-sm font-medium">{t("admin.properties.labels.priceLabel")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
+            <Input name="priceLabel" value={formState.priceLabel} readOnly />
+            <p className="text-xs text-muted-foreground mt-1">{t("admin.properties.helpers.priceLabel")}</p>
           </div>
           <div>
-            <label className="text-sm font-medium">Beds</label>
-            <Input type="number" name="beds" value={formState.beds} onChange={handleChange} required />
+            <label className="text-sm font-medium">{t("admin.properties.labels.beds")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
+            <Input type="number" name="beds" value={formState.beds} onChange={handleChange} />
           </div>
           <div>
-            <label className="text-sm font-medium">Baths</label>
-            <Input type="number" name="baths" value={formState.baths} onChange={handleChange} required />
+            <label className="text-sm font-medium">{t("admin.properties.labels.baths")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
+            <Input type="number" name="baths" value={formState.baths} onChange={handleChange} />
           </div>
           <div>
-            <label className="text-sm font-medium">Sqft Label</label>
-            <Input name="sqftLabel" value={formState.sqftLabel} onChange={handleChange} required />
+            <label className="text-sm font-medium">{t("admin.properties.labels.sqftLabel")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
+            <Input name="sqftLabel" value={formState.sqftLabel} onChange={handleChange} />
           </div>
           <div>
-            <label className="text-sm font-medium">Sqft Value</label>
-            <Input type="number" name="sqftValue" value={formState.sqftValue} onChange={handleChange} required />
+            <label className="text-sm font-medium">{t("admin.properties.labels.sqftValue")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
+            <Input type="number" name="sqftValue" value={formState.sqftValue} onChange={handleChange} />
           </div>
           <div className="md:col-span-2 space-y-3">
-            <label className="text-sm font-medium">Cover Image</label>
+            <label className="text-sm font-medium">{t("admin.properties.labels.coverImage")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
             <Input
               name="coverImage"
               value={formState.coverImage}
               onChange={handleChange}
-              placeholder="Paste an image URL or upload a file"
-              required
+              placeholder={t("admin.properties.placeholders.coverImage")}
             />
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <input
@@ -299,23 +315,23 @@ const AdminProperties = () => {
                 disabled={uploadingCover}
                 className="text-sm"
               />
-              {uploadingCover && <p className="text-xs text-muted-foreground">Uploading...</p>}
+              {uploadingCover && <p className="text-xs text-muted-foreground">{t("admin.common.uploading")}</p>}
             </div>
             {formState.coverImage && (
               <img
                 src={getMediaUrl(formState.coverImage)}
-                alt="Cover preview"
+                alt={t("admin.properties.labels.coverImage")}
                 className="h-40 w-full object-cover rounded-md border border-border"
               />
             )}
           </div>
           <div className="md:col-span-2 space-y-3">
-            <label className="text-sm font-medium">Gallery</label>
+            <label className="text-sm font-medium">{t("admin.properties.labels.gallery")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
             <Textarea
               name="gallery"
               value={formState.gallery}
               onChange={handleChange}
-              placeholder="Paste URLs or use the uploader below"
+              placeholder={t("admin.properties.placeholders.gallery")}
             />
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <input
@@ -326,7 +342,7 @@ const AdminProperties = () => {
                 disabled={uploadingGallery}
                 className="text-sm"
               />
-              {uploadingGallery && <p className="text-xs text-muted-foreground">Uploading...</p>}
+              {uploadingGallery && <p className="text-xs text-muted-foreground">{t("admin.common.uploading")}</p>}
             </div>
             {galleryItems.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -334,7 +350,7 @@ const AdminProperties = () => {
                   <img
                     key={item}
                     src={getMediaUrl(item)}
-                    alt="Gallery preview"
+                    alt={t("admin.properties.labels.gallery")}
                     className="h-24 w-full object-cover rounded border border-border"
                   />
                 ))}
@@ -342,24 +358,24 @@ const AdminProperties = () => {
             )}
           </div>
           <div className="md:col-span-2">
-            <label className="text-sm font-medium">Description</label>
-            <Textarea name="description" value={formState.description} onChange={handleChange} required />
+            <label className="text-sm font-medium">{t("admin.properties.labels.description")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
+            <Textarea name="description" value={formState.description} onChange={handleChange} />
           </div>
           <div className="md:col-span-2">
-            <label className="text-sm font-medium">Features (comma separated)</label>
+            <label className="text-sm font-medium">{t("admin.properties.labels.features")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
             <Textarea name="features" value={formState.features} onChange={handleChange} />
           </div>
           <div>
-            <label className="text-sm font-medium">Type</label>
-            <Input name="type" value={formState.type} onChange={handleChange} required />
+            <label className="text-sm font-medium">{t("admin.properties.labels.type")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
+            <Input name="type" value={formState.type} onChange={handleChange} />
           </div>
           <div>
-            <label className="text-sm font-medium">Company Name (Optional)</label>
+            <label className="text-sm font-medium">{t("admin.properties.labels.companyName")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
             <Input name="companyName" value={formState.companyName} onChange={handleChange} placeholder="e.g., Crystal DBC" />
-            <p className="text-xs text-muted-foreground mt-1">Name of the company listing this property</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("admin.properties.helpers.companyName")}</p>
           </div>
           <div>
-            <label className="text-sm font-medium">Status</label>
+            <label className="text-sm font-medium">{t("admin.properties.labels.status")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
             <Select
               value={formState.status}
               onValueChange={(value) =>
@@ -372,12 +388,12 @@ const AdminProperties = () => {
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select status" />
+                <SelectValue placeholder={t("admin.properties.placeholders.selectStatus")} />
               </SelectTrigger>
               <SelectContent>
                 {STATUS_OPTIONS.map((option) => (
                   <SelectItem key={option} value={option}>
-                    {option}
+                    {t(`admin.propertyOptions.${option === "For Sale" ? "forSale" : "forRent"}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -386,18 +402,18 @@ const AdminProperties = () => {
 
           {formState.status === "For Sale" && (
             <div>
-              <label className="text-sm font-medium">Construction Status</label>
+              <label className="text-sm font-medium">{t("admin.properties.labels.constructionStatus")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
               <Select
                 value={formState.constructionStatus}
                 onValueChange={(value) => setFormState((prev) => ({ ...prev, constructionStatus: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select construction status" />
+                  <SelectValue placeholder={t("admin.properties.placeholders.selectConstructionStatus")} />
                 </SelectTrigger>
                 <SelectContent>
                   {CONSTRUCTION_STATUS_OPTIONS.map((option) => (
                     <SelectItem key={option} value={option}>
-                      {option}
+                      {t(`admin.propertyOptions.${option === "Finished Construction" ? "finishedConstruction" : "underConstruction"}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -407,18 +423,18 @@ const AdminProperties = () => {
 
           {formState.status === "For Rent" && (
             <div>
-              <label className="text-sm font-medium">Rent paid by</label>
+              <label className="text-sm font-medium">{t("admin.properties.labels.rentPayPeriod")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
               <Select
                 value={formState.rentPayPeriod}
                 onValueChange={(value) => setFormState((prev) => ({ ...prev, rentPayPeriod: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select period" />
+                  <SelectValue placeholder={t("admin.properties.placeholders.selectRentPeriod")} />
                 </SelectTrigger>
                 <SelectContent>
                   {RENT_PAY_PERIOD_OPTIONS.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
+                      {t(`admin.propertyOptions.${opt.value}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -426,10 +442,10 @@ const AdminProperties = () => {
             </div>
           )}
           <div>
-            <label className="text-sm font-medium">Featured</label>
+            <label className="text-sm font-medium">{t("admin.properties.labels.featured")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
             <div className="flex items-center space-x-3 mt-2">
               <input type="checkbox" name="isFeatured" checked={formState.isFeatured} onChange={handleChange} />
-              <span className="text-sm text-muted-foreground">Show on homepage</span>
+              <span className="text-sm text-muted-foreground">{t("admin.properties.labels.showOnHomepage")}</span>
             </div>
           </div>
           <div className="md:col-span-2 flex gap-3 justify-end">
@@ -438,18 +454,18 @@ const AdminProperties = () => {
                 setFormState(initialFormState);
                 setEditingId(null);
               }}>
-                Cancel
+                {t("admin.properties.actions.cancel")}
               </Button>
             )}
             <Button type="submit" disabled={mutation.isPending}>
-              {editingId ? "Save Changes" : "Create Property"}
+              {editingId ? t("admin.properties.actions.saveChanges") : t("admin.properties.actions.createProperty")}
             </Button>
           </div>
         </form>
       </AdminGlassCard>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {isLoading && <p className="text-white/50">Loading properties...</p>}
+        {isLoading && <p className="text-white/50">{t("admin.properties.loading")}</p>}
         {data?.map((property) => (
           <div key={property._id} className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-3 transition hover:bg-white/10">
             {property.coverImage ? (
@@ -466,27 +482,27 @@ const AdminProperties = () => {
               </div>
               <div className="flex gap-2">
                 <Button variant="secondary" size="sm" onClick={() => handleEdit(property)} className="bg-white/10 text-white hover:bg-white/20 border border-white/10">
-                  Edit
+                  {t("admin.properties.actions.edit")}
                 </Button>
                 {canDelete ? (
                   <Button variant="destructive" size="sm" onClick={() => deleteMutation.mutate(property._id)}>
-                    Delete
+                    {t("admin.properties.actions.delete")}
                   </Button>
                 ) : null}
               </div>
             </div>
             <p className="text-luxury-gold font-semibold text-sm">{property.priceLabel}</p>
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
-              <span className="px-2 py-1 rounded-full bg-white/10 text-white/80">{property.status}</span>
+              <span className="px-2 py-1 rounded-full bg-white/10 text-white/80">{t(`admin.propertyOptions.${property.status === "For Sale" ? "forSale" : "forRent"}`)}</span>
               {property.status === "For Sale" && property.constructionStatus ? (
-                <span className="px-2 py-1 rounded-full bg-white/10 text-white/80">{property.constructionStatus}</span>
+                <span className="px-2 py-1 rounded-full bg-white/10 text-white/80">{t(`admin.propertyOptions.${property.constructionStatus === "Finished Construction" ? "finishedConstruction" : "underConstruction"}`)}</span>
               ) : null}
               {property.isFeatured ? (
-                <span className="px-2 py-1 rounded-full bg-amber-500/10 text-amber-400">Featured</span>
+                <span className="px-2 py-1 rounded-full bg-amber-500/10 text-amber-400">{t("admin.properties.labels.featured")}</span>
               ) : null}
               {property.status === "For Rent" ? (
                 <span className="px-2 py-1 rounded-full bg-luxury-gold/10 text-luxury-gold">
-                  Paid by {property.rentPayPeriod ?? "month"}
+                  {t("admin.properties.labels.rentPayPeriod")}: {t(`admin.propertyOptions.${property.rentPayPeriod ?? "month"}`)}
                 </span>
               ) : null}
             </div>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import apiClient from "@/lib/apiClient";
 import type { InvestmentBox } from "@/types";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
@@ -24,6 +25,7 @@ const initialFormState = {
 };
 
 const AdminInvestmentBoxes = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -50,26 +52,26 @@ const AdminInvestmentBoxes = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-investment-boxes"] });
-      toast({ title: `Investment box ${editingId ? "updated" : "created"}` });
+      toast({ title: editingId ? t("admin.investmentBoxes.toasts.updated") : t("admin.investmentBoxes.toasts.created") });
       setFormState(initialFormState);
       setEditingId(null);
     },
-    onError: () => toast({ title: "Operation failed", variant: "destructive" }),
+    onError: () => toast({ title: t("admin.investmentBoxes.toasts.operationFailed"), variant: "destructive" }),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => apiClient.delete(`/investment-boxes/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-investment-boxes"] });
-      toast({ title: "Investment box deleted" });
+      toast({ title: t("admin.investmentBoxes.toasts.deleted") });
     },
-    onError: () => toast({ title: "Delete failed", variant: "destructive" }),
+    onError: () => toast({ title: t("admin.investmentBoxes.toasts.deleteFailed"), variant: "destructive" }),
   });
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (!formState.name.trim()) {
-      toast({ title: "Name is required", variant: "destructive" });
+      toast({ title: t("admin.investmentBoxes.validation.nameRequired"), variant: "destructive" });
       return;
     }
     mutation.mutate();
@@ -90,14 +92,14 @@ const AdminInvestmentBoxes = () => {
     <div className="space-y-8">
       <AdminPageHeader
         icon={Package}
-        title="Investment Boxes"
-        description="Create and manage the investment boxes available to users."
+        title={t("admin.investmentBoxes.headerTitle")}
+        description={t("admin.investmentBoxes.headerDescription")}
       />
 
-      <AdminGlassCard title={editingId ? "Edit Investment Box" : "Create Investment Box"} description="Configure investment opportunities.">
+      <AdminGlassCard title={editingId ? t("admin.investmentBoxes.formTitleEdit") : t("admin.investmentBoxes.formTitleCreate")} description={t("admin.investmentBoxes.formDescription")}>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
           <div className="md:col-span-2">
-            <label className="text-sm font-medium">Name</label>
+            <label className="text-sm font-medium">{t("admin.investmentBoxes.labels.name")}</label>
             <Input
               value={formState.name}
               onChange={(e) => setFormState((prev) => ({ ...prev, name: e.target.value }))}
@@ -106,16 +108,16 @@ const AdminInvestmentBoxes = () => {
           </div>
 
           <div className="md:col-span-2">
-            <label className="text-sm font-medium">Description</label>
+            <label className="text-sm font-medium">{t("admin.investmentBoxes.labels.description")}</label>
             <Textarea
               value={formState.description}
               onChange={(e) => setFormState((prev) => ({ ...prev, description: e.target.value }))}
-              placeholder="Short description shown to users"
+              placeholder={t("admin.investmentBoxes.placeholders.description")}
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium">ROI (%)</label>
+            <label className="text-sm font-medium">{t("admin.investmentBoxes.labels.roiPercent")}</label>
             <Input
               type="number"
               value={formState.roiPercentage}
@@ -125,7 +127,7 @@ const AdminInvestmentBoxes = () => {
           </div>
 
           <div>
-            <label className="text-sm font-medium">Minimum Investment</label>
+            <label className="text-sm font-medium">{t("admin.investmentBoxes.labels.minInvestment")}</label>
             <Input
               type="number"
               value={formState.minInvestmentAmount}
@@ -135,7 +137,7 @@ const AdminInvestmentBoxes = () => {
           </div>
 
           <div>
-            <label className="text-sm font-medium">Active</label>
+            <label className="text-sm font-medium">{t("admin.investmentBoxes.labels.active")}</label>
             <div className="flex items-center space-x-3 mt-2">
               <input
                 type="checkbox"
@@ -143,7 +145,7 @@ const AdminInvestmentBoxes = () => {
                 onChange={(e) => setFormState((prev) => ({ ...prev, isActive: e.target.checked }))}
                 className="rounded border-white/10 bg-white/5"
               />
-              <span className="text-sm text-white/60">Show to users</span>
+              <span className="text-sm text-white/60">{t("admin.investmentBoxes.labels.showToUsers")}</span>
             </div>
           </div>
 
@@ -158,18 +160,18 @@ const AdminInvestmentBoxes = () => {
                   setEditingId(null);
                 }}
               >
-                Cancel
+                {t("admin.investmentBoxes.actions.cancel")}
               </Button>
             )}
             <Button type="submit" disabled={mutation.isPending} className="bg-luxury-gold hover:bg-luxury-gold/90 text-black">
-              {editingId ? "Save Changes" : "Create Box"}
+              {editingId ? t("admin.investmentBoxes.actions.saveChanges") : t("admin.investmentBoxes.actions.create")}
             </Button>
           </div>
         </form>
       </AdminGlassCard>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {isLoading && <p className="text-white/60">Loading investment boxes...</p>}
+        {isLoading && <p className="text-white/60">{t("admin.investmentBoxes.loading")}</p>}
         {data?.map((box) => (
           <div key={box._id} className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-3 transition hover:bg-white/10">
             <div className="flex items-start justify-between gap-3">
@@ -179,28 +181,28 @@ const AdminInvestmentBoxes = () => {
               </div>
               <div className="flex gap-2">
                 <Button size="sm" variant="secondary" className="bg-white/10 text-white hover:bg-white/20 border border-white/10" onClick={() => handleEdit(box)}>
-                  Edit
+                  {t("admin.investmentBoxes.actions.edit")}
                 </Button>
                 <Button
                   size="sm"
                   variant="destructive"
                   onClick={() => {
-                    const ok = window.confirm("Delete this investment box?");
+                    const ok = window.confirm(t("admin.investmentBoxes.confirm.delete"));
                     if (!ok) return;
                     deleteMutation.mutate(box._id);
                   }}
                   disabled={deleteMutation.isPending}
                 >
-                  Delete
+                  {t("admin.investmentBoxes.actions.delete")}
                 </Button>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-wide">
-              <span className="px-2 py-1 rounded-full bg-white/10 text-white border border-white/10">ROI {box.roiPercentage}%</span>
-              <span className="px-2 py-1 rounded-full bg-white/10 text-white border border-white/10">Min {Math.round(box.minInvestmentAmount).toLocaleString()}</span>
+              <span className="px-2 py-1 rounded-full bg-white/10 text-white border border-white/10">{t("admin.investmentBoxes.badges.roi", { value: box.roiPercentage })}</span>
+              <span className="px-2 py-1 rounded-full bg-white/10 text-white border border-white/10">{t("admin.investmentBoxes.badges.minInvestment", { value: Math.round(box.minInvestmentAmount).toLocaleString() })}</span>
               <span className={`px-2 py-1 rounded-full border ${box.isActive ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"}`}>
-                {box.isActive ? "Active" : "Inactive"}
+                {box.isActive ? t("admin.investmentBoxes.badges.active") : t("admin.investmentBoxes.badges.inactive")}
               </span>
             </div>
           </div>

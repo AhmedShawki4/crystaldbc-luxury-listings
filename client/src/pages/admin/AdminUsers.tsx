@@ -11,6 +11,7 @@ import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { Shield, UserRound, Mail, Activity } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { fetchActivityLogs } from "@/lib/activityLogs";
+import { useTranslation } from "react-i18next";
 
 const fetchUsers = async () => {
   const { data } = await apiClient.get<{ users: User[] }>("/users");
@@ -23,7 +24,8 @@ const AdminUsers = () => {
   const { data } = useQuery({ queryKey: ["users"], queryFn: fetchUsers });
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [formState, setFormState] = useState({ name: "", email: "", password: "", role: "user" as Role });
+  const { t } = useTranslation();
+  const [formState, setFormState] = useState({ name: "", email: "", password: "", role: "user" as Role, country: "" });
   const [logUser, setLogUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -38,28 +40,28 @@ const AdminUsers = () => {
     mutationFn: () => apiClient.post("/users", formState),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
-      toast({ title: "User created" });
-      setFormState({ name: "", email: "", password: "", role: "user" });
+      toast({ title: t("admin.users.toasts.created") });
+      setFormState({ name: "", email: "", password: "", role: "user", country: "" });
     },
-    onError: () => toast({ title: "Failed to create user", variant: "destructive" }),
+    onError: () => toast({ title: t("admin.users.toasts.createFailed"), variant: "destructive" }),
   });
 
   const updateRole = useMutation({
     mutationFn: ({ id, role }: { id: string; role: Role }) => apiClient.put(`/users/${id}`, { role }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
-      toast({ title: "Role updated" });
+      toast({ title: t("admin.users.toasts.roleUpdated") });
     },
-    onError: () => toast({ title: "Failed to update role", variant: "destructive" }),
+    onError: () => toast({ title: t("admin.users.toasts.roleUpdateFailed"), variant: "destructive" }),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => apiClient.delete(`/users/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
-      toast({ title: "User removed" });
+      toast({ title: t("admin.users.toasts.removed") });
     },
-    onError: () => toast({ title: "Failed to delete", variant: "destructive" }),
+    onError: () => toast({ title: t("admin.users.toasts.deleteFailed"), variant: "destructive" }),
   });
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -81,21 +83,21 @@ const AdminUsers = () => {
     <div className="space-y-8">
       <AdminPageHeader
         icon={Shield}
-        title="User Access"
-        description="Administrators can provision or revoke access for teammates."
+        title={t("admin.users.title")}
+        description={t("admin.users.description")}
       />
 
       <AdminGlassCard
-        title="Add User"
-        description="Create a new account for a team member or investor."
+        title={t("admin.users.addTitle")}
+        description={t("admin.users.addDescription")}
       >
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <div>
-            <label className="text-sm font-medium">Name</label>
+            <label className="text-sm font-medium">{t("admin.users.labels.name")}</label>
             <Input value={formState.name} onChange={(e) => setFormState((prev) => ({ ...prev, name: e.target.value }))} required />
           </div>
           <div>
-            <label className="text-sm font-medium">Email</label>
+            <label className="text-sm font-medium">{t("admin.users.labels.email")}</label>
             <Input
               type="email"
               value={formState.email}
@@ -104,7 +106,7 @@ const AdminUsers = () => {
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Password</label>
+            <label className="text-sm font-medium">{t("admin.users.labels.password")}</label>
             <Input
               type="password"
               value={formState.password}
@@ -113,7 +115,7 @@ const AdminUsers = () => {
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Role</label>
+            <label className="text-sm font-medium">{t("admin.users.labels.role")}</label>
             <Select value={formState.role} onValueChange={(value: Role) => setFormState((prev) => ({ ...prev, role: value }))}>
               <SelectTrigger>
                 <SelectValue />
@@ -121,25 +123,33 @@ const AdminUsers = () => {
               <SelectContent>
                 {roles.map((role) => (
                   <SelectItem key={role} value={role} className="capitalize">
-                    {role}
+                    {t(`admin.roles.${role}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
+          <div>
+            <label className="text-sm font-medium">{t("admin.users.labels.country")}</label>
+            <Input
+              value={formState.country}
+              onChange={(e) => setFormState((prev) => ({ ...prev, country: e.target.value }))}
+              placeholder={t("admin.users.placeholders.country")}
+            />
+          </div>
           <div className="md:col-span-2 flex justify-end">
             <Button type="submit" disabled={createMutation.isPending}>
-              Add User
+              {t("admin.users.actions.add")}
             </Button>
           </div>
         </form>
       </AdminGlassCard>
 
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <h2 className="text-lg font-display font-semibold">Manage Users</h2>
+        <h2 className="text-lg font-display font-semibold">{t("admin.users.manageTitle")}</h2>
         <div className="w-full md:w-72">
           <Input
-            placeholder="Search by name, email, or role"
+            placeholder={t("admin.users.searchPlaceholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="bg-white/5 border-white/10"
@@ -165,35 +175,35 @@ const AdminUsers = () => {
             <div className="flex items-center gap-4">
               <Select value={user.role} onValueChange={(value: Role) => updateRole.mutate({ id: user.id, role: value })}>
                 <SelectTrigger className="w-[160px] capitalize bg-white/5 border-white/10 text-white">
-                  <SelectValue />
+                  <SelectValue>{t(`admin.roles.${user.role}`)}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {roles.map((role) => (
                     <SelectItem key={role} value={role} className="capitalize">
-                      {role}
+                      {t(`admin.roles.${role}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               <Button variant="outline" onClick={() => setLogUser(user)} className="border-white/20 hover:bg-white/10 text-white hover:text-white">
                 <Activity className="mr-2 h-4 w-4" />
-                View Logs
+                {t("admin.users.actions.viewLogs")}
               </Button>
               <Button
                 variant="destructive"
                 onClick={() => {
-                  if (!window.confirm(`Delete user "${user.name || user.email}"? This cannot be undone.`)) return;
+                  if (!window.confirm(t("admin.users.confirmDelete", { name: user.name || user.email }))) return;
                   deleteMutation.mutate(user.id);
                 }}
               >
-                Remove
+                {t("admin.users.actions.remove")}
               </Button>
             </div>
           </div>
         ))}
         {filteredUsers.length === 0 && (
           <div className="rounded-2xl border border-dashed border-white/20 p-6 text-white/50 text-sm text-center">
-            No users match your search.
+            {t("admin.users.empty")}
           </div>
         )}
       </div>
@@ -202,11 +212,11 @@ const AdminUsers = () => {
         <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              Activity Logs — {logUser?.name ?? ""}
+              {t("admin.users.logsTitle")} — {logUser?.name ?? ""}
             </DialogTitle>
           </DialogHeader>
           {loadingLogs ? (
-            <p className="text-sm text-muted-foreground">Loading logs...</p>
+            <p className="text-sm text-muted-foreground">{t("admin.users.loadingLogs")}</p>
           ) : selectedLogs && selectedLogs.logs.length > 0 ? (
             <div className="space-y-3">
               {selectedLogs.logs.map((log) => (
@@ -219,7 +229,7 @@ const AdminUsers = () => {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No activity recorded for this user yet.</p>
+            <p className="text-sm text-muted-foreground">{t("admin.users.noActivity")}</p>
           )}
         </DialogContent>
       </Dialog>

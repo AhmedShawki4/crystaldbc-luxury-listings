@@ -9,13 +9,18 @@ const sanitize = (user) => ({
   email: user.email,
   role: user.role,
   phone: user.phone,
+  country: user.country,
   isActive: user.isActive,
   createdAt: user.createdAt,
 });
 
-exports.getUsers = async (_req, res) => {
+exports.getUsers = async (req, res) => {
   try {
-    const users = await User.find().sort({ createdAt: -1 });
+    const query = {};
+    if (req.query.country) {
+      query.country = req.query.country;
+    }
+    const users = await User.find(query).sort({ createdAt: -1 });
     res.json({ users: users.map(sanitize) });
   } catch (error) {
     console.error("Failed to fetch users", error.message);

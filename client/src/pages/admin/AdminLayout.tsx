@@ -23,24 +23,26 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
+import { useTranslation } from "react-i18next";
 
-const NAV_ITEMS: Array<{ to: string; label: string; exact?: boolean; roles?: Role[]; icon: LucideIcon }> = [
-  { to: "/admin", label: "Overview", exact: true, roles: ["admin", "employee", "property-handler"], icon: Gauge },
-  { to: "/admin/properties", label: "Properties", roles: ["admin", "employee", "property-handler"], icon: Building2 },
-  { to: "/admin/rentals", label: "Rent Requests", roles: ["admin", "employee", "property-handler"], icon: HandCoins },
-  { to: "/admin/projects", label: "Trending Projects", roles: ["admin", "employee"], icon: Sparkles },
-  { to: "/admin/cms", label: "CMS", roles: ["admin", "employee"], icon: PenSquare },
-  { to: "/admin/leads", label: "Leads", roles: ["admin", "employee"], icon: Users2 },
-  { to: "/admin/messages", label: "Messages", roles: ["admin", "employee"], icon: Mail },
-  { to: "/admin/reports", label: "Reports", roles: ["admin", "employee"], icon: BarChart3 },
-  { to: "/admin/activity", label: "Activity Logs", roles: ["admin"], icon: ClipboardList },
-  { to: "/admin/users", label: "Users", roles: ["admin"], icon: ShieldCheck },
-  { to: "/admin/investments", label: "Investments", roles: ["admin"], icon: CircleDollarSign },
-  { to: "/admin/investment-boxes", label: "Investment Boxes", roles: ["admin"], icon: Package },
+const NAV_ITEMS: Array<{ to: string; labelKey: string; exact?: boolean; roles?: Role[]; icon: LucideIcon }> = [
+  { to: "/admin", labelKey: "admin.nav.overview", exact: true, roles: ["admin", "employee", "property-handler"], icon: Gauge },
+  { to: "/admin/properties", labelKey: "admin.nav.properties", roles: ["admin", "employee", "property-handler"], icon: Building2 },
+  { to: "/admin/rentals", labelKey: "admin.nav.rentals", roles: ["admin", "employee", "property-handler"], icon: HandCoins },
+  { to: "/admin/projects", labelKey: "admin.nav.trendingProjects", roles: ["admin", "employee"], icon: Sparkles },
+  { to: "/admin/cms", labelKey: "admin.nav.cms", roles: ["admin", "employee"], icon: PenSquare },
+  { to: "/admin/leads", labelKey: "admin.nav.leads", roles: ["admin", "employee"], icon: Users2 },
+  { to: "/admin/messages", labelKey: "admin.nav.messages", roles: ["admin", "employee"], icon: Mail },
+  { to: "/admin/reports", labelKey: "admin.nav.reports", roles: ["admin", "employee"], icon: BarChart3 },
+  { to: "/admin/activity", labelKey: "admin.nav.activityLogs", roles: ["admin"], icon: ClipboardList },
+  { to: "/admin/users", labelKey: "admin.nav.users", roles: ["admin"], icon: ShieldCheck },
+  { to: "/admin/investments", labelKey: "admin.nav.investments", roles: ["admin"], icon: CircleDollarSign },
+  { to: "/admin/investment-boxes", labelKey: "admin.nav.investmentBoxes", roles: ["admin"], icon: Package },
 ];
 
 const AdminLayout = () => {
   const { user, logout } = useAuth();
+  const { t, i18n } = useTranslation();
 
   // Fetch pending investments count
   const { data: pendingCount = 0 } = useQuery({
@@ -60,7 +62,7 @@ const AdminLayout = () => {
     <div className="min-h-screen flex">
       <aside className="w-72 bg-gradient-to-b from-[#030b14] via-luxury-dark to-[#0a1a2a] text-white hidden md:flex flex-col shadow-2xl">
         <div className="px-6 py-8 border-b border-white/10 space-y-3">
-          <h2 className="text-2xl font-display font-bold">Admin</h2>
+          <h2 className="text-2xl font-display font-bold">{t("admin.layout.adminTitle")}</h2>
           <p className="text-sm text-white/70 mt-1">{user?.name}</p>
           <p className="text-xs text-white/50 uppercase">{user?.role}</p>
           <Button
@@ -68,7 +70,18 @@ const AdminLayout = () => {
             className="w-full bg-gradient-to-r from-luxury-gold to-luxury-dark text-white hover:from-luxury-gold/80 hover:to-luxury-dark/80 shadow-lg"
             variant="secondary"
           >
-            <Link to="/">Back to Home</Link>
+            <Link to="/">{t("admin.layout.backToHome")}</Link>
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full border-white/30 text-white hover:bg-white/10"
+            onClick={() => {
+              const nextLang = i18n.language === "ar" ? "en" : "ar";
+              i18n.changeLanguage(nextLang);
+              localStorage.setItem("i18nextLng", nextLang);
+            }}
+          >
+            {t("admin.layout.toggleLanguage")}
           </Button>
         </div>
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto selection:bg-luxury-gold/30 custom-scrollbar">
@@ -89,7 +102,7 @@ const AdminLayout = () => {
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-white/10">
                   <Icon className="h-4 w-4" />
                 </span>
-                <span className="flex-1">{item.label}</span>
+                <span className="flex-1">{t(item.labelKey)}</span>
                 {/* Show notification badge for Investments */}
                 {item.to === "/admin/investments" && pendingCount > 0 && (
                   <span className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold">
@@ -103,7 +116,7 @@ const AdminLayout = () => {
         <div className="px-4 py-6 border-t-2 border-luxury-gold bg-gradient-to-r from-luxury-dark via-luxury-gold/10 to-luxury-dark/80 space-y-3 rounded-b-xl shadow-lg">
 
           <Button variant="destructive" className="w-full" onClick={logout}>
-            Sign out
+            {t("admin.layout.signOut")}
           </Button>
         </div>
       </aside>
@@ -111,26 +124,38 @@ const AdminLayout = () => {
       <div className="flex-1 bg-[#020617] min-h-screen">
         <header className="sticky top-0 z-50 px-4 py-4 shadow-md bg-background/95 backdrop-blur-sm border-b border-border flex items-center justify-between md:hidden">
           <div>
-            <p className="text-sm text-muted-foreground">Signed in as</p>
+            <p className="text-sm text-muted-foreground">{t("admin.layout.signedInAs")}</p>
             <p className="font-semibold">{user?.name}</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" asChild className="mr-2 border-luxury-gold/30 text-luxury-gold hover:bg-luxury-gold/10 hover:text-luxury-gold hover:border-luxury-gold/60 transition-colors">
-              <Link to="/" title="Back to Home" className="flex items-center gap-2">
+              <Link to="/" title={t("admin.layout.goToHomepage")} className="flex items-center gap-2">
                 <Home className="h-4 w-4" />
-                <span className="hidden sm:inline">Home</span>
+                <span className="hidden sm:inline">{t("admin.layout.goToHomepage")}</span>
               </Link>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-white/20"
+              onClick={() => {
+                const nextLang = i18n.language === "ar" ? "en" : "ar";
+                i18n.changeLanguage(nextLang);
+                localStorage.setItem("i18nextLng", nextLang);
+              }}
+            >
+              {t("admin.layout.toggleLanguageShort")}
             </Button>
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="sm" className="flex items-center gap-2">
                   <PanelLeft className="h-4 w-4" />
-                  Menu
+                  {t("admin.layout.menuButton")}
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-[280px] bg-gradient-to-b from-[#030b14] via-luxury-dark to-[#0a1a2a] text-white p-0 flex flex-col h-full">
                 <SheetHeader className="px-4 pt-5 pb-3 border-b border-white/10 text-left">
-                  <SheetTitle className="text-lg font-display text-white">Admin Menu</SheetTitle>
+                  <SheetTitle className="text-lg font-display text-white">{t("admin.layout.adminMenu")}</SheetTitle>
                   <p className="text-xs text-white/60">{user?.name} · {user?.role}</p>
                 </SheetHeader>
                 <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
@@ -151,7 +176,7 @@ const AdminLayout = () => {
                         <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
                           <Icon className="h-4 w-4" />
                         </span>
-                        <span>{item.label}</span>
+                        <span>{t(item.labelKey)}</span>
                       </NavLink>
                     );
                   })}
@@ -160,7 +185,7 @@ const AdminLayout = () => {
 
                   <Button variant="outline" className="w-full border-white/30 text-white" size="sm" onClick={logout}>
                     <LogOut className="h-4 w-4 mr-2" />
-                    Sign out
+                    {t("admin.layout.signOut")}
                   </Button>
                 </div>
               </SheetContent>

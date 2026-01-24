@@ -9,6 +9,7 @@ const sanitizeUser = (user) => ({
   email: user.email,
   role: user.role,
   phone: user.phone,
+  country: user.country,
   avatarUrl: user.avatarUrl,
   createdAt: user.createdAt,
 });
@@ -19,7 +20,7 @@ exports.register = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { name, email, password, phone } = req.body;
+  const { name, email, password, phone, country } = req.body;
 
   try {
     const existingUser = await User.findOne({ email });
@@ -32,6 +33,7 @@ exports.register = async (req, res) => {
       email,
       password,
       phone,
+      country,
       role: ROLES.USER,
     });
 

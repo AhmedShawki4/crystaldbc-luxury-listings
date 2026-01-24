@@ -26,6 +26,7 @@ import AdminGlassCard from "@/components/admin/AdminGlassCard";
 import ThreePieChart from "@/components/admin/ThreePieChart";
 import { Badge } from "@/components/ui/badge";
 import { AnalyticsSummary } from "@/types";
+import { useTranslation } from "react-i18next";
 
 const fetchSummary = async () => {
   const { data } = await apiClient.get<AnalyticsSummary>("/analytics/summary");
@@ -36,14 +37,15 @@ const fetchSummary = async () => {
 
 const AdminOverview = () => {
   const { data, isLoading } = useQuery({ queryKey: ["analytics"], queryFn: fetchSummary });
+  const { t } = useTranslation();
   const formatCurrency = (value: number) => `EGP ${Math.round(value).toLocaleString()}`;
 
   if (isLoading) {
-    return <div className="p-8 text-white">Loading dashboard...</div>;
+    return <div className="p-8 text-white">{t("admin.overview.loading")}</div>;
   }
 
   if (!data) {
-    return <div className="p-8 text-white">Unable to load dashboard data.</div>;
+    return <div className="p-8 text-white">{t("admin.overview.unable")}</div>;
   }
 
   const { stats, recentLeads } = data;
@@ -55,7 +57,7 @@ const AdminOverview = () => {
   // Prepare Chart Data
   const chartData = (data.investmentTimeline?.length
     ? data.investmentTimeline
-    : [{ label: "To Date", invested: totalInvested, received: actualProfit, outstanding: Math.max(totalInvested - actualProfit, 0) }]
+    : [{ label: t("admin.overview.toDate"), invested: totalInvested, received: actualProfit, outstanding: Math.max(totalInvested - actualProfit, 0) }]
   ).map((item) => ({
     ...item,
     outstanding: Math.max(item.outstanding ?? item.invested - item.received, 0),
@@ -63,11 +65,11 @@ const AdminOverview = () => {
 
   // Prepare Pie Data
   const pieData = [
-    { label: "Properties", value: stats.properties || 10, color: "#7c3aed" },
-    { label: "Leads", value: stats.leads || 5, color: "#22d3ee" },
-    { label: "Messages", value: stats.messages || 3, color: "#fbbf24" },
-    { label: "Users", value: stats.users || 8, color: "#a78bfa" },
-    { label: "Wishlist", value: stats.wishlistItems || 2, color: "#fb7185" },
+    { label: t("admin.overview.pieLabels.properties"), value: stats.properties || 10, color: "#7c3aed" },
+    { label: t("admin.overview.pieLabels.leads"), value: stats.leads || 5, color: "#22d3ee" },
+    { label: t("admin.overview.pieLabels.messages"), value: stats.messages || 3, color: "#fbbf24" },
+    { label: t("admin.overview.pieLabels.users"), value: stats.users || 8, color: "#a78bfa" },
+    { label: t("admin.overview.pieLabels.wishlist"), value: stats.wishlistItems || 2, color: "#fb7185" },
   ];
 
   return (
@@ -84,15 +86,15 @@ const AdminOverview = () => {
 
             <div className="flex items-center justify-between mb-8 relative z-10">
               <div>
-                <h2 className="text-3xl font-display font-bold text-white mb-2">Performance</h2>
-                <p className="text-slate-400">Live Investment Snapshot</p>
+                <h2 className="text-3xl font-display font-bold text-white mb-2">{t("admin.overview.performance")}</h2>
+                <p className="text-slate-400">{t("admin.overview.liveSnapshot")}</p>
               </div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 shadow-inner">
                 <span className="relative flex h-3 w-3">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                 </span>
-                <span className="text-sm font-medium text-emerald-400">Live Updates</span>
+                <span className="text-sm font-medium text-emerald-400">{t("admin.overview.liveUpdates")}</span>
               </div>
             </div>
 
@@ -116,9 +118,9 @@ const AdminOverview = () => {
                     itemStyle={{ color: "#fff" }}
                     cursor={{ fill: "rgba(255,255,255,0.02)" }}
                   />
-                  <Bar dataKey="invested" name="Invested" fill="url(#barGradient)" barSize={20} radius={[4, 4, 0, 0]} filter="url(#shadow)" />
-                  <Bar dataKey="received" name="Received" fill="#34d399" barSize={20} radius={[4, 4, 0, 0]} opacity={0.8} />
-                  <Line type="monotone" dataKey="outstanding" name="Outstanding" stroke="#fbbf24" strokeWidth={3} dot={{ r: 4, strokeWidth: 0, fill: "#fbbf24" }} activeDot={{ r: 6, strokeWidth: 0, fill: "#fff" }} />
+                  <Bar dataKey="invested" name={t("admin.overview.series.invested")} fill="url(#barGradient)" barSize={20} radius={[4, 4, 0, 0]} filter="url(#shadow)" />
+                  <Bar dataKey="received" name={t("admin.overview.series.received")} fill="#34d399" barSize={20} radius={[4, 4, 0, 0]} opacity={0.8} />
+                  <Line type="monotone" dataKey="outstanding" name={t("admin.overview.series.outstanding")} stroke="#fbbf24" strokeWidth={3} dot={{ r: 4, strokeWidth: 0, fill: "#fbbf24" }} activeDot={{ r: 6, strokeWidth: 0, fill: "#fff" }} />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
@@ -128,23 +130,23 @@ const AdminOverview = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Invested */}
             <div className="rounded-2xl bg-[#0b1224] border border-white/10 p-6 shadow-xl hover:border-white/20 transition-colors">
-              <p className="text-sm text-slate-400 font-medium mb-2">Total Invested</p>
+              <p className="text-sm text-slate-400 font-medium mb-2">{t("admin.overview.totalInvested")}</p>
               <h3 className="text-3xl font-display font-bold text-white mb-1">{formatCurrency(totalInvested)}</h3>
-              <p className="text-xs text-slate-500">Capital across all approved deals</p>
+              <p className="text-xs text-slate-500">{t("admin.overview.totalInvestedHelp")}</p>
             </div>
 
             {/* Actual Profit */}
             <div className="rounded-2xl bg-[#0b1224] border border-white/10 p-6 shadow-xl hover:border-white/20 transition-colors">
-              <p className="text-sm text-slate-400 font-medium mb-2">Actual Profit</p>
+              <p className="text-sm text-slate-400 font-medium mb-2">{t("admin.overview.actualProfit")}</p>
               <h3 className="text-3xl font-display font-bold text-white mb-1">{formatCurrency(actualProfit)}</h3>
-              <p className="text-xs text-slate-500">Sum of received payouts</p>
+              <p className="text-xs text-slate-500">{t("admin.overview.actualProfitHelp")}</p>
             </div>
 
             {/* Outstanding Payouts */}
             <div className="rounded-2xl bg-[#0b1224] border border-white/10 p-6 shadow-xl hover:border-white/20 transition-colors">
-              <p className="text-sm text-slate-400 font-medium mb-2">Outstanding Payouts</p>
+              <p className="text-sm text-slate-400 font-medium mb-2">{t("admin.overview.outstanding")}</p>
               <h3 className="text-3xl font-display font-bold text-white mb-1">{formatCurrency(Math.max(totalInvested - actualProfit, 0))}</h3>
-              <p className="text-xs text-slate-500">Total invested minus amounts paid</p>
+              <p className="text-xs text-slate-500">{t("admin.overview.outstandingHelp")}</p>
               <div className="mt-3 h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                 <div className="h-full bg-luxury-gold rounded-full transition-all" style={{ width: `${Math.min((actualProfit / totalInvested) * 100, 100)}%` }} />
               </div>
@@ -152,15 +154,15 @@ const AdminOverview = () => {
 
             {/* Invested Boxes */}
             <div className="rounded-2xl bg-[#0b1224] border border-white/10 p-6 shadow-xl hover:border-white/20 transition-colors">
-              <p className="text-sm text-slate-400 font-medium mb-2">Invested Boxes</p>
+              <p className="text-sm text-slate-400 font-medium mb-2">{t("admin.overview.investedProperties")}</p>
               <h3 className="text-3xl font-display font-bold text-white mb-1">{investedProperties}</h3>
-              <p className="text-xs text-slate-500 mb-2">Projects currently funded</p>
+              <p className="text-xs text-slate-500 mb-2">{t("admin.overview.investedPropertiesHelp")}</p>
               <div className="flex items-center gap-2 mt-auto">
                 <div className="p-1.5 bg-luxury-gold/10 rounded-full">
                   <DollarSign className="w-3 h-3 text-luxury-gold" />
                 </div>
                 <TrendingUp className="w-3 h-3 text-emerald-400" />
-                <span className="text-xs text-slate-400">Portfolio coverage {roiPercent.toFixed(1)}%</span>
+                <span className="text-xs text-slate-400">{t("admin.overview.portfolioCoverage", { percent: roiPercent.toFixed(1) })}</span>
               </div>
             </div>
           </div>
@@ -176,7 +178,7 @@ const AdminOverview = () => {
             <div className="relative z-10 flex flex-col h-full justify-between">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-medium text-slate-400">Portfolio ROI</h3>
+                  <h3 className="text-lg font-medium text-slate-400">{t("admin.overview.roi")}</h3>
                   <div className="p-2 bg-white/5 rounded-full border border-white/10">
                     <TrendingUp className="w-4 h-4 text-emerald-400" />
                   </div>
@@ -189,24 +191,24 @@ const AdminOverview = () => {
                 </div>
                 <p className="text-sm font-medium text-emerald-400 flex items-center mb-6">
                   <ArrowUpRight className="w-4 h-4 mr-1" />
-                  +2.4% vs last month
+                  {t("admin.overview.roiDelta")}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 border-t border-white/10 pt-6">
                 <div>
-                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-1">Net Profit</p>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-1">{t("admin.overview.netProfit")}</p>
                   <p className="text-lg font-bold text-white tracking-tight">{formatCurrency(actualProfit)}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-1">Projected</p>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-1">{t("admin.overview.projected")}</p>
                   <p className="text-lg font-bold text-slate-300 tracking-tight">~18.5%</p>
                 </div>
               </div>
 
               <div className="mt-6">
                 <div className="flex justify-between text-xs text-slate-400 mb-2">
-                  <span>Progress to Goal</span>
+                  <span>{t("admin.overview.progressToGoal")}</span>
                   <span>{Math.round(Math.min(roiPercent, 100))}%</span>
                 </div>
                 <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
@@ -221,8 +223,8 @@ const AdminOverview = () => {
             <div className="absolute inset-0 bg-gradient-to-b from-blue-900/5 to-transparent pointer-events-none" />
 
             <div className="p-8 pb-0 relative z-10">
-              <p className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-1">Distribution</p>
-              <h3 className="text-2xl font-display font-semibold text-white">Engagement Mix</h3>
+              <p className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-1">{t("admin.overview.distribution")}</p>
+              <h3 className="text-2xl font-display font-semibold text-white">{t("admin.overview.engagementMix")}</h3>
             </div>
 
             <div className="flex-1 relative w-full h-full">
@@ -248,9 +250,9 @@ const AdminOverview = () => {
 
       {/* RECENT LEADS */}
       <AdminGlassCard
-        eyebrow="Pipeline Activity"
-        title="Recent Lead Submissions"
-        description={`Latest ${recentLeads.length} potential investors`}
+        eyebrow={t("admin.overview.pipelineActivity")}
+        title={t("admin.overview.recentLeads")}
+        description={t("admin.overview.lastSubmissions", { count: recentLeads.length })}
         className="mt-6"
       >
         <div className="space-y-3">
@@ -281,7 +283,7 @@ const AdminOverview = () => {
           {recentLeads.length === 0 && (
             <div className="py-8 text-center">
               <Users2 className="h-12 w-12 text-white/10 mx-auto mb-3" />
-              <p className="text-sm text-slate-400">No recent leads found.</p>
+              <p className="text-sm text-slate-400">{t("admin.overview.noLeads")}</p>
             </div>
           )}
         </div>

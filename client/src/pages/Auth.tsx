@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useAuth from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import type { AxiosError } from "axios";
@@ -9,6 +10,15 @@ import { useTranslation } from "react-i18next";
 import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+
+const COUNTRY_OPTIONS = [
+  { value: "Egypt", label: "Egypt" },
+  { value: "UAE", label: "UAE" },
+  { value: "Saudi Arabia", label: "Saudi Arabia" },
+  { value: "Germany", label: "Germany" },
+  { value: "Russia", label: "Russia" },
+  { value: "Other", label: "Other" },
+] as const;
 
 export const AuthCard = ({
   mode,
@@ -29,6 +39,7 @@ export const AuthCard = ({
     email: "",
     password: "",
     phone: "",
+    country: "",
     confirmPassword: "",
   });
   const [loading, setLoading] = useState(false);
@@ -86,6 +97,10 @@ export const AuthCard = ({
           newErrors.phone = t("auth.validation.phoneRequired");
         }
 
+        if (!formState.country) {
+          newErrors.country = t("auth.validation.countryRequired");
+        }
+
         if (formState.password.length < 6) {
           newErrors.password = t("auth.validation.passwordMin");
         } else if (!/\d/.test(formState.password)) {
@@ -109,6 +124,7 @@ export const AuthCard = ({
           email: formState.email,
           password: formState.password,
           phone: formState.phone,
+          country: formState.country,
         });
         toast({ title: t("auth.meta.created"), description: t("auth.meta.welcome") });
       }
@@ -203,6 +219,30 @@ export const AuthCard = ({
               aria-invalid={!!errors.phone}
             />
             {errors.phone && <p className="mt-1 text-xs text-destructive">{errors.phone}</p>}
+          </div>
+        )}
+
+        {mode === "register" && (
+          <div>
+            <label htmlFor="country" className="text-sm font-medium block mb-2">
+              {t("auth.fields.country")}
+            </label>
+            <Select
+              value={formState.country}
+              onValueChange={(value) => setFormState((prev) => ({ ...prev, country: value }))}
+            >
+              <SelectTrigger className={cn(errors.country && "border-destructive focus-visible:ring-destructive")}>
+                <SelectValue placeholder={t("auth.fields.selectCountry")} />
+              </SelectTrigger>
+              <SelectContent>
+                {COUNTRY_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {t(`auth.countries.${option.value.toLowerCase().replace(" ", "")}`, option.label)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.country && <p className="mt-1 text-xs text-destructive">{errors.country}</p>}
           </div>
         )}
 

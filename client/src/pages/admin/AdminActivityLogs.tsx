@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import AdminGlassCard from "@/components/admin/AdminGlassCard";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { ClipboardList, ShieldCheck, Search } from "lucide-react";
@@ -9,6 +10,7 @@ import { fetchActivityLogs } from "@/lib/activityLogs";
 const formatDate = (value: string) => new Date(value).toLocaleString();
 
 const AdminActivityLogs = () => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -28,15 +30,15 @@ const AdminActivityLogs = () => {
   const logs = data?.logs ?? [];
 
   if (isLoading) {
-    return <p className="text-muted-foreground">Loading activity logs...</p>;
+    return <p className="text-muted-foreground">{t("admin.activityLogs.loading")}</p>;
   }
 
   return (
     <div className="space-y-6">
       <AdminPageHeader
         icon={ClipboardList}
-        title="Activity Logs"
-        description="Audit every sensitive action performed across the dashboard."
+        title={t("admin.activityLogs.headerTitle")}
+        description={t("admin.activityLogs.headerDescription")}
       />
 
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -45,29 +47,29 @@ const AdminActivityLogs = () => {
           <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search action, entity, or ID"
+            placeholder={t("admin.activityLogs.searchPlaceholder")}
             className="pl-9"
           />
         </div>
         <p className="text-sm text-muted-foreground">
-          Showing {logs.length} of {data?.total ?? logs.length} entries
+          {t("admin.activityLogs.showing", { current: logs.length, total: data?.total ?? logs.length })}
         </p>
       </div>
 
       {!logs.length ? (
         <div className="text-center py-12 border border-dashed border-white/10 rounded-2xl bg-white/5">
-          <p className="text-white/40">No activity recorded matching your criteria.</p>
+          <p className="text-white/40">{t("admin.activityLogs.noResults")}</p>
           {search && (
             <button
               onClick={() => setSearch("")}
               className="mt-2 text-sm text-luxury-gold hover:underline"
             >
-              Clear search
+              {t("admin.activityLogs.clearSearch")}
             </button>
           )}
         </div>
       ) : (
-        <AdminGlassCard title="Recent Activity" description="A chronological record of system events.">
+        <AdminGlassCard title={t("admin.activityLogs.recentActivity")} description={t("admin.activityLogs.recentActivityDesc")}>
           <div className="space-y-4 mt-4">
             {logs.map((log) => (
               <div key={log._id} className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-2 transition hover:bg-white/10">
@@ -77,7 +79,7 @@ const AdminActivityLogs = () => {
                       <ShieldCheck className="h-5 w-5 text-luxury-gold" />
                     </span>
                     <div>
-                      <p className="font-semibold text-white">{log.user?.name ?? "System"}</p>
+                      <p className="font-semibold text-white">{log.user?.name ?? t("admin.activityLogs.system")}</p>
                       <p className="text-sm text-white/50">{log.user?.email ?? "-"}</p>
                     </div>
                   </div>
@@ -85,7 +87,7 @@ const AdminActivityLogs = () => {
                 </div>
                 <p className="text-white/90 font-medium">{log.action}</p>
                 <p className="text-sm text-white/50">
-                  {log.entityType ? `${log.entityType} • ${log.entityId ?? "—"}` : "General"}
+                  {log.entityType ? `${log.entityType} • ${log.entityId ?? "—"}` : t("admin.activityLogs.general")}
                 </p>
                 {log.metadata && (
                   <pre className="bg-black/30 rounded-lg p-3 text-xs text-white/60 overflow-x-auto border border-white/5">

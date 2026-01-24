@@ -4,7 +4,7 @@ import AuthModal from "./AuthModal";
 import type { LucideIcon } from "lucide-react";
 import { Menu, X, Home, Building2, Info, PhoneCall, Heart, Sparkles, TrendingUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { US, EG, DE, RU, SA } from 'country-flag-icons/react/3x2';
+import { US, AE, DE, RU, SA } from 'country-flag-icons/react/3x2';
 import { cn } from "@/lib/utils";
 import useAuth from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
@@ -32,7 +32,7 @@ const Navigation = () => {
   const { t, i18n } = useTranslation();
   const languages = [
     { code: "en", label: "EN", Flag: US },
-    { code: "ar", label: "AR", Flag: EG },
+    { code: "ar", label: "AR", Flag: AE },
     { code: "de", label: "DE", Flag: DE },
     { code: "ru", label: "RU", Flag: RU },
   ];
@@ -86,13 +86,13 @@ const Navigation = () => {
         <div className="hidden lg:flex items-center justify-end pb-1 text-[9px] font-semibold uppercase tracking-[0.32em] text-white/60">
           <span className="text-white/40">{t("layout.locations")}</span>
         </div>
-        <div className="flex items-center justify-between h-14 md:h-16">
+        <div className="flex items-center justify-between h-24 md:h-28">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group ml-4 lg:ml-10">
             <img
               src="/crystaldbclogo.png"
               alt="CrystalDBC Logo"
-              className="h-14 md:h-16 w-auto drop-shadow-lg transition-transform group-hover:scale-105 -mt-1 md:-mt-2"
+              className="h-24 md:h-28 w-auto drop-shadow-lg transition-transform group-hover:scale-105"
             />
           </Link>
 

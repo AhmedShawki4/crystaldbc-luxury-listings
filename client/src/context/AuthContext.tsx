@@ -9,7 +9,7 @@ interface AuthContextValue {
   loading: boolean;
   isAuthenticated: boolean;
   login: (credentials: { email: string; password: string }) => Promise<void>;
-  register: (payload: { name: string; email: string; password: string; phone?: string }) => Promise<void>;
+  register: (payload: { name: string; email: string; password: string; phone?: string; country: string }) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     handleAuthSuccess(data);
   };
 
-  const register = async (payload: { name: string; email: string; password: string; phone?: string }) => {
+  const register = async (payload: { name: string; email: string; password: string; phone?: string; country: string }) => {
     const { data } = await apiClient.post<{ user: User; token: string }>("/auth/register", payload);
     handleAuthSuccess(data);
   };
