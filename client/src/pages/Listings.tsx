@@ -28,7 +28,11 @@ const Listings = () => {
   const [constructionStatusFilter, setConstructionStatusFilter] = useState("all");
   const [featuredOnly, setFeaturedOnly] = useState(false);
 
-  const { data: siteSettings } = useCmsSection<SiteSettingsContent>("siteSettings", { rentButtonEnabled: true });
+  const { data: siteSettings } = useCmsSection<SiteSettingsContent>("siteSettings", {
+    rentButtonEnabled: true,
+    investmentPageEnabled: true,
+    logoUrl: "/crystaldbclogo.png",
+  });
   const rentButtonEnabled = siteSettings?.rentButtonEnabled ?? true;
   const effectiveListingType = rentButtonEnabled ? listingType : "sale";
 

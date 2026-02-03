@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout";
 
 import RegisterInterestDialog from "./components/RegisterInterestDialog";
@@ -33,8 +33,21 @@ import AdminActivityLogs from "./pages/admin/AdminActivityLogs";
 import AdminInvestments from "./pages/admin/AdminInvestments";
 import AdminRentals from "./pages/admin/AdminRentals";
 import AdminInvestmentBoxes from "./pages/admin/AdminInvestmentBoxes";
+import { useCmsSection } from "@/hooks/useCmsSection";
+import type { SiteSettingsContent } from "@/types";
 
 const queryClient = new QueryClient();
+
+const InvestmentGate = () => {
+  const { data: siteSettings } = useCmsSection<SiteSettingsContent>("siteSettings", {
+    rentButtonEnabled: true,
+    investmentPageEnabled: true,
+    logoUrl: "/crystaldbclogo.png",
+  });
+  const investmentPageEnabled = siteSettings?.investmentPageEnabled ?? true;
+
+  return investmentPageEnabled ? <Investment /> : <Navigate to="/" replace />;
+};
 
 const App = () => {
   useEffect(() => {
@@ -59,7 +72,7 @@ const App = () => {
               <Route path="property/:propertyId" element={<PropertyDetail />} />
               <Route path="about" element={<About />} />
               <Route path="contact" element={<Contact />} />
-              <Route path="investment" element={<Investment />} />
+              <Route path="investment" element={<InvestmentGate />} />
               <Route
                 path="my-investments"
                 element={

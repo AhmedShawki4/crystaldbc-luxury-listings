@@ -112,7 +112,11 @@ const PropertyDetail = () => {
   const { toast } = useToast();
   
   // Fetch site settings to check if rent button is enabled
-  const { data: siteSettings } = useCmsSection<SiteSettingsContent>("siteSettings", { rentButtonEnabled: true });
+  const { data: siteSettings } = useCmsSection<SiteSettingsContent>("siteSettings", {
+    rentButtonEnabled: true,
+    investmentPageEnabled: true,
+    logoUrl: "/crystaldbclogo.png",
+  });
   const rentButtonEnabled = siteSettings?.rentButtonEnabled ?? true;
   
   const fallbackSimilar = useMemo(

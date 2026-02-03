@@ -271,7 +271,7 @@ const resources = {
         filterOptions: {
           allLocations: "All Locations",
           allTypes: "All Types",
-          anyPrice: "Any Price",
+          anyPrice: "All Prices",
           under100: "Under 100k",
           between100And250: "100k - 250k",
           over250: "250k+",
@@ -324,7 +324,7 @@ const resources = {
         filterOptions: {
           allLocations: "All Locations",
           allTypes: "All Types",
-          anyPrice: "Any Price",
+          anyPrice: "All Prices",
           under5m: "Under $5M",
           between5And10: "$5M - $10M",
           over10: "$10M+",
@@ -1299,10 +1299,19 @@ const resources = {
             title: "Site Settings",
             description: "Control global site features and visibility options.",
             preview: "Preview",
+            logo: {
+              label: "Header Logo URL",
+              placeholder: "Paste a logo URL or upload an image",
+            },
             rentButton: {
               label: "Rent Button Visibility",
               description: "Show or hide the rent application button on property detail pages.",
               previewText: "Apply for Rent",
+            },
+            investmentPage: {
+              label: "Investment Page Visibility",
+              description: "Show or hide the Investment page and its navigation button.",
+              previewText: "Investment Page",
             },
             status: {
               visible: "Visible",
@@ -1745,7 +1754,7 @@ const resources = {
         resultsLabel: "عقارات متاحة",
         loading: "جاري تحميل الإيجارات...",
         filterOptions: {
-          allLocations: "كل المواقع",
+          allLocations: "كل الدول",
           allTypes: "كل الأنواع",
           anyPrice: "أي سعر",
           under100: "أقل من 100k",
@@ -2622,10 +2631,19 @@ const resources = {
             title: "إعدادات الموقع",
             description: "تحكم في ميزات الموقع العامة وخيارات الإظهار.",
             preview: "معاينة",
+            logo: {
+              label: "رابط شعار الترويسة",
+              placeholder: "ألصق رابط الشعار أو قم برفع صورة",
+            },
             rentButton: {
               label: "إظهار زر الإيجار",
               description: "إظهار أو إخفاء زر طلب الإيجار في صفحات تفاصيل العقار.",
               previewText: "تقدم للإيجار",
+            },
+            investmentPage: {
+              label: "إظهار صفحة الاستثمار",
+              description: "إظهار أو إخفاء صفحة الاستثمار وزرها في شريط التنقل.",
+              previewText: "صفحة الاستثمار",
             },
             status: {
               visible: "مرئي",

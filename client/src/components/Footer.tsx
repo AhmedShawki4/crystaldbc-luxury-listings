@@ -28,9 +28,8 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div>
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <img src="/crystaldbclogo.png" alt="CrystalDBC Logo" className="h-12 w-auto" />
+              <img src="/crystaldbclogo.png" alt="CrystalDBC Logo" className="h-40 w-auto" />
             </Link>
-            <h3 className="text-lg font-display font-semibold mb-3">CrystalDBC</h3>
             <p className="text-white/70 text-sm leading-relaxed">{content.description}</p>
           </div>
 
@@ -93,7 +92,7 @@ const Footer = () => {
         ) : null}
 
         <div className="border-t border-white/10 pt-8 text-center text-white/70 text-sm">
-          <p>&copy; {new Date().getFullYear()} CrystalDBC. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} All rights reserved.</p>
         </div>
       </div>
     </footer>

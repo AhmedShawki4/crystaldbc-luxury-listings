@@ -8,6 +8,9 @@ import { US, AE, DE, RU, SA } from 'country-flag-icons/react/3x2';
 import { cn } from "@/lib/utils";
 import useAuth from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
+import { useCmsSection } from "@/hooks/useCmsSection";
+import type { SiteSettingsContent } from "@/types";
+import { getMediaUrl } from "@/lib/media";
 
 type NavLinkItem = {
   name: string;
@@ -30,6 +33,13 @@ const Navigation = () => {
   }, []);
   const { user, isAuthenticated, logout, loading } = useAuth();
   const { t, i18n } = useTranslation();
+  const { data: siteSettings } = useCmsSection<SiteSettingsContent>("siteSettings", {
+    rentButtonEnabled: true,
+    investmentPageEnabled: true,
+    logoUrl: "/crystaldbclogo.png",
+  });
+  const investmentPageEnabled = siteSettings?.investmentPageEnabled ?? true;
+  const logoUrl = siteSettings?.logoUrl || "/crystaldbclogo.png";
   const languages = [
     { code: "en", label: "EN", Flag: US },
     { code: "ar", label: "AR", Flag: AE },
@@ -54,7 +64,7 @@ const Navigation = () => {
   const navLinks: NavLinkItem[] = [
     { name: t("nav.home"), path: "/", icon: Home },
     { name: t("nav.properties"), path: "/listings", icon: Building2 },
-    { name: t("nav.investment"), path: "/investment", icon: TrendingUp },
+    ...(investmentPageEnabled ? [{ name: t("nav.investment"), path: "/investment", icon: TrendingUp }] : []),
     { name: t("nav.about"), path: "/about", icon: Info },
     { name: t("nav.contact"), path: "/contact", icon: PhoneCall },
   ];
@@ -64,7 +74,10 @@ const Navigation = () => {
   }
 
   const isActive = (path: string) => location.pathname === path;
-  const transparentPaths = ["/", "/listings", "/for-rent", "/investment", "/about", "/contact", "/my-investments"];
+  const transparentPaths = ["/", "/listings", "/for-rent", "/about", "/contact", "/my-investments"];
+  if (investmentPageEnabled) {
+    transparentPaths.push("/investment");
+  }
   const isTransparentPage = transparentPaths.includes(location.pathname) || location.pathname.startsWith("/property/");
   const useDarkNav = scrolled || !isTransparentPage || isOpen;
 
@@ -86,13 +99,13 @@ const Navigation = () => {
         <div className="hidden lg:flex items-center justify-end pb-1 text-[9px] font-semibold uppercase tracking-[0.32em] text-white/60">
           <span className="text-white/40">{t("layout.locations")}</span>
         </div>
-        <div className="flex items-center justify-between h-24 md:h-28">
+        <div className="flex items-center justify-between h-28 md:h-32">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group ml-4 lg:ml-10">
             <img
-              src="/crystaldbclogo.png"
+              src={getMediaUrl(logoUrl)}
               alt="CrystalDBC Logo"
-              className="h-24 md:h-28 w-auto drop-shadow-lg transition-transform group-hover:scale-105"
+              className="h-28 md:h-32 w-auto drop-shadow-lg transition-transform group-hover:scale-105"
             />
           </Link>
 

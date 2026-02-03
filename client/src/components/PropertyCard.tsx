@@ -36,7 +36,11 @@ const PropertyCard = ({
   const { addToWishlist, activeId, isAdding } = useWishlistActions();
   const rawId = id?.toString();
   const propertyId = rawId && /^[a-f\d]{24}$/i.test(rawId) ? rawId : undefined;
-  const { data: siteSettings } = useCmsSection<SiteSettingsContent>("siteSettings", { rentButtonEnabled: true });
+  const { data: siteSettings } = useCmsSection<SiteSettingsContent>("siteSettings", {
+    rentButtonEnabled: true,
+    investmentPageEnabled: true,
+    logoUrl: "/crystaldbclogo.png",
+  });
   const rentButtonEnabled = siteSettings?.rentButtonEnabled ?? true;
 
   const statusStyle: Record<string, string> = {

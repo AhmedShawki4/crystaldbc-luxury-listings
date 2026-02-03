@@ -144,6 +144,8 @@ export interface FooterContent {
 
 export interface SiteSettingsContent {
   rentButtonEnabled: boolean;
+  investmentPageEnabled: boolean;
+  logoUrl: string;
 }
 
 export interface Lead {

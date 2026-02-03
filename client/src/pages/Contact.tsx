@@ -36,6 +36,7 @@ const Contact = () => {
       "Sunday: By Appointment Only",
     ],
   });
+  const officeStat = contactContent?.office ? contactContent.office.split("\n")[0] : "Cairo & Dubai";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,7 +84,7 @@ const Contact = () => {
         stats={[
           { label: t("contact.stats.phone"), value: contactContent?.phone ?? "+1 (888) 555-1234" },
           { label: t("contact.stats.email"), value: contactContent?.email ?? "info@crystaldbc.com" },
-          { label: t("contact.stats.office"), value: "Cairo & Dubai", helper: t("contact.stats.officeHelper") },
+          { label: t("contact.stats.office"), value: officeStat, helper: t("contact.stats.officeHelper") },
         ]}
         actions={(
           <>

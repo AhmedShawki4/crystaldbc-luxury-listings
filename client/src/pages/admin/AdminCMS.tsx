@@ -12,7 +12,7 @@ import { getMediaUrl } from "@/lib/media";
 import uploadImage from "@/lib/uploadImage";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminGlassCard from "@/components/admin/AdminGlassCard";
-import { PenSquare, Settings, DollarSign } from "lucide-react";
+import { PenSquare, Settings, DollarSign, TrendingUp } from "lucide-react";
 
 const fetchSections = async () => {
   const { data } = await apiClient.get<{ sections: CMSSection[] }>("/cms");
@@ -53,7 +53,7 @@ const normalizeAbout = (content?: Partial<AboutContent>): AboutContent => ({
 });
 
 const normalizeFooter = (content?: Partial<FooterContent>): FooterContent => ({
-  description: "",
+  description: content?.description ?? "",
   contact: {
     phone: content?.contact?.phone ?? "",
     email: content?.contact?.email ?? "",
@@ -66,6 +66,8 @@ const normalizeFooter = (content?: Partial<FooterContent>): FooterContent => ({
 
 const normalizeSiteSettings = (content?: Partial<SiteSettingsContent>): SiteSettingsContent => ({
   rentButtonEnabled: content?.rentButtonEnabled ?? true,
+  investmentPageEnabled: content?.investmentPageEnabled ?? true,
+  logoUrl: content?.logoUrl ?? "/crystaldbclogo.png",
 });
 
 const toMultiline = (items: string[]) => items.join("\n");
@@ -646,6 +648,13 @@ const SiteSettingsEditor = ({ section, onSave, saving }: CmsEditorProps<SiteSett
       }
     >
       <div className="mt-4 space-y-6">
+        <ImageUploadField
+          label={t("admin.cms.siteSettings.logo.label")}
+          value={draft.logoUrl}
+          onChange={(value) => setDraft((prev) => ({ ...prev, logoUrl: value }))}
+          placeholder={t("admin.cms.siteSettings.logo.placeholder")}
+        />
+
         <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-muted/30">
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-luxury-gold/20 to-luxury-gold/5 flex items-center justify-center">
@@ -659,6 +668,22 @@ const SiteSettingsEditor = ({ section, onSave, saving }: CmsEditorProps<SiteSett
           <Switch
             checked={draft.rentButtonEnabled}
             onCheckedChange={(checked) => setDraft((prev) => ({ ...prev, rentButtonEnabled: checked }))}
+          />
+        </div>
+
+        <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-muted/30">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-luxury-gold/20 to-luxury-gold/5 flex items-center justify-center">
+              <TrendingUp className="h-6 w-6 text-luxury-gold" />
+            </div>
+            <div>
+              <p className="font-medium">{t("admin.cms.siteSettings.investmentPage.label")}</p>
+              <p className="text-sm text-muted-foreground">{t("admin.cms.siteSettings.investmentPage.description")}</p>
+            </div>
+          </div>
+          <Switch
+            checked={draft.investmentPageEnabled}
+            onCheckedChange={(checked) => setDraft((prev) => ({ ...prev, investmentPageEnabled: checked }))}
           />
         </div>
 
@@ -679,6 +704,25 @@ const SiteSettingsEditor = ({ section, onSave, saving }: CmsEditorProps<SiteSett
                 : "bg-red-500/20 text-red-400"
             }`}>
               {draft.rentButtonEnabled
+                ? t("admin.cms.siteSettings.status.visible")
+                : t("admin.cms.siteSettings.status.hidden")}
+            </span>
+          </div>
+          <div className="mt-3 flex items-center gap-3">
+            <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              draft.investmentPageEnabled
+                ? "bg-gradient-to-r from-luxury-gold to-luxury-gold-dark text-luxury-dark"
+                : "bg-muted text-muted-foreground line-through opacity-50"
+            }`}>
+              <TrendingUp className="h-4 w-4" />
+              {t("admin.cms.siteSettings.investmentPage.previewText")}
+            </span>
+            <span className={`text-xs px-2 py-1 rounded-full ${
+              draft.investmentPageEnabled
+                ? "bg-green-500/20 text-green-400"
+                : "bg-red-500/20 text-red-400"
+            }`}>
+              {draft.investmentPageEnabled
                 ? t("admin.cms.siteSettings.status.visible")
                 : t("admin.cms.siteSettings.status.hidden")}
             </span>
