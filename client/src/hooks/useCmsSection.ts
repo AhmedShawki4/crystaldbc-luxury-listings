@@ -1,20 +1,67 @@
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import apiClient from "@/lib/apiClient";
-import type { CMSSection } from "@/types";
+import type { CMSSection, CmsContent, CmsLanguage, LocalizedContent } from "@/types";
+
+const CMS_LANGUAGES: CmsLanguage[] = ["en", "ar", "de", "ru"];
+
+const isLocalizedContent = <TContent,>(content: CmsContent<TContent>): content is LocalizedContent<TContent> => {
+  return Boolean(content && typeof content === "object" && "translations" in (content as Record<string, unknown>));
+};
+
+const normalizeLocalizedContent = <TContent,>(
+  content: CmsContent<TContent> | undefined,
+  fallback: TContent,
+): LocalizedContent<TContent> => {
+  if (content && isLocalizedContent(content)) {
+    const base = content.translations.en ?? fallback;
+    return {
+      translations: {
+        en: content.translations.en ?? fallback,
+        ar: content.translations.ar ?? base,
+        de: content.translations.de ?? base,
+        ru: content.translations.ru ?? base,
+      },
+    };
+  }
+
+  const base = (content as TContent) ?? fallback;
+  return {
+    translations: {
+      en: base,
+      ar: base,
+      de: base,
+      ru: base,
+    },
+  };
+};
+
+const resolveLocalizedContent = <TContent,>(
+  content: CmsContent<TContent> | undefined,
+  language: string,
+  fallback: TContent,
+): TContent => {
+  const normalized = normalizeLocalizedContent(content, fallback);
+  const lang = CMS_LANGUAGES.includes(language as CmsLanguage) ? (language as CmsLanguage) : "en";
+  return normalized.translations[lang] ?? normalized.translations.en ?? fallback;
+};
 
 export function useCmsSection<TContent = unknown>(key: string, fallback?: TContent) {
+  const { i18n } = useTranslation();
+  const fallbackContent = fallback as TContent;
+
   return useQuery({
-    queryKey: ["cms", key],
+    queryKey: ["cms", key, i18n.language],
     queryFn: async () => {
       try {
         const { data } = await apiClient.get<{ section: CMSSection<TContent> }>(`/cms/${key}`);
-        return data.section.content;
+        return resolveLocalizedContent(data.section.content, i18n.language, fallbackContent);
       } catch (error) {
         // If section not found, return fallback
-        return fallback as TContent;
+        return fallbackContent;
       }
     },
-    placeholderData: fallback,
+    placeholderData: fallbackContent,
     staleTime: 1000 * 30, // Cache for 30 seconds
     refetchOnWindowFocus: true, // Refetch when user comes back to the page
   });

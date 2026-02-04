@@ -1216,6 +1216,11 @@ const resources = {
           headerTitle: "Content Management",
           headerDescription: "Edit homepage content blocks with friendly forms and instant previews.",
           loading: "Loading CMS...",
+          language: {
+            label: "Content language",
+            description: "Choose which language version you want to edit.",
+            placeholder: "Select a language",
+          },
           hero: {
             title: "Homepage Hero",
             description: "Update the main hero content and see a live preview.",
@@ -2548,6 +2553,11 @@ const resources = {
           headerTitle: "إدارة المحتوى",
           headerDescription: "عدّل محتوى الصفحة الرئيسية باستخدام نماذج سهلة مع معاينة فورية.",
           loading: "جاري تحميل إدارة المحتوى...",
+          language: {
+            label: "لغة المحتوى",
+            description: "اختر نسخة اللغة التي تريد تعديلها.",
+            placeholder: "اختر لغة",
+          },
           hero: {
             title: "بطل الصفحة الرئيسية",
             description: "حدّث محتوى البطل الرئيسي وشاهد معاينة مباشرة.",

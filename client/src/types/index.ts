@@ -101,10 +101,18 @@ export interface TrendingProject {
   property?: Property;
 }
 
+export type CmsLanguage = "en" | "ar" | "de" | "ru";
+
+export interface LocalizedContent<TContent> {
+  translations: Record<CmsLanguage, TContent>;
+}
+
+export type CmsContent<TContent> = TContent | LocalizedContent<TContent>;
+
 export interface CMSSection<TContent = unknown> {
   _id: string;
   key: string;
-  content: TContent;
+  content: CmsContent<TContent>;
 }
 
 export interface HeroContent {

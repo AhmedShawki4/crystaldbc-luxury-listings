@@ -2,11 +2,22 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import apiClient from "@/lib/apiClient";
-import type { CMSSection, HeroContent, ContactContent, FooterContent, AboutContent, SiteSettingsContent } from "@/types";
+import type {
+  CMSSection,
+  HeroContent,
+  ContactContent,
+  FooterContent,
+  AboutContent,
+  SiteSettingsContent,
+  CmsLanguage,
+  LocalizedContent,
+  CmsContent,
+} from "@/types";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { getMediaUrl } from "@/lib/media";
 import uploadImage from "@/lib/uploadImage";
@@ -17,6 +28,44 @@ import { PenSquare, Settings, DollarSign, TrendingUp } from "lucide-react";
 const fetchSections = async () => {
   const { data } = await apiClient.get<{ sections: CMSSection[] }>("/cms");
   return data.sections;
+};
+
+const CMS_LANGUAGES: { code: CmsLanguage; label: string }[] = [
+  { code: "en", label: "English" },
+  { code: "ar", label: "العربية" },
+  { code: "de", label: "Deutsch" },
+  { code: "ru", label: "Русский" },
+];
+
+const isLocalizedContent = <TContent,>(content: CmsContent<TContent>): content is LocalizedContent<TContent> => {
+  return Boolean(content && typeof content === "object" && "translations" in (content as Record<string, unknown>));
+};
+
+const normalizeLocalizedContent = <TContent,>(
+  content: CmsContent<TContent> | undefined,
+  fallback: TContent,
+): LocalizedContent<TContent> => {
+  if (content && isLocalizedContent(content)) {
+    const base = content.translations.en ?? fallback;
+    return {
+      translations: {
+        en: content.translations.en ?? fallback,
+        ar: content.translations.ar ?? base,
+        de: content.translations.de ?? base,
+        ru: content.translations.ru ?? base,
+      },
+    };
+  }
+
+  const base = (content as TContent) ?? fallback;
+  return {
+    translations: {
+      en: base,
+      ar: base,
+      de: base,
+      ru: base,
+    },
+  };
 };
 
 const normalizeHero = (content?: Partial<HeroContent>): HeroContent => ({
@@ -192,30 +241,46 @@ const ImageUploadField = ({ label, value, onChange, placeholder }: ImageUploadFi
 
 interface CmsEditorProps<T> {
   section: CMSSection<T>;
-  onSave: (key: string, content: T) => Promise<void>;
+  onSave: (key: string, content: CmsContent<T>) => Promise<void>;
   saving: boolean;
+  language: CmsLanguage;
 }
 
-const HeroSectionEditor = ({ section, onSave, saving }: CmsEditorProps<HeroContent>) => {
+const HeroSectionEditor = ({ section, onSave, saving, language }: CmsEditorProps<HeroContent>) => {
   const { t } = useTranslation();
-  const [draft, setDraft] = useState<HeroContent>(normalizeHero(section.content as HeroContent));
+  const [localizedDraft, setLocalizedDraft] = useState<LocalizedContent<HeroContent>>(
+    normalizeLocalizedContent(section.content as CmsContent<HeroContent>, normalizeHero()),
+  );
+  const [draft, setDraft] = useState<HeroContent>(localizedDraft.translations[language]);
 
   useEffect(() => {
-    setDraft(normalizeHero(section.content as HeroContent));
-  }, [section.content]);
+    const normalized = normalizeLocalizedContent(section.content as CmsContent<HeroContent>, normalizeHero());
+    setLocalizedDraft(normalized);
+    setDraft(normalized.translations[language]);
+  }, [section.content, language]);
+
+  const updateDraft = (next: HeroContent) => {
+    setDraft(next);
+    setLocalizedDraft((prev) => ({
+      translations: {
+        ...prev.translations,
+        [language]: next,
+      },
+    }));
+  };
 
   const handleChange = (field: keyof HeroContent, value: string) => {
-    setDraft((prev) => ({ ...prev, [field]: value }));
+    updateDraft({ ...draft, [field]: value });
   };
 
   const handleCtaChange = (cta: "primaryCta" | "secondaryCta", field: "label" | "href", value: string) => {
-    setDraft((prev) => ({
-      ...prev,
+    updateDraft({
+      ...draft,
       [cta]: {
-        ...prev[cta],
+        ...draft[cta],
         [field]: value,
       },
-    }));
+    });
   };
 
   return (
@@ -223,7 +288,7 @@ const HeroSectionEditor = ({ section, onSave, saving }: CmsEditorProps<HeroConte
       title={t("admin.cms.hero.title")}
       description={t("admin.cms.hero.description")}
       rightSlot={
-        <Button onClick={() => onSave(section.key, draft)} disabled={saving}>
+        <Button onClick={() => onSave(section.key, localizedDraft)} disabled={saving}>
           {saving ? t("admin.cms.actions.saving") : t("admin.cms.actions.save") + " Hero"}
         </Button>
       }
@@ -290,24 +355,38 @@ const HeroSectionEditor = ({ section, onSave, saving }: CmsEditorProps<HeroConte
   );
 };
 
-const ContactSectionEditor = ({ section, onSave, saving }: CmsEditorProps<ContactContent>) => {
+const ContactSectionEditor = ({ section, onSave, saving, language }: CmsEditorProps<ContactContent>) => {
   const { t } = useTranslation();
-  const [draft, setDraft] = useState<ContactContent>(normalizeContact(section.content as ContactContent));
+  const [localizedDraft, setLocalizedDraft] = useState<LocalizedContent<ContactContent>>(
+    normalizeLocalizedContent(section.content as CmsContent<ContactContent>, normalizeContact()),
+  );
+  const [draft, setDraft] = useState<ContactContent>(localizedDraft.translations[language]);
   const [officeHoursText, setOfficeHoursText] = useState(toMultiline(draft.officeHours));
 
   useEffect(() => {
-    const normalized = normalizeContact(section.content as ContactContent);
-    setDraft(normalized);
-    setOfficeHoursText(toMultiline(normalized.officeHours));
-  }, [section.content]);
+    const normalized = normalizeLocalizedContent(section.content as CmsContent<ContactContent>, normalizeContact());
+    setLocalizedDraft(normalized);
+    setDraft(normalized.translations[language]);
+    setOfficeHoursText(toMultiline(normalized.translations[language].officeHours));
+  }, [section.content, language]);
+
+  const updateDraft = (next: ContactContent) => {
+    setDraft(next);
+    setLocalizedDraft((prev) => ({
+      translations: {
+        ...prev.translations,
+        [language]: next,
+      },
+    }));
+  };
 
   const updateField = (field: keyof ContactContent, value: string) => {
-    setDraft((prev) => ({ ...prev, [field]: value }));
+    updateDraft({ ...draft, [field]: value });
   };
 
   const handleOfficeHoursChange = (value: string) => {
     setOfficeHoursText(value);
-    setDraft((prev) => ({ ...prev, officeHours: fromMultiline(value) }));
+    updateDraft({ ...draft, officeHours: fromMultiline(value) });
   };
 
   return (
@@ -315,7 +394,7 @@ const ContactSectionEditor = ({ section, onSave, saving }: CmsEditorProps<Contac
       title={t("admin.cms.contact.title")}
       description={t("admin.cms.contact.description")}
       rightSlot={
-        <Button onClick={() => onSave(section.key, draft)} disabled={saving}>
+        <Button onClick={() => onSave(section.key, localizedDraft)} disabled={saving}>
           {saving ? t("admin.cms.actions.saving") : t("admin.cms.actions.save") + " Contact"}
         </Button>
       }
@@ -370,29 +449,43 @@ const ContactSectionEditor = ({ section, onSave, saving }: CmsEditorProps<Contac
   );
 };
 
-const FooterSectionEditor = ({ section, onSave, saving }: CmsEditorProps<FooterContent>) => {
+const FooterSectionEditor = ({ section, onSave, saving, language }: CmsEditorProps<FooterContent>) => {
   const { t } = useTranslation();
-  const [draft, setDraft] = useState<FooterContent>(normalizeFooter(section.content as FooterContent));
+  const [localizedDraft, setLocalizedDraft] = useState<LocalizedContent<FooterContent>>(
+    normalizeLocalizedContent(section.content as CmsContent<FooterContent>, normalizeFooter()),
+  );
+  const [draft, setDraft] = useState<FooterContent>(localizedDraft.translations[language]);
   const [quickLinksText, setQuickLinksText] = useState(formatLinks(draft.quickLinks));
   const [propertyTypesText, setPropertyTypesText] = useState(toMultiline(draft.propertyTypes));
   const [socialText, setSocialText] = useState(formatSocial(draft.social));
 
   useEffect(() => {
-    const normalized = normalizeFooter(section.content as FooterContent);
-    setDraft(normalized);
-    setQuickLinksText(formatLinks(normalized.quickLinks));
-    setPropertyTypesText(toMultiline(normalized.propertyTypes));
-    setSocialText(formatSocial(normalized.social));
-  }, [section.content]);
+    const normalized = normalizeLocalizedContent(section.content as CmsContent<FooterContent>, normalizeFooter());
+    setLocalizedDraft(normalized);
+    setDraft(normalized.translations[language]);
+    setQuickLinksText(formatLinks(normalized.translations[language].quickLinks));
+    setPropertyTypesText(toMultiline(normalized.translations[language].propertyTypes));
+    setSocialText(formatSocial(normalized.translations[language].social));
+  }, [section.content, language]);
 
-  const updateContact = (field: keyof FooterContent["contact"], value: string) => {
-    setDraft((prev) => ({
-      ...prev,
-      contact: {
-        ...prev.contact,
-        [field]: value,
+  const updateDraft = (next: FooterContent) => {
+    setDraft(next);
+    setLocalizedDraft((prev) => ({
+      translations: {
+        ...prev.translations,
+        [language]: next,
       },
     }));
+  };
+
+  const updateContact = (field: keyof FooterContent["contact"], value: string) => {
+    updateDraft({
+      ...draft,
+      contact: {
+        ...draft.contact,
+        [field]: value,
+      },
+    });
   };
 
   return (
@@ -400,7 +493,7 @@ const FooterSectionEditor = ({ section, onSave, saving }: CmsEditorProps<FooterC
       title={t("admin.cms.footer.title")}
       description={t("admin.cms.footer.description")}
       rightSlot={
-        <Button onClick={() => onSave(section.key, draft)} disabled={saving}>
+        <Button onClick={() => onSave(section.key, localizedDraft)} disabled={saving}>
           {saving ? t("admin.cms.actions.saving") : t("admin.cms.actions.save") + " Footer"}
         </Button>
       }
@@ -411,7 +504,7 @@ const FooterSectionEditor = ({ section, onSave, saving }: CmsEditorProps<FooterC
             <label className="text-sm font-medium">{t("admin.cms.footer.labels.description")}</label>
             <Textarea
               value={draft.description}
-              onChange={(e) => setDraft((prev) => ({ ...prev, description: e.target.value }))}
+              onChange={(e) => updateDraft({ ...draft, description: e.target.value })}
               rows={4}
             />
           </div>
@@ -433,7 +526,7 @@ const FooterSectionEditor = ({ section, onSave, saving }: CmsEditorProps<FooterC
               value={quickLinksText}
               onChange={(e) => {
                 setQuickLinksText(e.target.value);
-                setDraft((prev) => ({ ...prev, quickLinks: parseLinks(e.target.value) }));
+                updateDraft({ ...draft, quickLinks: parseLinks(e.target.value) });
               }}
               rows={4}
             />
@@ -444,7 +537,7 @@ const FooterSectionEditor = ({ section, onSave, saving }: CmsEditorProps<FooterC
               value={propertyTypesText}
               onChange={(e) => {
                 setPropertyTypesText(e.target.value);
-                setDraft((prev) => ({ ...prev, propertyTypes: fromMultiline(e.target.value) }));
+                updateDraft({ ...draft, propertyTypes: fromMultiline(e.target.value) });
               }}
               rows={3}
             />
@@ -455,7 +548,7 @@ const FooterSectionEditor = ({ section, onSave, saving }: CmsEditorProps<FooterC
               value={socialText}
               onChange={(e) => {
                 setSocialText(e.target.value);
-                setDraft((prev) => ({ ...prev, social: parseSocial(e.target.value) }));
+                updateDraft({ ...draft, social: parseSocial(e.target.value) });
               }}
               rows={3}
             />
@@ -495,27 +588,41 @@ const FooterSectionEditor = ({ section, onSave, saving }: CmsEditorProps<FooterC
   );
 };
 
-const AboutSectionEditor = ({ section, onSave, saving }: CmsEditorProps<AboutContent>) => {
+const AboutSectionEditor = ({ section, onSave, saving, language }: CmsEditorProps<AboutContent>) => {
   const { t } = useTranslation();
-  const [draft, setDraft] = useState<AboutContent>(normalizeAbout(section.content as AboutContent));
+  const [localizedDraft, setLocalizedDraft] = useState<LocalizedContent<AboutContent>>(
+    normalizeLocalizedContent(section.content as CmsContent<AboutContent>, normalizeAbout()),
+  );
+  const [draft, setDraft] = useState<AboutContent>(localizedDraft.translations[language]);
   const [storyText, setStoryText] = useState(toMultiline(draft.storyParagraphs));
   const [valuesText, setValuesText] = useState(formatAboutValues(draft.values));
   const [statsText, setStatsText] = useState(formatAboutStats(draft.stats));
 
   useEffect(() => {
-    const normalized = normalizeAbout(section.content as AboutContent);
-    setDraft(normalized);
-    setStoryText(toMultiline(normalized.storyParagraphs));
-    setValuesText(formatAboutValues(normalized.values));
-    setStatsText(formatAboutStats(normalized.stats));
-  }, [section.content]);
+    const normalized = normalizeLocalizedContent(section.content as CmsContent<AboutContent>, normalizeAbout());
+    setLocalizedDraft(normalized);
+    setDraft(normalized.translations[language]);
+    setStoryText(toMultiline(normalized.translations[language].storyParagraphs));
+    setValuesText(formatAboutValues(normalized.translations[language].values));
+    setStatsText(formatAboutStats(normalized.translations[language].stats));
+  }, [section.content, language]);
+
+  const updateDraft = (next: AboutContent) => {
+    setDraft(next);
+    setLocalizedDraft((prev) => ({
+      translations: {
+        ...prev.translations,
+        [language]: next,
+      },
+    }));
+  };
 
   return (
     <AdminGlassCard
       title={t("admin.cms.about.title")}
       description={t("admin.cms.about.description")}
       rightSlot={
-        <Button onClick={() => onSave(section.key, draft)} disabled={saving}>
+        <Button onClick={() => onSave(section.key, localizedDraft)} disabled={saving}>
           {saving ? t("admin.cms.actions.saving") : t("admin.cms.actions.save") + " About"}
         </Button>
       }
@@ -526,20 +633,20 @@ const AboutSectionEditor = ({ section, onSave, saving }: CmsEditorProps<AboutCon
             <label className="text-sm font-medium">{t("admin.cms.about.labels.heroTitle")}</label>
             <Input
               value={draft.heroTitle}
-              onChange={(e) => setDraft((prev) => ({ ...prev, heroTitle: e.target.value }))}
+              onChange={(e) => updateDraft({ ...draft, heroTitle: e.target.value })}
             />
           </div>
           <div>
             <label className="text-sm font-medium">{t("admin.cms.about.labels.heroSubtitle")}</label>
             <Input
               value={draft.heroSubtitle}
-              onChange={(e) => setDraft((prev) => ({ ...prev, heroSubtitle: e.target.value }))}
+              onChange={(e) => updateDraft({ ...draft, heroSubtitle: e.target.value })}
             />
           </div>
           <ImageUploadField
             label={t("admin.cms.about.labels.heroImage")}
             value={draft.heroImage}
-            onChange={(value) => setDraft((prev) => ({ ...prev, heroImage: value }))}
+            onChange={(value) => updateDraft({ ...draft, heroImage: value })}
             placeholder={t("admin.cms.hero.placeholders.backgroundImage")}
           />
           <div>
@@ -548,7 +655,7 @@ const AboutSectionEditor = ({ section, onSave, saving }: CmsEditorProps<AboutCon
               value={storyText}
               onChange={(e) => {
                 setStoryText(e.target.value);
-                setDraft((prev) => ({ ...prev, storyParagraphs: fromMultiline(e.target.value) }));
+                updateDraft({ ...draft, storyParagraphs: fromMultiline(e.target.value) });
               }}
               rows={4}
             />
@@ -559,7 +666,7 @@ const AboutSectionEditor = ({ section, onSave, saving }: CmsEditorProps<AboutCon
               value={valuesText}
               onChange={(e) => {
                 setValuesText(e.target.value);
-                setDraft((prev) => ({ ...prev, values: parseAboutValues(e.target.value) }));
+                updateDraft({ ...draft, values: parseAboutValues(e.target.value) });
               }}
               rows={4}
             />
@@ -570,7 +677,7 @@ const AboutSectionEditor = ({ section, onSave, saving }: CmsEditorProps<AboutCon
               value={statsText}
               onChange={(e) => {
                 setStatsText(e.target.value);
-                setDraft((prev) => ({ ...prev, stats: parseAboutStats(e.target.value) }));
+                updateDraft({ ...draft, stats: parseAboutStats(e.target.value) });
               }}
               rows={3}
             />
@@ -735,23 +842,36 @@ const SiteSettingsEditor = ({ section, onSave, saving }: CmsEditorProps<SiteSett
 
 interface JsonSectionEditorProps {
   section: CMSSection;
-  onSave: (key: string, content: unknown) => Promise<void>;
+  onSave: (key: string, content: CmsContent<unknown>) => Promise<void>;
   saving: boolean;
   onInvalidJson: () => void;
+  language: CmsLanguage;
 }
 
-const JsonSectionEditor = ({ section, onSave, saving, onInvalidJson }: JsonSectionEditorProps) => {
+const JsonSectionEditor = ({ section, onSave, saving, onInvalidJson, language }: JsonSectionEditorProps) => {
   const { t } = useTranslation();
-  const [value, setValue] = useState(JSON.stringify(section.content, null, 2));
+  const [localizedDraft, setLocalizedDraft] = useState<LocalizedContent<unknown>>(
+    normalizeLocalizedContent(section.content as CmsContent<unknown>, {}),
+  );
+  const [value, setValue] = useState(JSON.stringify(localizedDraft.translations[language] ?? {}, null, 2));
 
   useEffect(() => {
-    setValue(JSON.stringify(section.content, null, 2));
-  }, [section.content]);
+    const normalized = normalizeLocalizedContent(section.content as CmsContent<unknown>, {});
+    setLocalizedDraft(normalized);
+    setValue(JSON.stringify(normalized.translations[language] ?? {}, null, 2));
+  }, [section.content, language]);
 
   const handleSave = async () => {
     try {
       const parsed = JSON.parse(value);
-      await onSave(section.key, parsed);
+      const updated: LocalizedContent<unknown> = {
+        translations: {
+          ...localizedDraft.translations,
+          [language]: parsed,
+        },
+      };
+      setLocalizedDraft(updated);
+      await onSave(section.key, updated);
     } catch (error) {
       console.error("Invalid CMS JSON", error);
       onInvalidJson();
@@ -784,11 +904,15 @@ const JsonSectionEditor = ({ section, onSave, saving, onInvalidJson }: JsonSecti
 };
 
 const AdminCMS = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const { data, isLoading, refetch } = useQuery({ queryKey: ["cms", "all"], queryFn: fetchSections });
   const { toast } = useToast();
   const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [activeLanguage, setActiveLanguage] = useState<CmsLanguage>(() => {
+    const match = CMS_LANGUAGES.find((lang) => lang.code === (i18n.language as CmsLanguage));
+    return match?.code ?? "en";
+  });
 
   const handleSave = async <T,>(key: string, content: T) => {
     try {
@@ -823,6 +947,27 @@ const AdminCMS = () => {
         description={t("admin.cms.headerDescription")}
       />
 
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-muted/30 p-4">
+        <div>
+          <p className="text-sm font-medium">{t("admin.cms.language.label")}</p>
+          <p className="text-xs text-muted-foreground">{t("admin.cms.language.description")}</p>
+        </div>
+        <div className="min-w-[200px]">
+          <Select value={activeLanguage} onValueChange={(value) => setActiveLanguage(value as CmsLanguage)}>
+            <SelectTrigger>
+              <SelectValue placeholder={t("admin.cms.language.placeholder")} />
+            </SelectTrigger>
+            <SelectContent>
+              {CMS_LANGUAGES.map((lang) => (
+                <SelectItem key={lang.code} value={lang.code}>
+                  {lang.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
       <div className="space-y-6">
         {sections.map((section) => {
           if (section.key === "hero") {
@@ -832,6 +977,7 @@ const AdminCMS = () => {
                 section={section as CMSSection<HeroContent>}
                 onSave={handleSave}
                 saving={savingKey === section.key}
+                language={activeLanguage}
               />
             );
           }
@@ -843,6 +989,7 @@ const AdminCMS = () => {
                 section={section as CMSSection<AboutContent>}
                 onSave={handleSave}
                 saving={savingKey === section.key}
+                language={activeLanguage}
               />
             );
           }
@@ -854,6 +1001,7 @@ const AdminCMS = () => {
                 section={section as CMSSection<ContactContent>}
                 onSave={handleSave}
                 saving={savingKey === section.key}
+                language={activeLanguage}
               />
             );
           }
@@ -865,6 +1013,7 @@ const AdminCMS = () => {
                 section={section as CMSSection<FooterContent>}
                 onSave={handleSave}
                 saving={savingKey === section.key}
+                language={activeLanguage}
               />
             );
           }
@@ -876,6 +1025,7 @@ const AdminCMS = () => {
                 section={section as CMSSection<SiteSettingsContent>}
                 onSave={handleSave}
                 saving={savingKey === section.key}
+                language={activeLanguage}
               />
             );
           }
@@ -887,6 +1037,7 @@ const AdminCMS = () => {
               onSave={handleSave}
               saving={savingKey === section.key}
               onInvalidJson={() => toast({ title: "Invalid JSON", variant: "destructive" })}
+              language={activeLanguage}
             />
           );
         })}
