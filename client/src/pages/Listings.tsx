@@ -79,12 +79,12 @@ const Listings = () => {
   const { data: properties = [], isLoading } = useProperties(filters);
 
   const locations = useMemo(
-    () => ["all", ...Array.from(new Set(properties.map((p) => p.location)))],
+    () => ["all", ...Array.from(new Set(properties.map((p) => p.location).filter(Boolean)))],
     [properties]
   );
 
   const types = useMemo(
-    () => ["all", ...Array.from(new Set(properties.map((p) => p.type)))],
+    () => ["all", ...Array.from(new Set(properties.map((p) => p.type).filter(Boolean)))],
     [properties]
   );
 
