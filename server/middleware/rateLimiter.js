@@ -8,17 +8,17 @@ const buildLimiter = (options = {}) =>
     ...options,
   });
 
-const generalLimiter = buildLimiter({ windowMs: 15 * 60 * 1000, max: 300 });
+const generalLimiter = buildLimiter({ windowMs: 15 * 60 * 1000, max: 5000 });
 
 const authLimiter = buildLimiter({
   windowMs: 15 * 60 * 1000,
-  max: 20,
+  max: 100,
   message: { message: "Too many auth attempts. Try again in 15 minutes." },
 });
 
 const wishlistLimiter = buildLimiter({
   windowMs: 60 * 1000,
-  max: 3,
+  max: 60,
   message: { message: "You are adding wishlist items too quickly. Please wait a minute before trying again." },
   keyGenerator: (req) => (req.user ? req.user.id : req.ip),
 });

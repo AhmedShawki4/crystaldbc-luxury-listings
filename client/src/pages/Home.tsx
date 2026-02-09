@@ -1,6 +1,6 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useLayoutEffect, useRef, useEffect, useState } from "react";
+import { useLayoutEffect, useRef, useEffect, useState, useMemo } from "react";
 import FloatingShapes from "@/components/FloatingShapes";
 import Antigravity from "@/components/Antigravity";
 import { Link } from "react-router-dom";
@@ -38,7 +38,7 @@ import { useToast } from "@/hooks/use-toast";
 import useProperties from "@/hooks/useProperties";
 import apiClient from "@/lib/apiClient";
 import { useCmsSection } from "@/hooks/useCmsSection";
-import type { ContactContent } from "@/types";
+import type { ContactContent, HomeSuccessStoriesContent } from "@/types";
 import LazyModelViewer from "@/components/LazyModelViewer";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -170,16 +170,26 @@ const Home = () => {
   };
 
   type HomeFaq = { question: string; answer: string };
-  type HomeSuccessStat = { value: string; label: string; desc: string };
   type HomeTestimonial = { name: string; role: string; text: string };
 
   const faqItems = t("home.faqItems", { returnObjects: true });
   const faqs = Array.isArray(faqItems) ? (faqItems as HomeFaq[]) : [];
 
-  const successStatItems = t("home.successStats", { returnObjects: true });
-  const successStats = Array.isArray(successStatItems)
-    ? (successStatItems as HomeSuccessStat[])
-    : [];
+  const fallbackSuccessStories = useMemo<HomeSuccessStoriesContent>(() => {
+    const items = t("home.successStats", { returnObjects: true });
+    return {
+      eyebrow: t("home.successStories"),
+      title: t("home.realResults"),
+      stats: Array.isArray(items) ? (items as HomeSuccessStoriesContent["stats"]) : [],
+    };
+  }, [t]);
+
+  const { data: successStoriesContent } = useCmsSection<HomeSuccessStoriesContent>(
+    "homeSuccessStories",
+    fallbackSuccessStories,
+  );
+  const successStories = successStoriesContent ?? fallbackSuccessStories;
+  const successStats = Array.isArray(successStories.stats) ? successStories.stats : fallbackSuccessStories.stats;
 
   const testimonialItems = t("home.testimonialsItems", { returnObjects: true });
   const testimonials = Array.isArray(testimonialItems)
@@ -354,8 +364,8 @@ const Home = () => {
       <section className="py-24 bg-background reveal-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("home.successStories")}</span>
-            <h2 className="text-4xl md:text-5xl font-display font-medium text-primary">{t("home.realResults")}</h2>
+            <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{successStories.eyebrow}</span>
+            <h2 className="text-4xl md:text-5xl font-display font-medium text-primary">{successStories.title}</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 stagger-grid">

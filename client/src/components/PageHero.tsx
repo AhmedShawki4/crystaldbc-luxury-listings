@@ -108,7 +108,7 @@ const PageHero = ({
           <div className="grid min-w-[240px] gap-4 rounded-3xl border border-white/15 bg-white/5 p-6 backdrop-blur-xl">
             {stats.map((stat) => (
               <div key={`${stat.label}-${stat.value}`} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-3xl font-display font-bold text-white">{stat.value}</p>
+                <p className="text-3xl font-display font-bold text-white whitespace-pre-line">{stat.value}</p>
                 <p className="text-sm uppercase tracking-[0.2em] text-white/60">{stat.label}</p>
                 {stat.helper ? <p className="text-xs text-white/60">{stat.helper}</p> : null}
               </div>

@@ -9,6 +9,7 @@ import type {
   FooterContent,
   AboutContent,
   SiteSettingsContent,
+  HomeSuccessStoriesContent,
   CmsLanguage,
   LocalizedContent,
   CmsContent,
@@ -89,6 +90,7 @@ const normalizeContact = (content?: Partial<ContactContent>): ContactContent => 
   phone: content?.phone ?? "",
   email: content?.email ?? "",
   office: content?.office ?? "",
+  officeHelper: content?.officeHelper ?? "",
   officeHours: content?.officeHours ?? [],
 });
 
@@ -97,6 +99,10 @@ const normalizeAbout = (content?: Partial<AboutContent>): AboutContent => ({
   heroTitle: content?.heroTitle ?? "",
   heroSubtitle: content?.heroSubtitle ?? "",
   storyParagraphs: content?.storyParagraphs ?? [],
+  impactItems: content?.impactItems ?? [],
+  impactEyebrow: content?.impactEyebrow ?? "",
+  impactTitle: content?.impactTitle ?? "",
+  impactDescription: content?.impactDescription ?? "",
   values: content?.values ?? [],
   stats: content?.stats ?? [],
 });
@@ -119,7 +125,13 @@ const normalizeSiteSettings = (content?: Partial<SiteSettingsContent>): SiteSett
   logoUrl: content?.logoUrl ?? "/crystaldbclogo.png",
 });
 
-const toMultiline = (items: string[]) => items.join("\n");
+const normalizeHomeSuccessStories = (content?: Partial<HomeSuccessStoriesContent>): HomeSuccessStoriesContent => ({
+  eyebrow: content?.eyebrow ?? "",
+  title: content?.title ?? "",
+  stats: content?.stats ?? [],
+});
+
+const toMultiline = (items?: string[]) => (Array.isArray(items) ? items : []).join("\n");
 const fromMultiline = (value: string) =>
   value
     .split("\n")
@@ -175,6 +187,20 @@ const parseAboutStats = (value: string) =>
       return { label, value: statValue };
     })
     .filter((item) => item.label && item.value);
+
+    const formatSuccessStats = (stats: HomeSuccessStoriesContent["stats"]) =>
+      stats.map((stat) => `${stat.value} | ${stat.label} | ${stat.desc}`).join("\n");
+
+    const parseSuccessStats = (value: string) =>
+      value
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+          const [statValue = "", label = "", desc = ""] = line.split("|").map((part) => part.trim());
+          return { value: statValue, label, desc };
+        })
+        .filter((item) => item.value && item.label);
 
 interface ImageUploadFieldProps {
   label: string;
@@ -411,15 +437,19 @@ const ContactSectionEditor = ({ section, onSave, saving, language }: CmsEditorPr
           </div>
           <div>
             <label className="text-sm font-medium">{t("admin.cms.contact.labels.phone")}</label>
-            <Input value={draft.phone} onChange={(e) => updateField("phone", e.target.value)} />
+            <Textarea value={draft.phone} onChange={(e) => updateField("phone", e.target.value)} rows={2} />
           </div>
           <div>
             <label className="text-sm font-medium">{t("admin.cms.contact.labels.email")}</label>
-            <Input value={draft.email} onChange={(e) => updateField("email", e.target.value)} />
+            <Textarea value={draft.email} onChange={(e) => updateField("email", e.target.value)} rows={2} />
           </div>
           <div>
             <label className="text-sm font-medium">{t("admin.cms.contact.labels.office")}</label>
             <Textarea value={draft.office} onChange={(e) => updateField("office", e.target.value)} />
+          </div>
+          <div>
+            <label className="text-sm font-medium">{t("admin.cms.contact.labels.officeHelper")}</label>
+            <Input value={draft.officeHelper ?? ""} onChange={(e) => updateField("officeHelper", e.target.value)} />
           </div>
           <div>
             <label className="text-sm font-medium">{t("admin.cms.contact.labels.officeHours")}</label>
@@ -431,9 +461,9 @@ const ContactSectionEditor = ({ section, onSave, saving, language }: CmsEditorPr
           <h4 className="text-2xl font-display font-semibold">{draft.title || t("admin.cms.contact.defaultTitle")}</h4>
           <p className="text-muted-foreground">{draft.subtitle}</p>
           <div className="space-y-3 text-sm">
-            <p><span className="font-semibold">{t("admin.cms.contact.labels.phone")}:</span> {draft.phone}</p>
-            <p><span className="font-semibold">{t("admin.cms.contact.labels.email")}:</span> {draft.email}</p>
-            <p><span className="font-semibold">{t("admin.cms.contact.labels.office")}:</span> {draft.office}</p>
+            <p className="whitespace-pre-line"><span className="font-semibold">{t("admin.cms.contact.labels.phone")}:</span> {draft.phone}</p>
+            <p className="whitespace-pre-line"><span className="font-semibold">{t("admin.cms.contact.labels.email")}:</span> {draft.email}</p>
+            <p className="whitespace-pre-line"><span className="font-semibold">{t("admin.cms.contact.labels.office")}:</span> {draft.office}</p>
           </div>
           <div className="pt-4 border-t border-border">
             <p className="text-sm font-semibold mb-2">{t("admin.cms.contact.labels.officeHours")}</p>
@@ -442,6 +472,107 @@ const ContactSectionEditor = ({ section, onSave, saving, language }: CmsEditorPr
                 <li key={`${line}-${index}`}>{line}</li>
               ))}
             </ul>
+          </div>
+        </div>
+      </div>
+    </AdminGlassCard>
+  );
+};
+
+const HomeSuccessStoriesEditor = ({ section, onSave, saving, language }: CmsEditorProps<HomeSuccessStoriesContent>) => {
+  const { t, i18n } = useTranslation();
+
+  const getDefaults = (lang: CmsLanguage): HomeSuccessStoriesContent => {
+    const fixedT = i18n.getFixedT(lang);
+    const stats = fixedT("home.successStats", { returnObjects: true });
+    return normalizeHomeSuccessStories({
+      eyebrow: fixedT("home.successStories"),
+      title: fixedT("home.realResults"),
+      stats: Array.isArray(stats) ? (stats as HomeSuccessStoriesContent["stats"]) : [],
+    });
+  };
+
+  const [localizedDraft, setLocalizedDraft] = useState<LocalizedContent<HomeSuccessStoriesContent>>(
+    normalizeLocalizedContent(section.content as CmsContent<HomeSuccessStoriesContent>, getDefaults("en")),
+  );
+  const [draft, setDraft] = useState<HomeSuccessStoriesContent>(localizedDraft.translations[language]);
+  const [statsText, setStatsText] = useState(formatSuccessStats(draft.stats));
+
+  useEffect(() => {
+    const normalized = normalizeLocalizedContent(section.content as CmsContent<HomeSuccessStoriesContent>, getDefaults("en"));
+    const filled: LocalizedContent<HomeSuccessStoriesContent> = {
+      translations: {
+        en: normalized.translations.en?.stats?.length ? normalized.translations.en : getDefaults("en"),
+        ar: normalized.translations.ar?.stats?.length ? normalized.translations.ar : getDefaults("ar"),
+        de: normalized.translations.de?.stats?.length ? normalized.translations.de : getDefaults("de"),
+        ru: normalized.translations.ru?.stats?.length ? normalized.translations.ru : getDefaults("ru"),
+      },
+    };
+    setLocalizedDraft(filled);
+    setDraft(filled.translations[language]);
+    setStatsText(formatSuccessStats(filled.translations[language].stats));
+  }, [i18n, language, section.content]);
+
+  const updateDraft = (next: HomeSuccessStoriesContent) => {
+    setDraft(next);
+    setLocalizedDraft((prev) => ({
+      translations: {
+        ...prev.translations,
+        [language]: next,
+      },
+    }));
+  };
+
+  return (
+    <AdminGlassCard
+      title={t("admin.cms.homeSuccessStories.title")}
+      description={t("admin.cms.homeSuccessStories.description")}
+      rightSlot={
+        <Button onClick={() => onSave(section.key, localizedDraft)} disabled={saving}>
+          {saving ? t("admin.cms.actions.saving") : t("admin.cms.actions.save") + " Home"}
+        </Button>
+      }
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm font-medium">{t("admin.cms.homeSuccessStories.labels.eyebrow")}</label>
+            <Input
+              value={draft.eyebrow}
+              onChange={(e) => updateDraft({ ...draft, eyebrow: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">{t("admin.cms.homeSuccessStories.labels.title")}</label>
+            <Input
+              value={draft.title}
+              onChange={(e) => updateDraft({ ...draft, title: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">{t("admin.cms.homeSuccessStories.labels.stats")}</label>
+            <Textarea
+              value={statsText}
+              onChange={(e) => {
+                setStatsText(e.target.value);
+                updateDraft({ ...draft, stats: parseSuccessStats(e.target.value) });
+              }}
+              rows={5}
+            />
+          </div>
+        </div>
+
+        <div className="border border-border rounded-xl p-6 bg-muted/40 space-y-4">
+          <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">{draft.eyebrow || t("admin.cms.homeSuccessStories.preview.eyebrow")}</p>
+          <h4 className="text-2xl font-display font-semibold">{draft.title || t("admin.cms.homeSuccessStories.preview.title")}</h4>
+          <div className="space-y-3 text-sm text-muted-foreground">
+            {draft.stats.map((stat, index) => (
+              <div key={`${stat.value}-${stat.label}-${index}`}>
+                <p className="text-lg font-semibold text-primary">{stat.value}</p>
+                <p className="font-medium">{stat.label}</p>
+                <p className="text-xs text-muted-foreground">{stat.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -589,23 +720,56 @@ const FooterSectionEditor = ({ section, onSave, saving, language }: CmsEditorPro
 };
 
 const AboutSectionEditor = ({ section, onSave, saving, language }: CmsEditorProps<AboutContent>) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const hasMigratedRef = useRef(false);
+
+  const getImpactDefaults = (lang: CmsLanguage) =>
+    (i18n.getFixedT(lang)("about.impact.items", { returnObjects: true }) as string[]) ?? [];
+
+  const withImpactDefaults = (value: AboutContent | undefined, lang: CmsLanguage) => {
+    const normalized = normalizeAbout(value);
+    if (!Array.isArray(value?.impactItems) || value?.impactItems.length === 0) {
+      normalized.impactItems = getImpactDefaults(lang);
+    }
+    return normalized;
+  };
   const [localizedDraft, setLocalizedDraft] = useState<LocalizedContent<AboutContent>>(
     normalizeLocalizedContent(section.content as CmsContent<AboutContent>, normalizeAbout()),
   );
   const [draft, setDraft] = useState<AboutContent>(localizedDraft.translations[language]);
   const [storyText, setStoryText] = useState(toMultiline(draft.storyParagraphs));
+  const [impactItemsText, setImpactItemsText] = useState(toMultiline(draft.impactItems));
   const [valuesText, setValuesText] = useState(formatAboutValues(draft.values));
   const [statsText, setStatsText] = useState(formatAboutStats(draft.stats));
 
   useEffect(() => {
     const normalized = normalizeLocalizedContent(section.content as CmsContent<AboutContent>, normalizeAbout());
-    setLocalizedDraft(normalized);
-    setDraft(normalized.translations[language]);
-    setStoryText(toMultiline(normalized.translations[language].storyParagraphs));
-    setValuesText(formatAboutValues(normalized.translations[language].values));
-    setStatsText(formatAboutStats(normalized.translations[language].stats));
-  }, [section.content, language]);
+    const filled = {
+      translations: {
+        en: withImpactDefaults(normalized.translations.en, "en"),
+        ar: withImpactDefaults(normalized.translations.ar, "ar"),
+        de: withImpactDefaults(normalized.translations.de, "de"),
+        ru: withImpactDefaults(normalized.translations.ru, "ru"),
+      },
+    };
+
+    setLocalizedDraft(filled);
+    const next = filled.translations[language];
+    setDraft(next);
+    setStoryText(toMultiline(next.storyParagraphs));
+    setImpactItemsText(toMultiline(next.impactItems));
+    setValuesText(formatAboutValues(next.values));
+    setStatsText(formatAboutStats(next.stats));
+
+    const needsMigration = Object.values(normalized.translations).some(
+      (value) => !Array.isArray((value as AboutContent | undefined)?.impactItems),
+    );
+
+    if (needsMigration && !hasMigratedRef.current) {
+      hasMigratedRef.current = true;
+      onSave(section.key, filled).catch(() => undefined);
+    }
+  }, [i18n, language, onSave, section.content]);
 
   const updateDraft = (next: AboutContent) => {
     setDraft(next);
@@ -643,6 +807,28 @@ const AboutSectionEditor = ({ section, onSave, saving, language }: CmsEditorProp
               onChange={(e) => updateDraft({ ...draft, heroSubtitle: e.target.value })}
             />
           </div>
+          <div>
+            <label className="text-sm font-medium">{t("admin.cms.about.labels.impactEyebrow")}</label>
+            <Input
+              value={draft.impactEyebrow ?? ""}
+              onChange={(e) => updateDraft({ ...draft, impactEyebrow: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">{t("admin.cms.about.labels.impactTitle")}</label>
+            <Input
+              value={draft.impactTitle ?? ""}
+              onChange={(e) => updateDraft({ ...draft, impactTitle: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">{t("admin.cms.about.labels.impactDescription")}</label>
+            <Textarea
+              value={draft.impactDescription ?? ""}
+              onChange={(e) => updateDraft({ ...draft, impactDescription: e.target.value })}
+              rows={3}
+            />
+          </div>
           <ImageUploadField
             label={t("admin.cms.about.labels.heroImage")}
             value={draft.heroImage}
@@ -656,6 +842,17 @@ const AboutSectionEditor = ({ section, onSave, saving, language }: CmsEditorProp
               onChange={(e) => {
                 setStoryText(e.target.value);
                 updateDraft({ ...draft, storyParagraphs: fromMultiline(e.target.value) });
+              }}
+              rows={4}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">{t("admin.cms.about.labels.impactItems")}</label>
+            <Textarea
+              value={impactItemsText}
+              onChange={(e) => {
+                setImpactItemsText(e.target.value);
+                updateDraft({ ...draft, impactItems: fromMultiline(e.target.value) });
               }}
               rows={4}
             />
@@ -705,6 +902,23 @@ const AboutSectionEditor = ({ section, onSave, saving, language }: CmsEditorProp
               {draft.storyParagraphs.map((paragraph, index) => (
                 <p key={`${paragraph}-${index}`}>{paragraph}</p>
               ))}
+            </div>
+            <div className="space-y-2">
+              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{draft.impactEyebrow}</p>
+              <h5 className="text-base font-semibold">{draft.impactTitle}</h5>
+              <p className="text-sm text-muted-foreground">{draft.impactDescription}</p>
+              <div className="flex flex-wrap gap-2 pt-2">
+                {draft.impactItems
+                  .filter((item) => item && item.trim().length > 0)
+                  .map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-muted-foreground"
+                    >
+                      {item}
+                    </span>
+                  ))}
+              </div>
             </div>
             <div>
               <h5 className="text-sm font-semibold mb-2">Values</h5>
@@ -934,10 +1148,33 @@ const AdminCMS = () => {
     return <p className="text-muted-foreground">{t("admin.cms.loading")}</p>;
   }
 
+  const buildHomeSuccessDefaults = (lang: CmsLanguage): HomeSuccessStoriesContent => {
+    const fixedT = i18n.getFixedT(lang);
+    const stats = fixedT("home.successStats", { returnObjects: true });
+    return normalizeHomeSuccessStories({
+      eyebrow: fixedT("home.successStories"),
+      title: fixedT("home.realResults"),
+      stats: Array.isArray(stats) ? (stats as HomeSuccessStoriesContent["stats"]) : [],
+    });
+  };
+
+  const homeSuccessDefaults: LocalizedContent<HomeSuccessStoriesContent> = {
+    translations: {
+      en: buildHomeSuccessDefaults("en"),
+      ar: buildHomeSuccessDefaults("ar"),
+      de: buildHomeSuccessDefaults("de"),
+      ru: buildHomeSuccessDefaults("ru"),
+    },
+  };
+
   // Ensure siteSettings section exists (if not in DB, show with defaults)
-  const sections = data.some((s) => s.key === "siteSettings")
+  const sectionsWithSettings = data.some((s) => s.key === "siteSettings")
     ? data
     : [...data, { _id: "siteSettings-default", key: "siteSettings", content: normalizeSiteSettings() }];
+
+  const sections = sectionsWithSettings.some((s) => s.key === "homeSuccessStories")
+    ? sectionsWithSettings
+    : [...sectionsWithSettings, { _id: "homeSuccessStories-default", key: "homeSuccessStories", content: homeSuccessDefaults }];
 
   return (
     <div className="space-y-6">
@@ -999,6 +1236,18 @@ const AdminCMS = () => {
               <ContactSectionEditor
                 key={section._id}
                 section={section as CMSSection<ContactContent>}
+                onSave={handleSave}
+                saving={savingKey === section.key}
+                language={activeLanguage}
+              />
+            );
+          }
+
+          if (section.key === "homeSuccessStories") {
+            return (
+              <HomeSuccessStoriesEditor
+                key={section._id}
+                section={section as CMSSection<HomeSuccessStoriesContent>}
                 onSave={handleSave}
                 saving={savingKey === section.key}
                 language={activeLanguage}

@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import useAuth from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import type { AxiosError } from "axios";
@@ -46,6 +48,7 @@ export const AuthCard = ({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const formMotion = useMemo(() => ({
     initial: { opacity: 0, y: 16 },
@@ -109,6 +112,10 @@ export const AuthCard = ({
 
         if (formState.password !== formState.confirmPassword) {
           newErrors.confirmPassword = t("auth.validation.passwordMismatch");
+        }
+
+        if (!agreedToTerms) {
+          newErrors.terms = t("auth.validation.termsRequired");
         }
 
         if (Object.keys(newErrors).length) {
@@ -304,6 +311,28 @@ export const AuthCard = ({
               </button>
             </div>
             {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword}</p>}
+          </div>
+        )}
+
+        {mode === "register" && (
+          <div className="space-y-2">
+            <div className="flex items-start gap-2">
+              <Checkbox
+                id="agreeTerms"
+                checked={agreedToTerms}
+                onCheckedChange={(checked) => {
+                  setAgreedToTerms(Boolean(checked));
+                  setErrors((prev) => ({ ...prev, terms: "" }));
+                }}
+              />
+              <Label htmlFor="agreeTerms" className="text-sm text-muted-foreground leading-relaxed">
+                {t("auth.terms.label")} {" "}
+                <Link to="/terms" className="text-primary underline font-medium">
+                  {t("auth.terms.link")}
+                </Link>
+              </Label>
+            </div>
+            {errors.terms && <p className="text-xs text-destructive">{errors.terms}</p>}
           </div>
         )}
 

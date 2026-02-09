@@ -47,7 +47,11 @@ const About = () => {
     heroImage: FALLBACK_IMAGE,
     heroTitle: t("about.heroTitle"),
     heroSubtitle: t("about.heroSubtitle"),
+    impactEyebrow: t("about.impact.eyebrow"),
+    impactTitle: t("about.impact.title"),
+    impactDescription: t("about.impact.description"),
     storyParagraphs: t("about.storyParagraphs", { returnObjects: true }) as string[],
+    impactItems: t("about.impact.items", { returnObjects: true }) as string[],
     values: [
       { iconKey: "award", title: t("about.values.excellence.title"), description: t("about.values.excellence.description") },
       { iconKey: "users", title: t("about.values.expertise.title"), description: t("about.values.expertise.description") },
@@ -63,7 +67,10 @@ const About = () => {
   const storyParagraphs = toStringArray(content.storyParagraphs, fallbackAbout.storyParagraphs);
   const values = Array.isArray(content.values) && content.values.length ? content.values : fallbackAbout.values;
   const stats = toStatsArray(content.stats, fallbackAbout.stats);
-  const impactItems = toStringArray(t("about.impact.items", { returnObjects: true }));
+  const impactItems = toStringArray(content.impactItems, fallbackAbout.impactItems);
+  const impactEyebrow = content.impactEyebrow || t("about.impact.eyebrow");
+  const impactTitle = content.impactTitle || t("about.impact.title");
+  const impactDescription = content.impactDescription || t("about.impact.description");
 
   return (
     <div ref={mainRef} className="min-h-screen">
@@ -218,10 +225,10 @@ const About = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
             <div className="order-2 lg:order-1">
-              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("about.impact.eyebrow")}</span>
-              <h2 className="text-4xl font-display font-bold text-primary mb-6">{t("about.impact.title")}</h2>
+              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{impactEyebrow}</span>
+              <h2 className="text-4xl font-display font-bold text-primary mb-6">{impactTitle}</h2>
               <p className="text-lg text-muted-foreground font-light leading-relaxed mb-6">
-                {t("about.impact.description")}
+                {impactDescription}
               </p>
               <ul className="space-y-4 mt-8">
                 {impactItems.map((item, i) => (

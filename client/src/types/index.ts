@@ -129,8 +129,18 @@ export interface AboutContent {
   heroTitle: string;
   heroSubtitle: string;
   storyParagraphs: string[];
+  impactItems: string[];
+  impactEyebrow?: string;
+  impactTitle?: string;
+  impactDescription?: string;
   values: { iconKey: string; title: string; description: string }[];
   stats: { label: string; value: string }[];
+}
+
+export interface HomeSuccessStoriesContent {
+  eyebrow: string;
+  title: string;
+  stats: { value: string; label: string; desc: string }[];
 }
 
 export interface ContactContent {
@@ -139,6 +149,7 @@ export interface ContactContent {
   phone: string;
   email: string;
   office: string;
+  officeHelper?: string;
   officeHours: string[];
 }
 
@@ -183,7 +194,7 @@ export interface ContactMessage {
 export interface WishlistItem {
   _id: string;
   user: string;
-  property: Property;
+  property: Property | null;
   note?: string;
   createdAt: string;
 }

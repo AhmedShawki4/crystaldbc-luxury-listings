@@ -96,21 +96,34 @@ const MyInvestments = () => {
 
   const portfolioTrend = useMemo(() => {
     if (!investments.length) return [];
-    const sorted = [...investments].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    const labels = Array.from(
-      new Set(sorted.map((inv) => inv.investmentBox?.name || inv.property?.title || unknownPropertyLabel))
-    );
-    let runningTotals: Record<string, number> = {};
-    labels.forEach((label) => (runningTotals[label] = 0));
 
-    return sorted.map((inv) => {
-      const seriesKey = inv.investmentBox?.name || inv.property?.title || unknownPropertyLabel;
-      runningTotals[seriesKey] = (runningTotals[seriesKey] || 0) + inv.investmentAmount;
-      const dateLabel = new Date(inv.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric" });
-      return {
-        month: dateLabel,
-        ...runningTotals,
+    const months = 12;
+    const now = new Date();
+
+    return Array.from({ length: months + 1 }, (_, i) => {
+      const date = new Date(now);
+      date.setMonth(now.getMonth() + i);
+
+      const point: any = {
+        month: date.toLocaleDateString("en-US", { month: "short", year: "2-digit" }),
       };
+
+      investments.forEach((inv) => {
+        const seriesKey = inv.investmentBox?.name || inv.property?.title || unknownPropertyLabel;
+        const principal = inv.investmentAmount;
+        // Annual profit calculation
+        const annualProfit = inv.expectedProfit || principal * (inv.roiPercentage / 100);
+        // Monthly growth (linear projection)
+        const currentVal = principal + (annualProfit / 12) * i;
+
+        // Initialize or accumulate value for this asset class
+        point[seriesKey] = (point[seriesKey] || 0) + currentVal;
+
+        // Accumulate total
+        point.total = (point.total || 0) + currentVal;
+      });
+
+      return point;
     });
   }, [investments, unknownPropertyLabel]);
 
@@ -167,10 +180,10 @@ const MyInvestments = () => {
         additionalAmount: Number(increaseAmount),
         note: increaseNote.trim() || undefined,
       });
-      toast({ title: "Increase request sent", description: "An admin will review your request shortly." });
+      toast({ title: t("myInvestments.boxes.toasts.requestSubmittedTitle") });
       setIsIncreaseDialogOpen(false);
     } catch (error) {
-      toast({ title: "Unable to send request", variant: "destructive" });
+      toast({ title: t("myInvestments.boxes.toasts.unableToSubmitTitle"), variant: "destructive" });
     } finally {
       setSubmittingIncrease(false);
     }
@@ -201,9 +214,9 @@ const MyInvestments = () => {
       <div className="relative overflow-hidden py-20 pb-32">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-[#020617]/90 z-10" />
-          <LazyImage 
-            src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=2000" 
-            className="w-full h-full" 
+          <LazyImage
+            src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=2000"
+            className="w-full h-full"
             alt="Background"
             priority={true}
           />
@@ -223,17 +236,55 @@ const MyInvestments = () => {
           {/* HERO STATS */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { label: t("myInvestments.stats.totalInvested"), value: formatCurrency(totals.totalInvested), icon: Wallet, color: "text-blue-400" },
-              { label: t("myInvestments.stats.expectedProfit"), value: formatCurrency(totals.expectedProfit), icon: CircleDollarSign, color: "text-emerald-400" },
-              { label: t("myInvestments.stats.avgRoi"), value: `${totals.averageRoi.toFixed(1)}%`, icon: TrendingUp, color: "text-purple-400" },
-              { label: "Active Assets", value: investments.length, icon: Building2, color: "text-amber-400" }
+              {
+                label: t("myInvestments.stats.totalInvested"),
+                value: formatCurrency(totals.totalInvested),
+                icon: Wallet,
+                color: "text-blue-400",
+                gradient: "from-blue-500/10 to-indigo-500/5",
+                borderHover: "group-hover:border-blue-500/30",
+                bgIcon: "bg-blue-500/10"
+              },
+              {
+                label: t("myInvestments.stats.expectedProfit"),
+                value: formatCurrency(totals.expectedProfit),
+                icon: CircleDollarSign,
+                color: "text-emerald-400",
+                gradient: "from-emerald-500/10 to-teal-500/5",
+                borderHover: "group-hover:border-emerald-500/30",
+                bgIcon: "bg-emerald-500/10"
+              },
+              {
+                label: t("myInvestments.stats.avgRoi"),
+                value: `${totals.averageRoi.toFixed(1)}%`,
+                icon: TrendingUp,
+                color: "text-violet-400",
+                gradient: "from-violet-500/10 to-fuchsia-500/5",
+                borderHover: "group-hover:border-violet-500/30",
+                bgIcon: "bg-violet-500/10"
+              },
+              {
+                label: t("myInvestments.activeAssets"),
+                value: investments.length,
+                icon: Building2,
+                color: "text-amber-400",
+                gradient: "from-amber-500/10 to-orange-500/5",
+                borderHover: "group-hover:border-amber-500/30",
+                bgIcon: "bg-amber-500/10"
+              }
             ].map((stat, i) => (
-              <div key={i} className="group relative overflow-hidden rounded-2xl bg-white/5 border border-white/10 p-5 transition-all hover:bg-white/10 hover:-translate-y-1">
-                <div className={`absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity ${stat.color}`}>
-                  <stat.icon className="w-12 h-12" />
+              <div key={i} className={`group relative overflow-hidden rounded-2xl border border-white/10 p-6 transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br ${stat.gradient} ${stat.borderHover}`}>
+                <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity duration-500`}>
+                  <stat.icon className={`w-24 h-24 ${stat.color} -mr-6 -mt-6 rotate-12`} />
                 </div>
-                <p className="text-sm font-medium text-slate-400">{stat.label}</p>
-                <p className="mt-2 text-2xl font-bold tracking-tight text-white">{stat.value}</p>
+
+                <div className="relative z-10">
+                  <div className={`w-12 h-12 rounded-xl ${stat.bgIcon} flex items-center justify-center mb-4 border border-white/5`}>
+                    <stat.icon className={`w-6 h-6 ${stat.color}`} />
+                  </div>
+                  <p className="text-sm font-medium text-slate-400 uppercase tracking-wide">{stat.label}</p>
+                  <p className="mt-2 text-3xl font-display font-bold tracking-tight text-white group-hover:scale-105 origin-left transition-transform">{stat.value}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -253,7 +304,7 @@ const MyInvestments = () => {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h3 className="text-xl font-display font-semibold text-white">{t("myInvestments.portfolioValueTrend")}</h3>
-                  <p className="text-sm text-slate-400">Growth over time</p>
+                  <p className="text-sm text-slate-400">{t("myInvestments.growthOverTime")}</p>
                 </div>
                 <div className="p-2 rounded-xl bg-white/5 border border-white/10">
                   <BarChart3 className="w-5 h-5 text-luxury-gold" />
@@ -264,45 +315,65 @@ const MyInvestments = () => {
                   <div className="h-full flex items-center justify-center text-white/30 italic">No investment data yet</div>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={portfolioTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <AreaChart data={portfolioTrend} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#facc15" stopOpacity={0.8} />
-                          <stop offset="50%" stopColor="#eab308" stopOpacity={0.4} />
-                          <stop offset="100%" stopColor="#ca8a04" stopOpacity={0.1} />
+                          <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#D4AF37" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0%" stopColor="#facc15" />
+                          <stop offset="0%" stopColor="#FCD34D" />
+                          <stop offset="50%" stopColor="#D4AF37" />
                           <stop offset="100%" stopColor="#fbbf24" />
                         </linearGradient>
+                        <filter id="glow" height="300%" width="300%" x="-100%" y="-100%">
+                          <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+                          <feMerge>
+                            <feMergeNode in="coloredBlur" />
+                            <feMergeNode in="SourceGraphic" />
+                          </feMerge>
+                        </filter>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+                      <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.03)" vertical={false} />
                       <XAxis
                         dataKey="month"
-                        stroke="rgba(255,255,255,0.15)"
-                        tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
+                        stroke="rgba(212, 175, 55, 0.2)"
+                        tick={{ fill: "#94a3b8", fontSize: 10, fontWeight: 500, fontFamily: "var(--font-sans)" }}
                         axisLine={false}
                         tickLine={false}
-                        dy={8}
+                        dy={10}
+                        tickMargin={4}
                       />
-                      <YAxis stroke="rgba(255,255,255,0.15)" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }} axisLine={false} tickLine={false} dx={-8} />
+                      <YAxis
+                        stroke="rgba(212, 175, 55, 0.2)"
+                        tick={{ fill: "#94a3b8", fontSize: 10, fontWeight: 500, fontFamily: "var(--font-sans)" }}
+                        axisLine={false}
+                        tickLine={false}
+                        dx={-8}
+                        tickFormatter={(value) => `${value / 1000}k`}
+                      />
                       <Tooltip
-                        contentStyle={{ background: "rgba(11, 18, 36, 0.95)", borderColor: "rgba(250, 204, 21, 0.3)", borderRadius: "12px", backdropFilter: "blur(8px)" }}
-                        labelStyle={{ color: "#facc15", fontWeight: "bold", marginBottom: "8px" }}
+                        contentStyle={{
+                          background: "var(--background-start-rgb, #020617)",
+                          borderColor: "rgba(212, 175, 55, 0.2)",
+                          borderRadius: "16px",
+                          backdropFilter: "blur(12px)",
+                          boxShadow: "0 10px 40px -10px rgba(0,0,0,0.5)"
+                        }}
+                        labelStyle={{ color: "#D4AF37", fontWeight: "bold", marginBottom: "8px", fontFamily: "var(--font-display)" }}
                         itemStyle={{ color: "#fff", fontSize: "13px" }}
+                        cursor={{ stroke: "rgba(255,255,255,0.1)", strokeWidth: 1, strokeDasharray: "4 4" }}
+                        formatter={(value: number) => [formatCurrency(value), "Total Value"]}
                       />
-                      {Object.keys(portfolioTrend[0] || {}).filter(k => k !== 'month').map((propName, index) => (
-                        <Area
-                          key={propName}
-                          type="monotone"
-                          dataKey={propName}
-                          stackId="1"
-                          stroke="url(#lineGradient)"
-                          strokeWidth={2.5}
-                          fill="url(#areaGradient)"
-                          activeDot={{ r: 5, strokeWidth: 2, stroke: "#facc15", fill: "#0b1224" }}
-                        />
-                      ))}
+                      <Area
+                        type="monotone"
+                        dataKey="total"
+                        stroke="url(#lineGradient)"
+                        strokeWidth={3}
+                        fill="url(#areaGradient)"
+                        filter="url(#glow)"
+                        activeDot={{ r: 6, strokeWidth: 0, fill: "#fff", stroke: "#D4AF37" }}
+                      />
                     </AreaChart>
                   </ResponsiveContainer>
                 )}
@@ -315,7 +386,7 @@ const MyInvestments = () => {
             <div className="absolute -inset-1 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-3xl blur opacity-20 group-hover:opacity-30 transition duration-500" />
             <div className="relative z-10 flex flex-col h-full">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-display font-semibold text-white">Asset Allocation</h3>
+                <h3 className="text-xl font-display font-semibold text-white">{t("myInvestments.assetAllocation")}</h3>
                 <div className="p-2 rounded-xl bg-white/5 border border-white/10">
                   <PieChartIcon className="w-5 h-5 text-indigo-400" />
                 </div>
@@ -344,19 +415,19 @@ const MyInvestments = () => {
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="text-center">
-                    <p className="text-xs text-white/40 uppercase tracking-widest">Total</p>
-                    <p className="text-lg font-bold text-white">{investments.length} Assets</p>
+                    <p className="text-xs text-white/40 uppercase tracking-widest">{t("myInvestments.total")}</p>
+                    <p className="text-lg font-bold text-white">{investments.length} {t("myInvestments.assets")}</p>
                   </div>
                 </div>
               </div>
               <div className="mt-4 space-y-2">
                 {compositionData.slice(0, 3).map((item, i) => (
-                  <div key={i} className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
-                      <span className="text-slate-300 truncate max-w-[150px]">{item.name}</span>
+                  <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group/item">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.5)]" style={{ backgroundColor: item.color, boxShadow: `0 0 10px ${item.color}40` }} />
+                      <span className="text-slate-300 text-sm font-medium truncate max-w-[120px] group-hover/item:text-white transition-colors">{item.name}</span>
                     </div>
-                    <span className="text-white font-medium">{Math.round((item.value / totals.totalInvested) * 100)}%</span>
+                    <span className="text-white font-bold font-mono">{Math.round((item.value / totals.totalInvested) * 100)}%</span>
                   </div>
                 ))}
               </div>
@@ -372,60 +443,70 @@ const MyInvestments = () => {
             <div className="relative z-10 h-full flex flex-col">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-xl font-display font-semibold text-white">ROI Performance</h3>
-                  <p className="text-sm text-slate-400">Per investment asset</p>
+                  <h3 className="text-xl font-display font-semibold text-white">{t("myInvestments.roiPerformance")}</h3>
+                  <p className="text-sm text-slate-400">{t("myInvestments.perInvestmentAsset")}</p>
                 </div>
                 <div className="p-2 rounded-xl bg-white/5 border border-white/10">
                   <TrendingUp className="w-5 h-5 text-emerald-400" />
                 </div>
               </div>
-              <div className="flex-1 w-full min-h-[250px]">
+              <div className="flex-1 w-full min-h-[350px]">
                 {investments.length === 0 ? (
                   <div className="h-full flex items-center justify-center text-white/30 italic">No data available</div>
                 ) : (
                   <>
-                    {investments.slice(0, 5).map((inv, idx) => {
-                      const assetName = inv.investmentBox?.name || inv.property?.title || "Unknown Asset";
-                      const roi = inv.roiPercentage;
-                      const isPositive = roi >= 0;
+                    <div className="space-y-4">
+                      {investments.slice(0, 5).map((inv, idx) => {
+                        const assetName = inv.investmentBox?.name || inv.property?.title || "Unknown Asset";
+                        const roi = inv.roiPercentage;
+                        const isPositive = roi >= 0;
+                        const rankColor = idx === 0 ? "text-yellow-400 bg-yellow-400/10 border-yellow-400/20" :
+                          idx === 1 ? "text-slate-300 bg-slate-400/10 border-slate-400/20" :
+                            idx === 2 ? "text-amber-700 bg-amber-700/10 border-amber-700/20" :
+                              "text-slate-500 bg-slate-800/50 border-white/5";
 
-                      return (
-                        <div key={idx} className="mb-3 group/item relative rounded-2xl bg-white/5 border border-white/5 p-4 hover:bg-white/10 hover:border-emerald-500/30 transition-all duration-300">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <h4 className="text-sm font-semibold text-white group-hover/item:text-emerald-400 transition-colors truncate max-w-[200px]">
-                                {assetName}
-                              </h4>
-                              <p className="text-xs text-slate-500 mt-0.5">
-                                Invested: {formatCurrency(inv.investmentAmount)}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <div className="text-right">
-                                <div className={`text-2xl font-bold ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
-                                  {roi.toFixed(1)}%
+                        return (
+                          <div key={idx} className="group/item relative rounded-xl bg-gradient-to-r from-white/5 to-transparent border border-white/5 p-4 hover:bg-white/10 hover:border-white/10 transition-all duration-300">
+                            <div className="flex items-center gap-4">
+                              <div className={`flex items-center justify-center w-8 h-8 rounded-lg border text-sm font-bold ${rankColor}`}>
+                                {idx + 1}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-sm font-semibold text-white group-hover/item:text-luxury-gold transition-colors truncate">
+                                  {assetName}
+                                </h4>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <p className="text-xs text-slate-500">
+                                    Invested: <span className="text-slate-300">{formatCurrency(inv.investmentAmount)}</span>
+                                  </p>
                                 </div>
-                                <div className="text-xs text-slate-400">
+                              </div>
+                              <div className="text-right">
+                                <div className={`text-lg font-bold font-mono ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  {isPositive ? '+' : ''}{roi.toFixed(1)}%
+                                </div>
+                                <div className="text-xs text-slate-400 mt-0.5">
                                   {formatCurrency(inv.expectedProfit || inv.investmentAmount * (roi / 100))}
                                 </div>
                               </div>
-                              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isPositive ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
-                                <TrendingUp className={`w-5 h-5 ${isPositive ? 'text-emerald-400' : 'text-red-400 rotate-180'}`} />
+                            </div>
+                            <div className="mt-3 h-1.5 w-full bg-white/5 rounded-full overflow-hidden relative">
+                              <div
+                                className={`h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden ${isPositive ? 'bg-emerald-500' : 'bg-red-500'}`}
+                                style={{ width: `${Math.min(Math.abs(roi), 100)}%`, boxShadow: `0 0 10px ${isPositive ? '#10b981' : '#ef4444'}80` }}
+                              >
+                                <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]" />
                               </div>
                             </div>
                           </div>
-                          <div className="mt-3 h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full transition-all duration-500 ${isPositive ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-gradient-to-r from-red-500 to-orange-400'}`}
-                              style={{ width: `${Math.min(Math.abs(roi), 100)}%` }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                     {investments.length > 5 && (
-                      <div className="text-center pt-2">
-                        <span className="text-xs text-slate-500">Showing top 5 of {investments.length} investments</span>
+                      <div className="text-center pt-4">
+                        <Button variant="ghost" className="text-xs text-luxury-gold hover:text-white hover:bg-white/5">
+                          View All Investments
+                        </Button>
                       </div>
                     )}
                   </>
@@ -440,8 +521,8 @@ const MyInvestments = () => {
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-xl font-display font-semibold text-white">Performance Metrics</h3>
-                  <p className="text-sm text-slate-400">Key investment indicators</p>
+                  <h3 className="text-xl font-display font-semibold text-white">{t("myInvestments.performanceMetrics")}</h3>
+                  <p className="text-sm text-slate-400">{t("myInvestments.keyInvestmentIndicators")}</p>
                 </div>
                 <div className="p-2 rounded-xl bg-white/5 border border-white/10">
                   <CalendarCheck className="w-5 h-5 text-indigo-400" />
@@ -449,33 +530,52 @@ const MyInvestments = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                  <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Avg. ROI</p>
-                  <p className="text-2xl font-bold text-emerald-400">{totals.averageRoi.toFixed(1)}%</p>
-                  <div className="mt-2 flex items-center gap-1 text-xs text-emerald-300">
-                    <ArrowUpRight className="w-3 h-3" />
-                    <span>Above market</span>
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-transparent border border-emerald-500/20 group hover:border-emerald-500/40 transition-colors">
+                  <div className="flex justify-between items-start mb-2">
+                    <p className="text-xs text-emerald-200/70 uppercase tracking-wider font-semibold">{t("myInvestments.avgRoiLabel")}</p>
+                    <TrendingUp className="w-4 h-4 text-emerald-400 opacity-70 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  <p className="text-3xl font-display font-bold text-white group-hover:text-emerald-300 transition-colors">{totals.averageRoi.toFixed(1)}%</p>
+                  <div className="mt-2 flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+                    <span className="flex items-center justify-center w-4 h-4 rounded-full bg-emerald-400/20 text-emerald-300">
+                      <ArrowUpRight className="w-2.5 h-2.5" />
+                    </span>
+                    <span>{t("myInvestments.aboveMarket")}</span>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                  <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Total Payout</p>
-                  <p className="text-2xl font-bold text-white">{formatCurrency(totals.amountReceived)}</p>
-                  <div className="mt-2 h-1 w-full bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-luxury-gold rounded-full" style={{ width: `${Math.min((totals.amountReceived / totals.expectedProfit) * 100, 100)}%` }} />
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/20 group hover:border-blue-500/40 transition-colors">
+                  <div className="flex justify-between items-start mb-2">
+                    <p className="text-xs text-blue-200/70 uppercase tracking-wider font-semibold">{t("myInvestments.totalPayout")}</p>
+                    <Wallet className="w-4 h-4 text-blue-400 opacity-70 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  <p className="text-2xl font-display font-bold text-white mb-3">{formatCurrency(totals.amountReceived)}</p>
+                  <div className="relative h-1.5 w-full bg-blue-950/50 rounded-full overflow-hidden">
+                    <div
+                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full"
+                      style={{ width: `${Math.min((totals.amountReceived / totals.expectedProfit) * 100, 100)}%` }}
+                    />
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                  <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Pending</p>
-                  <p className="text-2xl font-bold text-amber-400">{formatCurrency(totals.expectedProfit - totals.amountReceived)}</p>
-                  <p className="text-xs text-slate-500 mt-1">Expected returns</p>
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20 group hover:border-amber-500/40 transition-colors">
+                  <div className="flex justify-between items-start mb-2">
+                    <p className="text-xs text-amber-200/70 uppercase tracking-wider font-semibold">{t("myInvestments.pending")}</p>
+                    <CircleDollarSign className="w-4 h-4 text-amber-400 opacity-70 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  <p className="text-2xl font-display font-bold text-amber-200 group-hover:text-amber-100 transition-colors">{formatCurrency(totals.expectedProfit - totals.amountReceived)}</p>
+                  <p className="text-xs text-amber-500/70 mt-1 font-medium">{t("myInvestments.expectedReturns")}</p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                  <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Diversification</p>
-                  <p className="text-2xl font-bold text-indigo-400">{compositionData.length}</p>
-                  <p className="text-xs text-slate-500 mt-1">Investment types</p>
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-transparent border border-indigo-500/20 group hover:border-indigo-500/40 transition-colors">
+                  <div className="flex justify-between items-start mb-2">
+                    <p className="text-xs text-indigo-200/70 uppercase tracking-wider font-semibold">{t("myInvestments.diversification")}</p>
+                    <PieChartIcon className="w-4 h-4 text-indigo-400 opacity-70 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-3xl font-display font-bold text-white group-hover:text-indigo-300 transition-colors">{compositionData.length}</p>
+                    <span className="text-sm text-indigo-300/60 font-medium">{t("myInvestments.investmentTypes")}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -485,8 +585,8 @@ const MyInvestments = () => {
         {/* AVAILABLE OPPORTUNITIES (3D Cards) */}
         <div className="mb-8 flex items-end justify-between">
           <div>
-            <h2 className="text-3xl font-display font-bold text-white leading-tight">Investment Opportunities</h2>
-            <p className="text-slate-400 mt-1">Curated high-yield real estate assets</p>
+            <h2 className="text-3xl font-display font-bold text-white leading-tight">{t("myInvestments.investmentOpportunities")}</h2>
+            <p className="text-slate-400 mt-1">{t("myInvestments.curatedHighYield")}</p>
           </div>
         </div>
 
@@ -519,7 +619,7 @@ const MyInvestments = () => {
                       {alreadyInvested && (
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400 border border-emerald-500/20">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                          Invested
+                          {t("myInvestments.invested")}
                         </span>
                       )}
                     </div>
@@ -529,11 +629,11 @@ const MyInvestments = () => {
 
                     <div className="grid grid-cols-2 gap-4 mb-8">
                       <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                        <p className="text-xs text-slate-400 mb-1">Target ROI</p>
+                        <p className="text-xs text-slate-400 mb-1">{t("myInvestments.targetRoi")}</p>
                         <p className="text-xl font-bold text-emerald-400">{box.roiPercentage}%</p>
                       </div>
                       <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                        <p className="text-xs text-slate-400 mb-1">Min Entry</p>
+                        <p className="text-xs text-slate-400 mb-1">{t("myInvestments.minEntry")}</p>
                         <p className="text-xl font-bold text-white">{Math.round(box.minInvestmentAmount / 1000)}k <span className="text-xs font-normal text-slate-500">EGP</span></p>
                       </div>
                     </div>
@@ -548,8 +648,8 @@ const MyInvestments = () => {
                         disabled={alreadyInvested && increasePending}
                       >
                         {alreadyInvested
-                          ? (increasePending ? "Increase Pending" : "Increase Stake")
-                          : "Start Investing"}
+                          ? (increasePending ? t("myInvestments.increasePending") : t("myInvestments.increaseStake"))
+                          : t("myInvestments.startInvesting")}
                       </Button>
                     </div>
                   </div>
@@ -565,12 +665,12 @@ const MyInvestments = () => {
       <Dialog open={isInvestDialogOpen} onOpenChange={setIsInvestDialogOpen}>
         <DialogContent className="max-w-lg bg-[#0b1224] border-white/10 text-white">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-display text-white">Invest in {selectedBox?.name}</DialogTitle>
-            <DialogDescription className="text-slate-400">Add funds to this high-yield portfolio.</DialogDescription>
+            <DialogTitle className="text-2xl font-display text-white">{t("myInvestments.investDialog.title", { name: selectedBox?.name })}</DialogTitle>
+            <DialogDescription className="text-slate-400">{t("myInvestments.investDialog.description")}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleInvestSubmit} className="space-y-6 mt-4">
             <div className="space-y-4">
-              <label className="text-sm font-medium text-slate-300">Investment Amount (EGP)</label>
+              <label className="text-sm font-medium text-slate-300">{t("myInvestments.investDialog.amountLabel")}</label>
 
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center">
                 <span className="text-4xl font-bold text-white tracking-tight">{formatCurrency(investmentAmount)}</span>
@@ -586,7 +686,7 @@ const MyInvestments = () => {
                 className="py-4"
               />
               <div className="flex justify-between items-center text-xs text-slate-500">
-                <span>Min: {formatCurrency(selectedBox?.minInvestmentAmount || 0)}</span>
+                <span>{t("myInvestments.investDialog.min")}: {formatCurrency(selectedBox?.minInvestmentAmount || 0)}</span>
                 <Input
                   type="number"
                   className="w-32 h-8 text-center bg-white/5 border-white/10 text-white text-xs"
@@ -597,23 +697,23 @@ const MyInvestments = () => {
                   onChange={(e) => setInvestmentAmount(Number(e.target.value))}
                   placeholder="Type amount"
                 />
-                <span>Max: 20M+</span>
+                <span>{t("myInvestments.investDialog.max")}: 20M+</span>
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300">Notes (Optional)</label>
+              <label className="text-sm font-medium text-slate-300">{t("myInvestments.investDialog.notesLabel")}</label>
               <Textarea
                 className="bg-white/5 border-white/10 text-white placeholder:text-white/20 resize-none"
                 value={investmentNotes}
                 onChange={(e) => setInvestmentNotes(e.target.value)}
-                placeholder="Any special requirements..."
+                placeholder={t("myInvestments.investDialog.notesPlaceholder")}
               />
             </div>
             <div className="flex justify-end gap-3 pt-2">
-              <Button type="button" variant="ghost" className="text-slate-400 hover:text-white hover:bg-white/5" onClick={() => setIsInvestDialogOpen(false)}>Cancel</Button>
+              <Button type="button" variant="ghost" className="text-slate-400 hover:text-white hover:bg-white/5" onClick={() => setIsInvestDialogOpen(false)}>{t("myInvestments.investDialog.cancel")}</Button>
               <Button type="submit" className="bg-luxury-gold text-luxury-dark hover:bg-luxury-gold/90 font-bold" disabled={submittingInvestment}>
-                {submittingInvestment ? "Processing..." : "Confirm Investment"}
+                {submittingInvestment ? t("myInvestments.investDialog.processing") : t("myInvestments.investDialog.confirm")}
               </Button>
             </div>
           </form>
@@ -623,12 +723,12 @@ const MyInvestments = () => {
       <Dialog open={isIncreaseDialogOpen} onOpenChange={setIsIncreaseDialogOpen}>
         <DialogContent className="max-w-lg bg-[#0b1224] border-white/10 text-white">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-display text-white">Increase Stake: {increaseBox?.name}</DialogTitle>
-            <DialogDescription className="text-slate-400">Compound your returns by adding more capital.</DialogDescription>
+            <DialogTitle className="text-2xl font-display text-white">{t("myInvestments.increaseDialog.title", { name: increaseBox?.name })}</DialogTitle>
+            <DialogDescription className="text-slate-400">{t("myInvestments.increaseDialog.description")}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleIncreaseSubmit} className="space-y-6 mt-4">
             <div className="space-y-4">
-              <label className="text-sm font-medium text-slate-300">Additional Amount (EGP)</label>
+              <label className="text-sm font-medium text-slate-300">{t("myInvestments.increaseDialog.amountLabel")}</label>
 
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center">
                 <span className="text-4xl font-bold text-white tracking-tight">{formatCurrency(increaseAmount)}</span>
@@ -660,18 +760,18 @@ const MyInvestments = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300">Note</label>
+              <label className="text-sm font-medium text-slate-300">{t("myInvestments.increaseDialog.noteLabel")}</label>
               <Textarea
                 className="bg-white/5 border-white/10 text-white placeholder:text-white/20 resize-none"
                 value={increaseNote}
                 onChange={(e) => setIncreaseNote(e.target.value)}
-                placeholder="Reason for increase..."
+                placeholder={t("myInvestments.increaseDialog.notePlaceholder")}
               />
             </div>
             <div className="flex justify-end gap-3 pt-2">
-              <Button type="button" variant="ghost" className="text-slate-400 hover:text-white hover:bg-white/5" onClick={() => setIsIncreaseDialogOpen(false)}>Cancel</Button>
+              <Button type="button" variant="ghost" className="text-slate-400 hover:text-white hover:bg-white/5" onClick={() => setIsIncreaseDialogOpen(false)}>{t("myInvestments.investDialog.cancel")}</Button>
               <Button type="submit" className="bg-luxury-gold text-luxury-dark hover:bg-luxury-gold/90 font-bold" disabled={submittingIncrease}>
-                {submittingIncrease ? "Processing..." : "Send Request"}
+                {submittingIncrease ? t("myInvestments.increaseDialog.processing") : t("myInvestments.increaseDialog.send")}
               </Button>
             </div>
           </form>

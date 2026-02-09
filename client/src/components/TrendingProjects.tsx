@@ -167,23 +167,20 @@ const TrendingProjects = () => {
                                 Request Info
                               </Link>
                             </Button>
-                            <Button
-                              type="button"
-                              size="lg"
-                              variant="ghost"
-                              className="border border-white/20 bg-white/5 text-white hover:bg-white/15 flex-1 sm:flex-none"
-                              onClick={() => addToWishlist(project.property?._id)}
-                              disabled={
-                                !project.property?._id ||
-                                (isAdding && activeId === project.property?._id)
-                              }
-                            >
-                              {isAdding && activeId === project.property?._id
-                                ? "Saving..."
-                                : project.property?._id
-                                  ? "Save to Wishlist"
-                                  : "Link property to enable"}
-                            </Button>
+                            {project.property?._id && (
+                              <Button
+                                type="button"
+                                size="lg"
+                                variant="ghost"
+                                className="border border-white/20 bg-white/5 text-white hover:bg-white/15 flex-1 sm:flex-none"
+                                onClick={() => addToWishlist(project.property?._id)}
+                                disabled={isAdding && activeId === project.property?._id}
+                              >
+                                {isAdding && activeId === project.property?._id
+                                  ? "Saving..."
+                                  : "Save to Wishlist"}
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </div>

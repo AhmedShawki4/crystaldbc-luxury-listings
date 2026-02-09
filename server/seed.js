@@ -220,12 +220,13 @@ const seed = async () => {
           heroImage:
             "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&q=80&w=2000",
           heroTitle: "About CrystalDBC",
-          heroSubtitle: "Excellence in luxury real estate since 1995",
+          heroSubtitle: "Excellence in luxury real estate since 2002",
           storyParagraphs: [
-            "Founded in 1995, CrystalDBC has established itself as a premier luxury real estate firm, specializing in exceptional properties that define sophisticated living.",
+            "Founded in 2002, CrystalDBC has established itself as a premier luxury real estate firm, specializing in exceptional properties that define sophisticated living.",
             "With decades of combined experience, our team brings unparalleled expertise in the luxury real estate market.",
             "We pride ourselves on attention to detail, market knowledge, and dedication to delivering results that exceed expectations.",
           ],
+          impactItems: ["Egypt", "Saudi Arabia", "Germany", "United Arab Emirates", "Russia", "Iraq"],
           values: [
             { iconKey: "Award", title: "Excellence", description: "We strive for excellence in every interaction." },
             { iconKey: "Users", title: "Expertise", description: "Deep market knowledge and proven success." },
@@ -233,7 +234,7 @@ const seed = async () => {
             { iconKey: "Heart", title: "Service", description: "Personalized attention for every client." },
           ],
           stats: [
-            { label: "Years Experience", value: "28+" },
+            { label: "Years Experience", value: "24+" },
             { label: "Properties Sold", value: "2,500+" },
             { label: "Total Sales Volume", value: "$5B+" },
             { label: "Client Satisfaction", value: "98%" },

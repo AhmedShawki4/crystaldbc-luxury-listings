@@ -30,13 +30,19 @@ const Contact = () => {
     phone: "+1 (888) 555-1234",
     email: "info@crystaldbc.com",
     office: "123 Luxury Avenue, Beverly Hills, CA 90210",
+    officeHelper: t("contact.stats.officeHelper"),
     officeHours: [
       "Monday - Friday: 9:00 AM - 6:00 PM",
       "Saturday: 10:00 AM - 4:00 PM",
       "Sunday: By Appointment Only",
     ],
   });
+  const phoneDisplay = contactContent?.phone ?? "+1 (888) 555-1234";
+  const emailDisplay = contactContent?.email ?? "info@crystaldbc.com";
+  const primaryPhone = phoneDisplay.split("\n")[0]?.trim() || "+18885551234";
+  const primaryEmail = emailDisplay.split("\n")[0]?.trim() || "info@crystaldbc.com";
   const officeStat = contactContent?.office ? contactContent.office.split("\n")[0] : "Cairo & Dubai";
+  const officeHelper = contactContent?.officeHelper ?? t("contact.stats.officeHelper");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,9 +88,9 @@ const Contact = () => {
         icon={Phone}
         backgroundImage="/crystalpattern.png"
         stats={[
-          { label: t("contact.stats.phone"), value: contactContent?.phone ?? "+1 (888) 555-1234" },
-          { label: t("contact.stats.email"), value: contactContent?.email ?? "info@crystaldbc.com" },
-          { label: t("contact.stats.office"), value: officeStat, helper: t("contact.stats.officeHelper") },
+          { label: t("contact.stats.phone"), value: phoneDisplay },
+          { label: t("contact.stats.email"), value: emailDisplay },
+          { label: t("contact.stats.office"), value: officeStat, helper: officeHelper },
         ]}
         actions={(
           <>
@@ -92,14 +98,14 @@ const Contact = () => {
               asChild
               className="bg-luxury-gold text-luxury-dark hover:bg-luxury-gold/80 shadow-lg shadow-luxury-gold/20"
             >
-              <a href={`tel:${contactContent?.phone ?? "+18885551234"}`}>{t("contact.actions.call")}</a>
+              <a href={`tel:${primaryPhone}`}>{t("contact.actions.call")}</a>
             </Button>
             <Button
               asChild
               variant="outline"
               className="border-accent bg-accent/10 text-accent hover:bg-accent/20 hover:text-accent-foreground"
             >
-              <a href={`mailto:${contactContent?.email ?? "info@crystaldbc.com"}`}>{t("contact.actions.email")}</a>
+              <a href={`mailto:${primaryEmail}`}>{t("contact.actions.email")}</a>
             </Button>
           </>
         )}
@@ -127,12 +133,11 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-primary mb-1">{t("common.phone")}</h3>
-                    <a
-                      href={`tel:${contactContent?.phone ?? "+18885551234"}`}
-                      className="text-muted-foreground hover:text-accent transition-colors"
+                    <p
+                      className="text-muted-foreground whitespace-pre-line"
                     >
-                      {contactContent?.phone ?? "+1 (888) 555-1234"}
-                    </a>
+                      {phoneDisplay}
+                    </p>
                   </div>
                 </div>
 
@@ -142,12 +147,11 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-primary mb-1">{t("common.email")}</h3>
-                    <a
-                      href={`mailto:${contactContent?.email ?? "info@crystaldbc.com"}`}
-                      className="text-muted-foreground hover:text-accent transition-colors"
+                    <p
+                      className="text-muted-foreground whitespace-pre-line"
                     >
-                      {contactContent?.email ?? "info@crystaldbc.com"}
-                    </a>
+                      {emailDisplay}
+                    </p>
                   </div>
                 </div>
 

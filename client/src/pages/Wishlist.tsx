@@ -21,6 +21,9 @@ const Wishlist = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const { data, isLoading } = useQuery({ queryKey: ["wishlist"], queryFn: fetchWishlist });
+  const hasProperty = (item: WishlistItem): item is WishlistItem & { property: NonNullable<WishlistItem["property"]> } =>
+    Boolean(item.property);
+  const safeItems = (data ?? []).filter(hasProperty);
 
   const removeMutation = useMutation({
     mutationFn: (id: string) => apiClient.delete(`/wishlist/${id}`),
@@ -46,9 +49,9 @@ const Wishlist = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {isLoading ? (
           <p className="text-muted-foreground">{t("wishlist.loading")}</p>
-        ) : data && data.length > 0 ? (
+        ) : safeItems.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {data.map((item) => (
+            {safeItems.map((item) => (
               <Card key={item._id} className="flex flex-col">
                 <CardHeader className="p-0">
                   <LazyImage

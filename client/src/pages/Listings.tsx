@@ -12,7 +12,7 @@ import { useCmsSection } from "@/hooks/useCmsSection";
 import type { SiteSettingsContent } from "@/types";
 
 const Listings = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [sortBy, setSortBy] = useState("featured");
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
@@ -78,15 +78,35 @@ const Listings = () => {
 
   const { data: properties = [], isLoading } = useProperties(filters);
 
-  const locations = useMemo(
-    () => ["all", ...Array.from(new Set(properties.map((p) => p.location)))],
-    [properties]
-  );
+  const locations = useMemo(() => {
+    const normalized = properties
+      .map((property) => property.location)
+      .filter((value): value is string => typeof value === "string")
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0);
 
-  const types = useMemo(
-    () => ["all", ...Array.from(new Set(properties.map((p) => p.type)))],
-    [properties]
-  );
+    return ["all", ...Array.from(new Set(normalized))];
+  }, [properties]);
+
+  const types = useMemo(() => {
+    const normalized = properties
+      .map((property) => property.type)
+      .filter((value): value is string => typeof value === "string")
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0);
+
+    return ["all", ...Array.from(new Set(normalized))];
+  }, [properties]);
+
+  const marketList = useMemo(() => {
+    const locationsText = t("layout.locations");
+    return locationsText
+      .split("|")
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+  }, [i18n.language, t]);
+
+  const marketSummary = marketList.length > 0 ? `Across ${marketList.join(", ")}` : "Across our markets";
 
   const cityCount = Math.max(locations.length - 1, 0);
   const typeCount = Math.max(types.length - 1, 0);
@@ -147,7 +167,7 @@ const Listings = () => {
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10">
                 <p className="text-3xl font-display font-bold text-white">{cityCount}</p>
                 <p className="text-sm uppercase tracking-[0.2em] text-white/60">Cities</p>
-                <p className="text-xs text-white/60 mt-1">Across Egypt</p>
+                <p className="text-xs text-white/60 mt-1">{marketSummary}</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10">
                 <p className="text-3xl font-display font-bold text-white">{typeCount}</p>

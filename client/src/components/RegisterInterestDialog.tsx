@@ -51,6 +51,7 @@ const RegisterInterestDialog = ({
   // Show popup only for guests (not logged in)
   const isGuest = !user;
   const hideOnAuth = location.pathname.startsWith("/auth");
+  const hideOnLegal = location.pathname.startsWith("/terms");
 
   const promptStorageKey = useMemo(() => `crystaldbc:lastInterestPrompt:guest`, []);
 
@@ -130,7 +131,7 @@ const RegisterInterestDialog = ({
     }));
   };
 
-  if (!isGuest || hideOnAuth) {
+  if (!isGuest || hideOnAuth || hideOnLegal) {
     return null;
   }
 

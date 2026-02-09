@@ -13,6 +13,7 @@ import Listings from "./pages/Listings";
 import PropertyDetail from "./pages/PropertyDetail";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import TermsAndConditions from "./pages/TermsAndConditions";
 import Investment from "./pages/Investment";
 import MyInvestments from "./pages/MyInvestments";
 import NotFound from "./pages/NotFound";
@@ -72,6 +73,7 @@ const App = () => {
               <Route path="property/:propertyId" element={<PropertyDetail />} />
               <Route path="about" element={<About />} />
               <Route path="contact" element={<Contact />} />
+              <Route path="terms" element={<TermsAndConditions />} />
               <Route path="investment" element={<InvestmentGate />} />
               <Route
                 path="my-investments"

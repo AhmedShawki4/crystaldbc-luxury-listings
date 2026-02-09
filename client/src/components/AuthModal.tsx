@@ -1,4 +1,6 @@
 
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { AuthCard } from "@/pages/Auth";
 
@@ -17,6 +19,14 @@ const AuthModal = ({
     onSwitchMode,
     onAuthSuccess,
 }: AuthModalProps) => {
+    const location = useLocation();
+
+    useEffect(() => {
+        if (isOpen) {
+            onOpenChange(false);
+        }
+    }, [location.pathname]);
+
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="fixed bottom-0 left-0 right-0 top-auto w-full max-w-none rounded-t-2xl rounded-b-none border-t border-border bg-background p-0 max-h-[70vh] overflow-y-auto sm:left-[50%] sm:top-[50%] sm:bottom-auto sm:right-auto sm:w-full sm:max-w-xl sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-xl sm:border-2 sm:border-accent sm:max-h-[90vh] [&>button]:hidden">
