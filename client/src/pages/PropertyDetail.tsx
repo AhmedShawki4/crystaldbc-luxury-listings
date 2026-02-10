@@ -38,6 +38,7 @@ type DetailedProperty = {
   type: string;
   status: string;
   companyName?: string;
+  phone?: string;
   rentPayPeriod?: "day" | "month" | "year";
 };
 
@@ -58,6 +59,7 @@ const normalizeStaticProperty = (property: StaticProperty): DetailedProperty => 
   type: property.type,
   status: property.status,
   companyName: undefined,
+  phone: property.phone,
   rentPayPeriod: "month",
 });
 
@@ -78,6 +80,7 @@ const normalizeApiProperty = (property: ApiProperty): DetailedProperty => ({
   type: property.type,
   status: property.status,
   companyName: property.companyName,
+  phone: property.phone,
   rentPayPeriod: property.rentPayPeriod,
 });
 
@@ -197,6 +200,9 @@ const PropertyDetail = () => {
     if (user?.role !== "user") return t("propertyDetail.disabledReasons.onlyUsers");
     return null;
   })();
+
+  const displayPhone = property?.phone?.trim() || "+971 12 345 6789";
+  const telPhone = displayPhone.replace(/[^\d+]/g, "");
 
   const handleRentSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -410,9 +416,9 @@ const PropertyDetail = () => {
                   variant="outline"
                   className="w-full border-2 hover:bg-accent/10"
                 >
-                  <a href="tel:+971123456789" className="flex items-center justify-center gap-2">
+                  <a href={`tel:${telPhone}`} className="flex items-center justify-center gap-2">
                     <Phone className="h-4 w-4" />
-                    {t("propertyDetail.callCta", { phone: "+971 12 345 6789" })}
+                    {t("propertyDetail.callCta", { phone: displayPhone })}
                   </a>
                 </Button>
 

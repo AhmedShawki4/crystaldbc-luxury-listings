@@ -14,6 +14,7 @@ export interface Property {
   features: string[];
   type: string;
   status: string;
+  phone?: string;
   isInvestable?: boolean;
   roiPercentage?: number;
   minInvestmentAmount?: number;

@@ -30,6 +30,7 @@ export interface Property {
   status: string;
   constructionStatus?: "Finished Construction" | "Under Construction";
   companyName?: string;
+  phone?: string;
   rentPayPeriod?: "day" | "month" | "year";
   isFeatured: boolean;
   isInvestable?: boolean;

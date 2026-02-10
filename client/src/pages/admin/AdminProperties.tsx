@@ -39,6 +39,7 @@ const initialFormState = {
   status: "For Sale",
   constructionStatus: "Finished Construction",
   companyName: "",
+  phone: "",
   rentPayPeriod: "month",
   isFeatured: false,
 };
@@ -137,6 +138,7 @@ const AdminProperties = () => {
       status: property.status,
       constructionStatus: property.constructionStatus ?? "Finished Construction",
       companyName: property.companyName ?? "",
+      phone: property.phone ?? "",
       rentPayPeriod: property.rentPayPeriod ?? "month",
       isFeatured: property.isFeatured,
     });
@@ -373,6 +375,10 @@ const AdminProperties = () => {
             <label className="text-sm font-medium">{t("admin.properties.labels.companyName")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
             <Input name="companyName" value={formState.companyName} onChange={handleChange} placeholder="e.g., Crystal DBC" />
             <p className="text-xs text-muted-foreground mt-1">{t("admin.properties.helpers.companyName")}</p>
+          </div>
+          <div>
+            <label className="text-sm font-medium">{t("admin.properties.labels.phone")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
+            <Input name="phone" value={formState.phone} onChange={handleChange} />
           </div>
           <div>
             <label className="text-sm font-medium">{t("admin.properties.labels.status")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>

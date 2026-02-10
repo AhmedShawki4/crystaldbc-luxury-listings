@@ -26,6 +26,7 @@ const propertySchema = new mongoose.Schema(
       enum: ["Finished Construction", "Under Construction"],
     },
     companyName: { type: String },
+    phone: { type: String, default: "" },
     rentPayPeriod: {
       type: String,
       enum: ["day", "month", "year"],
