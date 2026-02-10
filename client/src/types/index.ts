@@ -143,6 +143,13 @@ export interface HomeSuccessStoriesContent {
   stats: { value: string; label: string; desc: string }[];
 }
 
+export interface HomePartnersContent {
+  eyebrow: string;
+  title: string;
+  subtitle?: string;
+  partners: { name: string; logoUrl: string; website?: string }[];
+}
+
 export interface ContactContent {
   title: string;
   subtitle: string;

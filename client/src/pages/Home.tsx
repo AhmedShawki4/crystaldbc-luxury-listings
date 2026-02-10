@@ -38,7 +38,8 @@ import { useToast } from "@/hooks/use-toast";
 import useProperties from "@/hooks/useProperties";
 import apiClient from "@/lib/apiClient";
 import { useCmsSection } from "@/hooks/useCmsSection";
-import type { ContactContent, HomeSuccessStoriesContent } from "@/types";
+import type { ContactContent, HomePartnersContent, HomeSuccessStoriesContent } from "@/types";
+import { getMediaUrl } from "@/lib/media";
 import LazyModelViewer from "@/components/LazyModelViewer";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -188,8 +189,20 @@ const Home = () => {
     "homeSuccessStories",
     fallbackSuccessStories,
   );
+
+  const fallbackPartners = useMemo<HomePartnersContent>(() => ({ partners: [] }), []);
+  const { data: partnersContent } = useCmsSection<HomePartnersContent>(
+    "homePartners",
+    fallbackPartners,
+    { localized: false }
+  );
   const successStories = successStoriesContent ?? fallbackSuccessStories;
   const successStats = Array.isArray(successStories.stats) ? successStories.stats : fallbackSuccessStories.stats;
+
+  const partners = partnersContent ?? fallbackPartners;
+  const partnerItems = Array.isArray(partners.partners) ? partners.partners : [];
+  const showPartnersSection = partnerItems.length > 0;
+  const partnersLayoutClass = partnerItems.length < 6 ? "justify-center" : "justify-start";
 
   const testimonialItems = t("home.testimonialsItems", { returnObjects: true });
   const testimonials = Array.isArray(testimonialItems)
@@ -359,6 +372,69 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {showPartnersSection ? (
+        <section className="py-20 bg-gradient-to-b from-background via-background to-muted/20 reveal-section">
+          <div className="relative overflow-hidden">
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute -top-24 right-10 h-48 w-48 rounded-full bg-luxury-gold/10 blur-3xl" />
+              <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-luxury-gold/10 blur-3xl" />
+            </div>
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
+              <div className="text-center mb-12">
+                <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">
+                  {t("home.partnersEyebrow")}
+                </span>
+                <h2 className="text-3xl md:text-5xl font-display font-medium text-primary mb-4">
+                  {t("home.partnersTitle")}
+                </h2>
+                <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed">
+                  {t("home.partnersSubtitle")}
+                </p>
+              </div>
+
+              {partnerItems.length > 0 ? (
+                <div className={`flex flex-wrap ${partnersLayoutClass} gap-6 items-center`}>
+                  {partnerItems.map((partner, index) => {
+                    const logo = getMediaUrl(partner.logoUrl);
+                    const content = (
+                      <div className="group flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-border/60 bg-background/60 hover:bg-background transition-all duration-300 w-[140px] sm:w-[160px]">
+                        {logo ? (
+                          <img
+                            src={logo}
+                            alt={partner.name}
+                            className="max-h-14 w-auto object-contain opacity-80 group-hover:opacity-100 transition"
+                            loading="lazy"
+                          />
+                        ) : null}
+                        {partner.name ? (
+                          <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground text-center">
+                            {partner.name}
+                          </span>
+                        ) : null}
+                      </div>
+                    );
+
+                    return partner.website ? (
+                      <a
+                        key={`${partner.name}-${index}`}
+                        href={partner.website}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block"
+                      >
+                        {content}
+                      </a>
+                    ) : (
+                      <div key={`${partner.name}-${index}`}>{content}</div>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {/* 5. Client Success Stories (Replaces How It Works) */}
       <section className="py-24 bg-background reveal-section">

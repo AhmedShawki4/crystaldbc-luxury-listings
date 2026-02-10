@@ -46,16 +46,29 @@ const resolveLocalizedContent = <TContent,>(
   return normalized.translations[lang] ?? normalized.translations.en ?? fallback;
 };
 
-export function useCmsSection<TContent = unknown>(key: string, fallback?: TContent) {
+export function useCmsSection<TContent = unknown>(
+  key: string,
+  fallback?: TContent,
+  options?: { localized?: boolean }
+) {
   const { i18n } = useTranslation();
   const fallbackContent = fallback as TContent;
+  const localized = options?.localized !== false;
 
   return useQuery({
-    queryKey: ["cms", key, i18n.language],
+    queryKey: localized ? ["cms", key, i18n.language] : ["cms", key],
     queryFn: async () => {
       try {
         const { data } = await apiClient.get<{ section: CMSSection<TContent> }>(`/cms/${key}`);
-        return resolveLocalizedContent(data.section.content, i18n.language, fallbackContent);
+        if (localized) {
+          return resolveLocalizedContent(data.section.content, i18n.language, fallbackContent);
+        }
+        const content = data.section.content;
+        if (content && typeof content === "object" && "translations" in (content as Record<string, unknown>)) {
+          const localizedContent = content as LocalizedContent<TContent>;
+          return localizedContent.translations.en ?? fallbackContent;
+        }
+        return (content as TContent) ?? fallbackContent;
       } catch (error) {
         // If section not found, return fallback
         return fallbackContent;

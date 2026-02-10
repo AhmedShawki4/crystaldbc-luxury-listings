@@ -130,6 +130,9 @@ const resources = {
         exquisiteEyebrow: "Exquisite Selection",
         successStories: "Success Stories",
         realResults: "Real Results, Real Wealth",
+        partnersEyebrow: "Partners",
+        partnersTitle: "Trusted Partners",
+        partnersSubtitle: "Brands and institutions we proudly collaborate with",
         floating: {
           tagline: "Handpicked Luxury Real Estate",
           headline1: "Experience the pinnacle of luxury living.",
@@ -1420,6 +1423,28 @@ const resources = {
               title: "Real Results",
             },
           },
+          homePartners: {
+            title: "Partners",
+            description: "Edit the partners section on the homepage.",
+            labels: {
+              eyebrow: "Eyebrow",
+              title: "Title",
+              subtitle: "Subtitle",
+              partners: "Partners",
+              partnerName: "Partner Name",
+              partnerLogo: "Partner Logo",
+              partnerWebsite: "Partner Website (optional)",
+            },
+            actions: {
+              add: "Add Partner",
+              remove: "Remove",
+            },
+            preview: {
+              eyebrow: "Partners",
+              title: "Trusted Partners",
+            },
+            empty: "No partners added yet.",
+          },
           actions: {
             save: "Save",
             saving: "Saving...",
@@ -1657,6 +1682,9 @@ const resources = {
         exquisiteEyebrow: "اختيارات فاخرة",
         successStories: "قصص النجاح",
         realResults: "نتائج حقيقية، ثروة حقيقية",
+        partnersEyebrow: "شركاؤنا",
+        partnersTitle: "شركاء موثوقون",
+        partnersSubtitle: "علامات ومؤسسات نتعاون معها بفخر",
         floating: {
           tagline: "عقارات فاخرة مختارة بعناية",
           headline1: "اختبر قمة أسلوب الحياة الفاخر.",
@@ -2869,6 +2897,28 @@ const resources = {
               title: "نتائج حقيقية",
             },
           },
+          homePartners: {
+            title: "الشركاء",
+            description: "عدّل قسم الشركاء في الصفحة الرئيسية.",
+            labels: {
+              eyebrow: "الترويسة",
+              title: "العنوان",
+              subtitle: "العنوان الفرعي",
+              partners: "الشركاء",
+              partnerName: "اسم الشريك",
+              partnerLogo: "شعار الشريك",
+              partnerWebsite: "موقع الشريك (اختياري)",
+            },
+            actions: {
+              add: "إضافة شريك",
+              remove: "إزالة",
+            },
+            preview: {
+              eyebrow: "الشركاء",
+              title: "شركاء موثوقون",
+            },
+            empty: "لم تتم إضافة شركاء بعد.",
+          },
           actions: {
             save: "حفظ",
             saving: "جارٍ الحفظ...",
@@ -3235,6 +3285,9 @@ const resources = {
         exquisiteEyebrow: "Exklusive Auswahl",
         successStories: "Erfolgsgeschichten",
         realResults: "Echte Ergebnisse, echtes Vermögen",
+        partnersEyebrow: "Partner",
+        partnersTitle: "Vertrauenspartner",
+        partnersSubtitle: "Marken und Institutionen, mit denen wir stolz zusammenarbeiten",
         floating: {
           tagline: "Kuratiertes Luxus-Portfolio",
           headline1: "Erleben Sie den Gipfel luxuriösen Wohnens.",
@@ -4320,6 +4373,9 @@ const resources = {
         exquisiteEyebrow: "Изысканный выбор",
         successStories: "Истории успеха",
         realResults: "Реальные результаты, реальное богатство",
+        partnersEyebrow: "Партнеры",
+        partnersTitle: "Надежные партнеры",
+        partnersSubtitle: "Бренды и институты, с которыми мы сотрудничаем",
         floating: {
           tagline: "Кураторская коллекция элитной недвижимости",
           headline1: "Испытайте вершину роскошной жизни.",
