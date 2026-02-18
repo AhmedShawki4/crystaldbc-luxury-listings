@@ -27,6 +27,7 @@ const propertySchema = new mongoose.Schema(
     },
     companyName: { type: String },
     phone: { type: String, default: "" },
+    virtualTourEmbedUrl: { type: String, default: "" },
     rentPayPeriod: {
       type: String,
       enum: ["day", "month", "year"],

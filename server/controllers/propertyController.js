@@ -1,6 +1,45 @@
 const Property = require("../models/Property");
 const logActivity = require("../utils/logActivity");
 
+const GOOGLE_MAPS_EMBED_PATH = "/maps/embed";
+
+const normalizeVirtualTourEmbedUrl = (rawValue) => {
+  if (rawValue === undefined || rawValue === null) {
+    return undefined;
+  }
+
+  const value = String(rawValue).trim();
+  if (!value) {
+    return "";
+  }
+
+  const iframeMatch = value.match(/<iframe[^>]*\ssrc=["']([^"']+)["'][^>]*>/i);
+  const candidateUrl = iframeMatch ? iframeMatch[1] : value;
+
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(candidateUrl);
+  } catch (error) {
+    return null;
+  }
+
+  const hostname = parsedUrl.hostname.toLowerCase();
+  const isAllowedHost = hostname === "google.com" || hostname === "www.google.com";
+  if (!isAllowedHost) {
+    return null;
+  }
+
+  if (parsedUrl.protocol !== "https:") {
+    return null;
+  }
+
+  if (!parsedUrl.pathname.startsWith(GOOGLE_MAPS_EMBED_PATH)) {
+    return null;
+  }
+
+  return `${parsedUrl.origin}${parsedUrl.pathname}${parsedUrl.search}`;
+};
+
 const buildFilters = (query) => {
   const filters = {};
   if (query.search) {
@@ -95,6 +134,16 @@ exports.createProperty = async (req, res) => {
       }
     }
 
+    if (req.body.virtualTourEmbedUrl !== undefined) {
+      const normalizedEmbedUrl = normalizeVirtualTourEmbedUrl(req.body.virtualTourEmbedUrl);
+      if (normalizedEmbedUrl === null) {
+        return res.status(400).json({
+          message: "virtualTourEmbedUrl must be a valid Google Maps embed iframe or URL",
+        });
+      }
+      req.body.virtualTourEmbedUrl = normalizedEmbedUrl;
+    }
+
     if (req.body.status === "For Sale") {
       const allowed = ["Finished Construction", "Under Construction"];
       if (!req.body.constructionStatus || !allowed.includes(req.body.constructionStatus)) {
@@ -144,6 +193,16 @@ exports.updateProperty = async (req, res) => {
       if (!allowedCurrencies.includes(req.body.currencyCode)) {
         return res.status(400).json({ message: "currencyCode must be one of EGP, SAR, EUR, AED, or RUB" });
       }
+    }
+
+    if (req.body.virtualTourEmbedUrl !== undefined) {
+      const normalizedEmbedUrl = normalizeVirtualTourEmbedUrl(req.body.virtualTourEmbedUrl);
+      if (normalizedEmbedUrl === null) {
+        return res.status(400).json({
+          message: "virtualTourEmbedUrl must be a valid Google Maps embed iframe or URL",
+        });
+      }
+      req.body.virtualTourEmbedUrl = normalizedEmbedUrl;
     }
 
     const nextStatus = req.body.status;

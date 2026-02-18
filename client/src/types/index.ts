@@ -31,6 +31,7 @@ export interface Property {
   constructionStatus?: "Finished Construction" | "Under Construction";
   companyName?: string;
   phone?: string;
+  virtualTourEmbedUrl?: string;
   rentPayPeriod?: "day" | "month" | "year";
   isFeatured: boolean;
   isInvestable?: boolean;

@@ -39,6 +39,7 @@ type DetailedProperty = {
   status: string;
   companyName?: string;
   phone?: string;
+  virtualTourEmbedUrl?: string;
   rentPayPeriod?: "day" | "month" | "year";
 };
 
@@ -60,6 +61,7 @@ const normalizeStaticProperty = (property: StaticProperty): DetailedProperty => 
   status: property.status,
   companyName: undefined,
   phone: property.phone,
+  virtualTourEmbedUrl: undefined,
   rentPayPeriod: "month",
 });
 
@@ -81,6 +83,7 @@ const normalizeApiProperty = (property: ApiProperty): DetailedProperty => ({
   status: property.status,
   companyName: property.companyName,
   phone: property.phone,
+  virtualTourEmbedUrl: property.virtualTourEmbedUrl,
   rentPayPeriod: property.rentPayPeriod,
 });
 
@@ -382,6 +385,27 @@ const PropertyDetail = () => {
                 {property.description}
               </p>
             </div>
+
+            {property.virtualTourEmbedUrl ? (
+              <div className="mb-8">
+                <h2 className="text-2xl font-display font-bold text-primary mb-4">
+                  Virtual Tour Around The Complex
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  Use the embedded map to freely walk around streets and amenities near this property.
+                </p>
+                <div className="overflow-hidden rounded-lg border border-border bg-card">
+                  <iframe
+                    src={property.virtualTourEmbedUrl}
+                    title={`${property.title} virtual tour`}
+                    className="w-full h-[520px] md:h-[620px]"
+                    loading="lazy"
+                    allowFullScreen
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </div>
+              </div>
+            ) : null}
 
             <div>
               <h2 className="text-2xl font-display font-bold text-primary mb-4">

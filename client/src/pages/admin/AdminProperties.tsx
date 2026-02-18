@@ -40,6 +40,7 @@ const initialFormState = {
   constructionStatus: "Finished Construction",
   companyName: "",
   phone: "",
+  virtualTourEmbedUrl: "",
   rentPayPeriod: "month",
   isFeatured: false,
 };
@@ -139,6 +140,7 @@ const AdminProperties = () => {
       constructionStatus: property.constructionStatus ?? "Finished Construction",
       companyName: property.companyName ?? "",
       phone: property.phone ?? "",
+      virtualTourEmbedUrl: property.virtualTourEmbedUrl ?? "",
       rentPayPeriod: property.rentPayPeriod ?? "month",
       isFeatured: property.isFeatured,
     });
@@ -379,6 +381,18 @@ const AdminProperties = () => {
           <div>
             <label className="text-sm font-medium">{t("admin.properties.labels.phone")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
             <Input name="phone" value={formState.phone} onChange={handleChange} />
+          </div>
+          <div className="md:col-span-2">
+            <label className="text-sm font-medium">Google Maps Virtual Tour iframe <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
+            <Textarea
+              name="virtualTourEmbedUrl"
+              value={formState.virtualTourEmbedUrl}
+              onChange={handleChange}
+              placeholder="Paste the full Google Maps iframe embed code or /maps/embed URL"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Supports Google Maps embed only. Users can explore the complex directly from the property page.
+            </p>
           </div>
           <div>
             <label className="text-sm font-medium">{t("admin.properties.labels.status")} <span className="text-white/40 text-xs font-normal">({t("admin.common.optional")})</span></label>
