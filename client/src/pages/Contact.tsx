@@ -1,4 +1,5 @@
 import { Mail, Phone, MapPin } from "lucide-react";
+import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -81,6 +82,19 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen">
+      <SEOHead
+        title="Contact CrystalDBC - Get in Touch"
+        description="Contact CrystalDBC (Crystal DBC) for luxury real estate inquiries. Reach our expert team for property sales, investments, and rentals in Dubai, Egypt, Saudi Arabia, Germany. تواصل مع كريستال دي بي سي. Kontaktieren Sie CrystalDBC."
+        canonical="/contact"
+        keywords="contact CrystalDBC, Crystal DBC phone, تواصل معنا, Kontakt CrystalDBC, связаться с CrystalDBC"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "ContactPage",
+          "name": "Contact CrystalDBC",
+          "description": "Get in touch with CrystalDBC luxury real estate team",
+          "url": "https://crystaldbc.com/contact"
+        }}
+      />
       <PageHero
         eyebrow={t("contact.heroEyebrow")}
         title={contactContent?.title ?? t("contact.heroTitle")}

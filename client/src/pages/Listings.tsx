@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import SEOHead from "@/components/SEOHead";
 import PropertyCard from "@/components/PropertyCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -113,6 +114,19 @@ const Listings = () => {
 
   return (
     <div className="min-h-screen">
+      <SEOHead
+        title="Luxury Property Listings - Villas, Penthouses & Apartments"
+        description="Browse CrystalDBC's exclusive luxury property listings. Premium villas, penthouses, and apartments for sale and rent in Dubai, Cairo, Egypt, Red Sea, Saudi Arabia, and Germany. عقارات للبيع والإيجار - كريستال دي بي سي. Luxusimmobilien kaufen und mieten."
+        canonical="/listings"
+        keywords="CrystalDBC listings, luxury properties for sale, Dubai apartments, Cairo villas, عقارات للبيع, Immobilien kaufen, недвижимость купить"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "CrystalDBC Property Listings",
+          "description": "Browse luxury properties for sale and rent",
+          "url": "https://crystaldbc.com/listings"
+        }}
+      />
       {/* Unified Background */}
       <div className="fixed inset-0 z-[-1]">
         <LazyImage

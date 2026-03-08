@@ -92,7 +92,18 @@ const Footer = () => {
         ) : null}
 
         <div className="border-t border-white/10 pt-8 text-center text-white/70 text-sm">
-          <p>&copy; {new Date().getFullYear()} All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} CrystalDBC (Crystal DBC). All rights reserved.</p>
+          {/* SEO-rich semantic footer content for search engine crawlers */}
+          <div className="sr-only" aria-hidden="true">
+            <h2>CrystalDBC - Luxury Real Estate Worldwide</h2>
+            <p>CrystalDBC (Crystal DBC, crystaldbc, crstaldbc, CRYSTALDBC, Crystal-DBC) is a premier luxury real estate company founded in 2002, specializing in exclusive properties, villas, penthouses, and high-yield real estate investments.</p>
+            <p>Our markets: Dubai luxury real estate, Cairo luxury villas, Egypt Red Sea properties, Riyadh Saudi Arabia real estate, Germany premium apartments, Russia elite properties.</p>
+            <p lang="ar" dir="rtl">كريستال دي بي سي - عقارات فاخرة في دبي ومصر والسعودية وألمانيا وروسيا. فلل فاخرة، شقق بنتهاوس، استثمار عقاري عالي العائد.</p>
+            <p lang="de">CrystalDBC - Luxusimmobilien in Dubai, Ägypten, Saudi-Arabien, Deutschland und Russland. Luxusvillen, Penthäuser, Premium-Apartments und renditestarke Immobilieninvestitionen.</p>
+            <p lang="ru">CrystalDBC - Элитная недвижимость в Дубае, Египте, Саудовской Аравии, Германии и России. Роскошные виллы, пентхаусы, апартаменты премиум-класса и высокодоходные инвестиции в недвижимость.</p>
+            <p lang="fr">CrystalDBC - Immobilier de luxe à Dubaï, Égypte, Arabie Saoudite, Allemagne et Russie. Villas de luxe, penthouses, appartements haut de gamme et investissements immobiliers à haut rendement.</p>
+            <p lang="es">CrystalDBC - Bienes raíces de lujo en Dubái, Egipto, Arabia Saudita, Alemania y Rusia. Villas de lujo, penthouses, apartamentos premium e inversiones inmobiliarias de alto rendimiento.</p>
+          </div>
         </div>
       </div>
     </footer>

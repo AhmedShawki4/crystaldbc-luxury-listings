@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { MapPin, Bed, Bath, Square, ArrowLeft, Check, Phone, Mail, Heart, DollarSign } from "lucide-react";
+import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { properties } from "@/data/properties";
 import type { Property as StaticProperty } from "@/data/properties";
@@ -270,6 +271,23 @@ const PropertyDetail = () => {
 
   return (
     <div className="min-h-screen pt-20 bg-muted/10">
+      <SEOHead
+        title={`${property.title} - ${property.location}`}
+        description={`${property.title} in ${property.location}. ${property.beds} bedrooms, ${property.baths} bathrooms. ${property.priceLabel}. Luxury property by CrystalDBC (Crystal DBC). عقار فاخر من كريستال دي بي سي`}
+        canonical={`/property/${propertyId}`}
+        ogType="article"
+        keywords={`${property.title}, ${property.location}, CrystalDBC property, luxury ${property.type || 'property'}`}
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "RealEstateListing",
+          "name": property.title,
+          "description": `${property.title} in ${property.location}`,
+          "url": `https://crystaldbc.com/property/${propertyId}`,
+          "image": property.gallery?.[0] || property.coverImage || "",
+          "address": { "@type": "PostalAddress", "addressLocality": property.location },
+          "offers": { "@type": "Offer", "price": property.priceValue, "priceCurrency": "USD" }
+        }}
+      />
       {/* Back Button */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Button asChild variant="ghost" className="group">

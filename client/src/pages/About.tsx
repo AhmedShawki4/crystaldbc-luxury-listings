@@ -1,6 +1,7 @@
 import { Award, Users, Target, Heart, Globe2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useRef } from "react";
+import SEOHead from "@/components/SEOHead";
 import { useCmsSection } from "@/hooks/useCmsSection";
 import type { AboutContent } from "@/types";
 import { getMediaUrl } from "@/lib/media";
@@ -74,6 +75,12 @@ const About = () => {
 
   return (
     <div ref={mainRef} className="min-h-screen">
+      <SEOHead
+        title="About CrystalDBC - Our Legacy in Luxury Real Estate"
+        description="Learn about CrystalDBC (Crystal DBC), a premier luxury real estate firm established in 2002. Operating across Dubai, Egypt, Saudi Arabia, Germany, and Russia. كريستال دي بي سي - تاريخنا في العقارات الفاخرة. Über CrystalDBC - Luxusimmobilien seit 2002."
+        canonical="/about"
+        keywords="about CrystalDBC, Crystal DBC history, luxury real estate company, عن كريستال دي بي سي, über CrystalDBC"
+      />
       <PageHero
         eyebrow={t("about.heroEyebrow")}
         title={content.heroTitle || t("about.heroTitle")}

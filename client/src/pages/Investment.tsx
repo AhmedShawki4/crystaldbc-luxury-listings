@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import SEOHead from "@/components/SEOHead";
 import { ArrowRight, CheckCircle2, TrendingUp, Building2, BarChart3, PieChart, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -323,6 +324,20 @@ const Investment = () => {
 
     return (
         <div className="min-h-screen bg-background">
+            <SEOHead
+              title="Real Estate Investment Opportunities - High Yield ROI"
+              description="Invest in luxury real estate with CrystalDBC. High-yield investment boxes, transparent ROI tracking, and premium property portfolios across Dubai, Egypt, Saudi Arabia. استثمار عقاري مع كريستال دي بي سي. Immobilien Investition mit CrystalDBC."
+              canonical="/investment"
+              keywords="CrystalDBC investment, real estate ROI, property investment Dubai, investment boxes, استثمار عقاري, Immobilien Investition, инвестиции в недвижимость"
+              structuredData={{
+                "@context": "https://schema.org",
+                "@type": "InvestmentOrDeposit",
+                "name": "CrystalDBC Real Estate Investment",
+                "description": "High-yield luxury real estate investment opportunities",
+                "url": "https://crystaldbc.com/investment",
+                "provider": { "@type": "Organization", "name": "CrystalDBC" }
+              }}
+            />
             {/* Hero Section */}
             <section className="relative py-20 md:py-32 bg-luxury-dark text-white overflow-hidden">
                 <div className="absolute inset-0 z-0">

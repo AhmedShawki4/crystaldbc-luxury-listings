@@ -1,6 +1,7 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLayoutEffect, useRef, useEffect, useState, useMemo } from "react";
+import SEOHead from "@/components/SEOHead";
 import FloatingShapes from "@/components/FloatingShapes";
 import Antigravity from "@/components/Antigravity";
 import { Link } from "react-router-dom";
@@ -236,6 +237,20 @@ const Home = () => {
 
   return (
     <div ref={mainRef} className="min-h-screen">
+      <SEOHead
+        canonical="/"
+        title="Luxury Real Estate & Investment in Dubai, Egypt, Saudi Arabia"
+        description="CrystalDBC (Crystal DBC) is the premier luxury real estate platform. Explore exclusive villas, penthouses, apartments, and high-yield investment opportunities in Dubai, Cairo, Egypt, Red Sea, Riyadh, Saudi Arabia, Germany, and Russia. كريستال دي بي سي عقارات فاخرة"
+        keywords="CrystalDBC home, luxury homes Dubai, luxury villas Egypt, real estate investment, عقارات فاخرة دبي, Luxusimmobilien Dubai, элитная недвижимость"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "CrystalDBC - Luxury Real Estate & Investment",
+          "description": "Premier luxury real estate platform offering exclusive properties in Dubai, Egypt, Saudi Arabia, Germany, and Russia",
+          "url": "https://crystaldbc.com/",
+          "isPartOf": { "@type": "WebSite", "name": "CrystalDBC", "url": "https://crystaldbc.com" }
+        }}
+      />
       {/* 1. Hero Section */}
       <Hero />
 
