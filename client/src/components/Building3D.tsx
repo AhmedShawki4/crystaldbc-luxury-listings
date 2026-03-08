@@ -1,6 +1,6 @@
-import { useRef, useMemo, useState } from "react";
+import { useRef, useMemo, useState, useCallback } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Float, Environment, MeshTransmissionMaterial } from "@react-three/drei";
+import { Float, Environment, OrbitControls, MeshTransmissionMaterial } from "@react-three/drei";
 import * as THREE from "three";
 
 /* ═══════════════════════════════════════════════════════
@@ -347,55 +347,196 @@ function Particles({ count = 100 }: { count?: number }) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   FOG BACKGROUND PLANE (gradient)
+   FOG BACKGROUND SPHERE
    ═══════════════════════════════════════════════════════ */
 function BackgroundSphere() {
   return (
     <mesh>
       <sphereGeometry args={[50, 32, 32]} />
-      <meshBasicMaterial
-        color="#060a14"
-        side={THREE.BackSide}
-      />
+      <meshBasicMaterial color="#060a14" side={THREE.BackSide} />
     </mesh>
   );
 }
 
 /* ═══════════════════════════════════════════════════════
-   SCENE COMPOSITION
+   HOLOGRAPHIC SCAN RING — orbiting ring around main tower
    ═══════════════════════════════════════════════════════ */
-function CityScene() {
-  const groupRef = useRef<THREE.Group>(null!);
-  const { viewport } = useThree();
-  const isMobile = viewport.width < 6;
+function HoloRing({ position, radius = 1.2, color = "#d4af37", speed = 0.6 }: {
+  position: [number, number, number]; radius?: number; color?: string; speed?: number;
+}) {
+  const ref = useRef<THREE.Mesh>(null!);
 
   useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y =
-        Math.sin(state.clock.elapsedTime * 0.12) * 0.25 + state.clock.elapsedTime * 0.04;
+    if (ref.current) {
+      const t = state.clock.elapsedTime;
+      ref.current.position.y = position[1] + Math.sin(t * speed) * 2.5;
+      ref.current.rotation.x = Math.PI / 2;
+      ref.current.rotation.z = t * 0.3;
+      const mat = ref.current.material as THREE.MeshBasicMaterial;
+      mat.opacity = 0.12 + Math.sin(t * 1.5) * 0.06;
     }
   });
 
   return (
+    <mesh ref={ref} position={position}>
+      <torusGeometry args={[radius, 0.008, 16, 80]} />
+      <meshBasicMaterial color={color} transparent opacity={0.15} side={THREE.DoubleSide} />
+    </mesh>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   ENERGY BRIDGE — connecting line between two towers
+   ═══════════════════════════════════════════════════════ */
+function EnergyBridge({ start, end, color = "#d4af37" }: {
+  start: [number, number, number]; end: [number, number, number]; color?: string;
+}) {
+  const ref = useRef<THREE.Line>(null!);
+
+  const geom = useMemo(() => {
+    const curve = new THREE.QuadraticBezierCurve3(
+      new THREE.Vector3(...start),
+      new THREE.Vector3(
+        (start[0] + end[0]) / 2,
+        Math.max(start[1], end[1]) + 0.8,
+        (start[2] + end[2]) / 2
+      ),
+      new THREE.Vector3(...end)
+    );
+    const pts = curve.getPoints(30);
+    const g = new THREE.BufferGeometry().setFromPoints(pts);
+    return g;
+  }, [start, end]);
+
+  useFrame((state) => {
+    if (ref.current) {
+      const mat = ref.current.material as THREE.LineBasicMaterial;
+      mat.opacity = 0.08 + Math.sin(state.clock.elapsedTime * 2 + start[0]) * 0.05;
+    }
+  });
+
+  return (
+    <line ref={ref as React.RefObject<THREE.Line>} geometry={geom}>
+      <lineBasicMaterial color={color} transparent opacity={0.1} />
+    </line>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   GROUND PULSE RINGS — expanding concentric circles
+   ═══════════════════════════════════════════════════════ */
+function GroundPulse({ position }: { position: [number, number, number] }) {
+  const ring1 = useRef<THREE.Mesh>(null!);
+  const ring2 = useRef<THREE.Mesh>(null!);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    // Ring 1
+    if (ring1.current) {
+      const s = 0.5 + ((t * 0.3) % 2) * 2;
+      ring1.current.scale.set(s, s, s);
+      const mat = ring1.current.material as THREE.MeshBasicMaterial;
+      mat.opacity = Math.max(0, 0.15 - ((t * 0.3) % 2) * 0.08);
+    }
+    // Ring 2 (offset)
+    if (ring2.current) {
+      const s = 0.5 + (((t * 0.3) + 1) % 2) * 2;
+      ring2.current.scale.set(s, s, s);
+      const mat = ring2.current.material as THREE.MeshBasicMaterial;
+      mat.opacity = Math.max(0, 0.15 - (((t * 0.3) + 1) % 2) * 0.08);
+    }
+  });
+
+  return (
+    <group position={position} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh ref={ring1}>
+        <ringGeometry args={[0.95, 1, 64]} />
+        <meshBasicMaterial color="#d4af37" transparent opacity={0.1} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh ref={ring2}>
+        <ringGeometry args={[0.95, 1, 64]} />
+        <meshBasicMaterial color="#d4af37" transparent opacity={0.1} side={THREE.DoubleSide} />
+      </mesh>
+    </group>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   FLOATING DATA POINTS — small holographic markers
+   ═══════════════════════════════════════════════════════ */
+function DataPoint({ position, color = "#d4af37" }: { position: [number, number, number]; color?: string }) {
+  const ref = useRef<THREE.Group>(null!);
+
+  useFrame((state) => {
+    if (ref.current) {
+      ref.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 0.8 + position[0] * 3) * 0.15;
+      ref.current.rotation.y = state.clock.elapsedTime * 0.5;
+    }
+  });
+
+  return (
+    <group ref={ref} position={position}>
+      <mesh>
+        <octahedronGeometry args={[0.06, 0]} />
+        <meshBasicMaterial color={color} transparent opacity={0.8} />
+      </mesh>
+      {/* Tiny ring around it */}
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.12, 0.005, 8, 24]} />
+        <meshBasicMaterial color={color} transparent opacity={0.3} />
+      </mesh>
+      <pointLight color={color} intensity={0.3} distance={1.5} />
+    </group>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   SCENE COMPOSITION (with OrbitControls)
+   ═══════════════════════════════════════════════════════ */
+function CityScene({ onInteractionStart, onInteractionEnd }: {
+  onInteractionStart?: () => void;
+  onInteractionEnd?: () => void;
+}) {
+  const { viewport } = useThree();
+  const isMobile = viewport.width < 6;
+
+  return (
     <>
+      {/* User orbit controls — auto-rotate, constrained */}
+      <OrbitControls
+        enablePan={false}
+        enableZoom={true}
+        enableRotate={true}
+        autoRotate
+        autoRotateSpeed={0.8}
+        minDistance={6}
+        maxDistance={18}
+        minPolarAngle={Math.PI * 0.15}
+        maxPolarAngle={Math.PI * 0.55}
+        target={[0, 1, 0]}
+        onStart={onInteractionStart}
+        onEnd={onInteractionEnd}
+      />
+
       {/* Background */}
       <BackgroundSphere />
       <Starfield count={isMobile ? 400 : 800} />
 
       {/* Scene fog */}
-      <fog attach="fog" args={["#060a14", 12, 40]} />
+      <fog attach="fog" args={["#060a14", 14, 45]} />
 
       {/* Lighting rig */}
       <ambientLight intensity={0.25} />
       <directionalLight position={[5, 10, 5]} intensity={1.2} color="#fff5e6" />
       <directionalLight position={[-4, 6, -5]} intensity={0.5} color="#4a90d9" />
       <pointLight position={[0, 7, 0]} intensity={1.2} color="#d4af37" distance={18} />
-      {/* Rim light from behind */}
       <pointLight position={[-3, 3, -6]} intensity={0.6} color="#6a5acd" distance={15} />
       <pointLight position={[4, 2, -5]} intensity={0.4} color="#1e90ff" distance={12} />
+      {/* Warm fill from front-bottom */}
+      <pointLight position={[0, -1, 8]} intensity={0.3} color="#d4af37" distance={14} />
 
-      <Float speed={0.6} rotationIntensity={0.03} floatIntensity={0.2}>
-        <group ref={groupRef}>
+      <Float speed={0.5} rotationIntensity={0.02} floatIntensity={0.15}>
+        <group>
           {/* ── Towers ── */}
           <Tower position={[0, 1.2, 0]} height={5.5} width={1} depth={1} goldTint />
           <Tower position={[-1.8, 0.35, 0.3]} height={3.5} width={0.8} depth={0.8} />
@@ -403,8 +544,28 @@ function CityScene() {
           <Tower position={[0.3, -0.1, -1.5]} height={2.8} width={0.7} depth={0.7} />
           <Tower position={[-2.8, -0.3, -0.8]} height={2.2} width={0.6} depth={0.6} />
           <Tower position={[2.9, -0.15, 0.6]} height={2.5} width={0.65} depth={0.65} goldTint />
-          {/* Extra backdrop tower */}
           <Tower position={[-0.8, 0.0, -2.2]} height={2.0} width={0.55} depth={0.55} />
+
+          {/* ── Holographic scan rings on the main tower ── */}
+          <HoloRing position={[0, 2, 0]} radius={0.8} color="#d4af37" speed={0.6} />
+          <HoloRing position={[0, 1, 0]} radius={1.0} color="#4a90d9" speed={0.45} />
+          <HoloRing position={[0, 3.5, 0]} radius={0.6} color="#d4af37" speed={0.75} />
+
+          {/* ── Energy bridges between towers ── */}
+          <EnergyBridge start={[0, 2.5, 0.5]} end={[-1.8, 1.5, 0.7]} color="#d4af37" />
+          <EnergyBridge start={[0, 2.0, -0.5]} end={[1.7, 1.8, -0.2]} color="#4a90d9" />
+          <EnergyBridge start={[-1.8, 1.0, 0.3]} end={[-2.8, 0.5, -0.8]} color="#d4af37" />
+          <EnergyBridge start={[1.7, 1.2, -0.2]} end={[2.9, 0.8, 0.6]} color="#4a90d9" />
+
+          {/* ── Ground pulse rings ── */}
+          <GroundPulse position={[0, -2.48, 0]} />
+
+          {/* ── Data points floating near towers ── */}
+          <DataPoint position={[0.6, 4.5, 0.6]} color="#d4af37" />
+          <DataPoint position={[-1.2, 2.8, 0.9]} color="#4a90d9" />
+          <DataPoint position={[2.2, 3.0, 0.3]} color="#d4af37" />
+          <DataPoint position={[-2.0, 1.8, -0.3]} color="#8a6fff" />
+          <DataPoint position={[0.5, 1.5, -1.2]} color="#d4af37" />
 
           {/* ── Floating Crystals ── */}
           <Crystal position={[2.2, 3.5, 1.5]} scale={0.3} color="#d4af37" speed={0.35} orbitRadius={1.2} orbitOffset={0} />
@@ -419,7 +580,7 @@ function CityScene() {
           <LightBeam position={[-1.8, -2.5, 0.3]} color="#d4af37" height={8} />
 
           <GroundGrid />
-          <Particles count={isMobile ? 50 : 100} />
+          <Particles count={isMobile ? 50 : 120} />
         </group>
       </Float>
 
@@ -433,6 +594,10 @@ function CityScene() {
    ═══════════════════════════════════════════════════════ */
 export default function Building3D() {
   const [hovered, setHovered] = useState(false);
+  const [interacting, setInteracting] = useState(false);
+
+  const onInteractionStart = useCallback(() => setInteracting(true), []);
+  const onInteractionEnd = useCallback(() => setInteracting(false), []);
 
   return (
     <section className="relative w-full overflow-hidden" style={{ background: "linear-gradient(180deg, #04060d 0%, #080e1e 40%, #0a1228 70%, #060a14 100%)" }}>
@@ -492,18 +657,18 @@ export default function Building3D() {
 
           {/* 3D Canvas */}
           <div
-            className="order-1 lg:order-2 relative h-[480px] md:h-[580px] lg:h-[650px] cursor-grab active:cursor-grabbing"
+            className={`order-1 lg:order-2 relative h-[480px] md:h-[580px] lg:h-[650px] transition-all duration-300 ${interacting ? "cursor-grabbing" : "cursor-grab"}`}
             onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
+            onMouseLeave={() => { setHovered(false); setInteracting(false); }}
           >
-            {/* Corner accents */}
-            <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-luxury-gold/15 rounded-tl-xl z-10" />
-            <div className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-luxury-gold/15 rounded-tr-xl z-10" />
-            <div className="absolute bottom-0 left-0 w-16 h-16 border-b-2 border-l-2 border-luxury-gold/15 rounded-bl-xl z-10" />
-            <div className="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-luxury-gold/15 rounded-br-xl z-10" />
+            {/* Corner accents — animate on hover */}
+            <div className={`absolute top-0 left-0 border-t-2 border-l-2 border-luxury-gold/15 rounded-tl-xl z-10 transition-all duration-700 ${hovered ? "w-20 h-20 border-luxury-gold/30" : "w-16 h-16"}`} />
+            <div className={`absolute top-0 right-0 border-t-2 border-r-2 border-luxury-gold/15 rounded-tr-xl z-10 transition-all duration-700 ${hovered ? "w-20 h-20 border-luxury-gold/30" : "w-16 h-16"}`} />
+            <div className={`absolute bottom-0 left-0 border-b-2 border-l-2 border-luxury-gold/15 rounded-bl-xl z-10 transition-all duration-700 ${hovered ? "w-20 h-20 border-luxury-gold/30" : "w-16 h-16"}`} />
+            <div className={`absolute bottom-0 right-0 border-b-2 border-r-2 border-luxury-gold/15 rounded-br-xl z-10 transition-all duration-700 ${hovered ? "w-20 h-20 border-luxury-gold/30" : "w-16 h-16"}`} />
 
             {/* Hover glow ring */}
-            <div className={`absolute inset-0 rounded-xl transition-all duration-1000 ${hovered ? "shadow-[inset_0_0_60px_rgba(212,175,55,0.06)]" : ""}`} />
+            <div className={`absolute inset-0 rounded-xl transition-all duration-1000 ${hovered ? "shadow-[inset_0_0_80px_rgba(212,175,55,0.08)]" : ""}`} />
 
             <Canvas
               camera={{ position: [7, 4.5, 9], fov: 38 }}
@@ -511,13 +676,20 @@ export default function Building3D() {
               gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
               style={{ background: "transparent" }}
             >
-              <CityScene />
+              <CityScene onInteractionStart={onInteractionStart} onInteractionEnd={onInteractionEnd} />
             </Canvas>
 
-            {/* Floating label */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 backdrop-blur-md border border-white/10 z-10">
-              <div className="w-1 h-1 rounded-full bg-luxury-gold animate-pulse" />
-              <span className="text-[10px] text-white/40 uppercase tracking-[0.2em]">Interactive 3D</span>
+            {/* Floating interaction hint */}
+            <div className={`absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-1.5 rounded-full backdrop-blur-md border z-10 transition-all duration-500 ${interacting ? "bg-luxury-gold/10 border-luxury-gold/30" : "bg-white/5 border-white/10"}`}>
+              <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${interacting ? "bg-luxury-gold" : "bg-luxury-gold/60 animate-pulse"}`} />
+              <span className="text-[10px] text-white/50 uppercase tracking-[0.2em]">
+                {interacting ? "Exploring..." : "Drag to Explore"}
+              </span>
+              {!interacting && (
+                <svg className="w-3 h-3 text-white/30 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                </svg>
+              )}
             </div>
           </div>
         </div>
