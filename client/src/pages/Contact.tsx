@@ -4,17 +4,66 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import apiClient from "@/lib/apiClient";
 import { useCmsSection } from "@/hooks/useCmsSection";
 import type { ContactContent } from "@/types";
 import PageHero from "@/components/PageHero";
 import { useTranslation } from "react-i18next";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const Contact = () => {
   const { t } = useTranslation();
+  const mainRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
+  }, []);
+
+  // GSAP scroll animations
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      // Contact info card
+      gsap.fromTo(
+        ".contact-info-card",
+        { opacity: 0, x: -50 },
+        {
+          opacity: 1, x: 0, duration: 0.9, ease: "power3.out",
+          scrollTrigger: { trigger: ".contact-content-section", start: "top 80%" },
+        }
+      );
+      // Contact info items stagger
+      gsap.fromTo(
+        ".contact-info-item",
+        { opacity: 0, x: -20 },
+        {
+          opacity: 1, x: 0, duration: 0.6, stagger: 0.12, ease: "power2.out",
+          scrollTrigger: { trigger: ".contact-info-card", start: "top 80%" },
+        }
+      );
+      // Form card
+      gsap.fromTo(
+        ".contact-form-card",
+        { opacity: 0, x: 50 },
+        {
+          opacity: 1, x: 0, duration: 0.9, ease: "power3.out",
+          scrollTrigger: { trigger: ".contact-content-section", start: "top 80%" },
+        }
+      );
+      // Form fields stagger
+      gsap.fromTo(
+        ".contact-form-field",
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power2.out",
+          scrollTrigger: { trigger: ".contact-form-card", start: "top 80%" },
+        }
+      );
+    }, mainRef);
+    return () => ctx.revert();
   }, []);
 
   const { toast } = useToast();
@@ -81,7 +130,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div ref={mainRef} className="min-h-screen">
       <SEOHead
         title="Contact CrystalDBC - Get in Touch"
         description="Contact CrystalDBC (Crystal DBC) for luxury real estate inquiries. Reach our expert team for property sales, investments, and rentals in Dubai, Egypt, Saudi Arabia, Germany. تواصل مع كريستال دي بي سي. Kontaktieren Sie CrystalDBC."
@@ -126,11 +175,11 @@ const Contact = () => {
       />
 
       {/* Contact Content */}
-      <section className="py-20">
+      <section className="contact-content-section py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Information */}
-            <div className="rounded-3xl border border-border/60 bg-card/60 p-10 shadow-2xl shadow-black/5">
+            <div className="contact-info-card rounded-3xl border border-border/60 bg-card/60 p-10 shadow-2xl shadow-black/5 glow-border">
               <h2 className="text-3xl font-display font-bold text-primary mb-6">
                 {t("contact.infoTitle")}
               </h2>
@@ -141,7 +190,7 @@ const Contact = () => {
               <div className="w-20 h-[1px] bg-luxury-gold/50 mb-10" />
 
               <div className="space-y-8">
-                <div className="flex items-start gap-4">
+                <div className="contact-info-item flex items-start gap-4">
                   <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center flex-shrink-0">
                     <Phone className="h-6 w-6 text-accent" />
                   </div>
@@ -155,7 +204,7 @@ const Contact = () => {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
+                <div className="contact-info-item flex items-start gap-4">
                   <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center flex-shrink-0">
                     <Mail className="h-6 w-6 text-accent" />
                   </div>
@@ -169,7 +218,7 @@ const Contact = () => {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
+                <div className="contact-info-item flex items-start gap-4">
                   <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center flex-shrink-0">
                     <MapPin className="h-6 w-6 text-accent" />
                   </div>
@@ -196,13 +245,13 @@ const Contact = () => {
 
             {/* Contact Form */}
             <div>
-              <form onSubmit={handleSubmit} className="rounded-3xl border border-border/60 bg-card/80 p-8 shadow-2xl shadow-black/10">
+              <form onSubmit={handleSubmit} className="contact-form-card rounded-3xl border border-border/60 bg-card/80 p-8 shadow-2xl shadow-black/10 glow-border">
                 <h2 className="text-3xl font-display font-bold text-primary mb-6">
                   {t("contact.formTitle")}
                 </h2>
 
                 <div className="space-y-6">
-                  <div>
+                  <div className="contact-form-field">
                     <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
                       {t("contact.form.name")}
                     </label>
@@ -217,7 +266,7 @@ const Contact = () => {
                     />
                   </div>
 
-                  <div>
+                  <div className="contact-form-field">
                     <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
                       {t("contact.form.email")}
                     </label>
@@ -232,7 +281,7 @@ const Contact = () => {
                     />
                   </div>
 
-                  <div>
+                  <div className="contact-form-field">
                     <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-2">
                       {t("contact.form.phone")}
                     </label>
@@ -246,7 +295,7 @@ const Contact = () => {
                     />
                   </div>
 
-                  <div>
+                  <div className="contact-form-field">
                     <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
                       {t("contact.form.message")}
                     </label>

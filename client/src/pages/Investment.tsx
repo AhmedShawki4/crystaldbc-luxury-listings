@@ -339,7 +339,7 @@ const Investment = () => {
               }}
             />
             {/* Hero Section */}
-            <section className="relative py-20 md:py-32 bg-luxury-dark text-white overflow-hidden">
+            <section className="relative py-20 md:py-32 pt-36 md:pt-44 bg-luxury-dark text-white overflow-hidden">
                 <div className="absolute inset-0 z-0">
                     <img
                         src="/crystalpattern.png"

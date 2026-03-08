@@ -112,6 +112,62 @@ const Home = () => {
         }
       );
 
+      // Featured properties section – header elements
+      gsap.fromTo(
+        ".stagger-grid",
+        { opacity: 0 },
+        {
+          opacity: 1,
+          duration: 0.01,
+          scrollTrigger: {
+            trigger: ".stagger-grid",
+            start: "top 95%",
+          },
+        }
+      );
+
+      // Testimonial cards – 3D flip in
+      const testimonialCards = gsap.utils.toArray<HTMLElement>(".testimonial-card");
+      if (testimonialCards.length) {
+        gsap.fromTo(
+          testimonialCards,
+          { opacity: 0, rotateY: -15, scale: 0.9 },
+          {
+            opacity: 1,
+            rotateY: 0,
+            scale: 1,
+            duration: 0.8,
+            stagger: 0.15,
+            ease: "back.out(1.2)",
+            scrollTrigger: {
+              trigger: testimonialCards[0]?.parentElement,
+              start: "top 85%",
+            },
+          }
+        );
+      }
+
+      // Success stat counters – scale bounce
+      const successCards = gsap.utils.toArray<HTMLElement>(".success-stat-card");
+      if (successCards.length) {
+        gsap.fromTo(
+          successCards,
+          { opacity: 0, y: 60, scale: 0.85 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.7,
+            stagger: 0.2,
+            ease: "back.out(1.4)",
+            scrollTrigger: {
+              trigger: successCards[0]?.parentElement,
+              start: "top 85%",
+            },
+          }
+        );
+      }
+
     }, mainRef);
     return () => ctx.revert();
   }, []);
@@ -407,7 +463,8 @@ const Home = () => {
       </section>
 
       {/* Trusted Partners – Infinite Marquee */}
-      <section className="py-20 bg-gradient-to-b from-background via-background to-muted/20 reveal-section">
+      <section className="py-20 bg-gradient-to-b from-background via-background to-muted/20 reveal-section relative">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-luxury-gold/20 to-transparent" />
         <div className="relative overflow-hidden">
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute -top-24 right-10 h-48 w-48 rounded-full bg-luxury-gold/10 blur-3xl" />
@@ -424,6 +481,11 @@ const Home = () => {
               <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed">
                 {t("home.partnersSubtitle")}
               </p>
+              <div className="flex items-center justify-center gap-4 mt-4">
+                <div className="w-16 h-[1px] bg-gradient-to-r from-transparent to-luxury-gold/60" />
+                <div className="w-2 h-2 bg-luxury-gold rotate-45" />
+                <div className="w-16 h-[1px] bg-gradient-to-l from-transparent to-luxury-gold/60" />
+              </div>
             </div>
           </div>
 
@@ -474,20 +536,30 @@ const Home = () => {
       </section>
 
       {/* 5. Client Success Stories (Replaces How It Works) */}
-      <section className="py-24 bg-background reveal-section">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-24 bg-background reveal-section relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-luxury-gold/20 to-transparent" />
+        <div className="absolute -top-32 left-1/4 w-64 h-64 bg-luxury-gold/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-32 right-1/4 w-64 h-64 bg-luxury-gold/5 rounded-full blur-3xl" />
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-16">
             <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{successStories.eyebrow}</span>
             <h2 className="text-4xl md:text-5xl font-display font-medium text-primary">{successStories.title}</h2>
+            <div className="flex items-center justify-center gap-4 mt-4">
+              <div className="w-16 h-[1px] bg-gradient-to-r from-transparent to-luxury-gold/60" />
+              <div className="w-2 h-2 bg-luxury-gold rotate-45" />
+              <div className="w-16 h-[1px] bg-gradient-to-l from-transparent to-luxury-gold/60" />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 stagger-grid">
             {successStats.map((stat, i) => (
-              <div key={i} className="relative p-8 rounded-2xl bg-luxury-gold/5 border border-luxury-gold/10 hover:border-luxury-gold/30 transition-all duration-300 group">
+              <div key={i} className="relative p-8 rounded-2xl bg-luxury-gold/5 border border-luxury-gold/10 hover:border-luxury-gold/30 transition-all duration-500 group glow-border success-stat-card">
+                <div className="absolute top-4 right-4 w-8 h-8 border border-luxury-gold/10 rotate-45 group-hover:rotate-[135deg] transition-transform duration-700" />
                 <div className="text-5xl md:text-6xl font-display font-bold text-luxury-gold mb-4 group-hover:scale-105 transition-transform duration-300">
                   {stat.value}
                 </div>
                 <h3 className="text-xl font-semibold text-primary mb-3">{stat.label}</h3>
+                <div className="luxury-divider mb-3" />
                 <p className="text-muted-foreground font-light leading-relaxed">
                   {stat.desc}
                 </p>
@@ -506,19 +578,28 @@ const Home = () => {
       <FloatingShapes />
 
       {/* 6. Testimonials Section */}
-      <section className="py-24 bg-muted/20 reveal-section">
+      <section className="py-24 bg-muted/20 reveal-section relative overflow-hidden">
+        {/* Decorative background */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-luxury-gold/20 to-transparent" />
+        <div className="absolute -top-24 right-10 h-48 w-48 rounded-full bg-luxury-gold/5 blur-3xl" />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("home.testimonialsEyebrow")}</span>
             <h2 className="text-4xl md:text-5xl font-display font-medium text-primary">{t("home.testimonialsTitle")}</h2>
+            <div className="flex items-center justify-center gap-4 mt-4">
+              <div className="w-16 h-[1px] bg-gradient-to-r from-transparent to-luxury-gold/60" />
+              <div className="w-2 h-2 bg-luxury-gold rotate-45" />
+              <div className="w-16 h-[1px] bg-gradient-to-l from-transparent to-luxury-gold/60" />
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 stagger-grid">
             {testimonials.map((testimonial, i) => (
-              <div key={i} className="bg-background p-8 rounded-2xl shadow-sm hover:shadow-md transition-all border border-border/50">
-                <Quote className="h-8 w-8 text-luxury-gold/30 mb-6" />
+              <div key={i} className="bg-background p-8 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-500 border border-border/50 glow-border group testimonial-card" style={{ perspective: '1000px' }}>
+                <Quote className="h-8 w-8 text-luxury-gold/30 mb-6 group-hover:text-luxury-gold/50 transition-colors duration-300" />
                 <p className="text-muted-foreground italic mb-6 leading-relaxed">"{testimonial.text}"</p>
+                <div className="luxury-divider mb-6" />
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-luxury-gold/10 flex items-center justify-center text-luxury-gold font-bold">
+                  <div className="w-11 h-11 rounded-full bg-luxury-gold/10 flex items-center justify-center text-luxury-gold font-bold ring-2 ring-luxury-gold/20">
                     {testimonial.name[0]}
                   </div>
                   <div>
@@ -533,7 +614,8 @@ const Home = () => {
       </section>
 
       {/* 7. FAQ Section (NEW) */}
-      <section className="py-24 bg-background reveal-section">
+      <section className="py-24 bg-background reveal-section relative">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 faq-container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             <div className="space-y-6">
@@ -542,20 +624,20 @@ const Home = () => {
               <p className="text-lg text-muted-foreground font-light leading-relaxed">
                 {t("home.faqDescription")}
               </p>
-              <div className="p-8 bg-luxury-gold/5 border border-luxury-gold/20 rounded-lg">
+              <div className="p-8 bg-luxury-gold/5 border border-luxury-gold/20 rounded-2xl glow-border">
                 <h4 className="text-xl font-display font-semibold mb-2 text-primary">{t("home.faqCtaTitle")}</h4>
                 <p className="text-muted-foreground mb-4">{t("home.faqCtaSubtitle")}</p>
-                <Button asChild variant="outline" className="border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-white">
+                <Button asChild variant="outline" className="border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-white transition-all duration-300">
                   <Link to="/contact">{t("home.faqCtaButton")}</Link>
                 </Button>
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               <Accordion type="single" collapsible className="w-full">
                 {faqs.map((faq, index) => (
-                  <AccordionItem key={index} value={`item-${index}`} className="faq-item border-b border-border/60">
-                    <AccordionTrigger className="text-left text-lg font-medium hover:text-luxury-gold transition-colors py-6">
+                  <AccordionItem key={index} value={`item-${index}`} className="faq-item border-b border-border/40 group">
+                    <AccordionTrigger className="text-left text-lg font-medium hover:text-luxury-gold transition-colors py-6 group-hover:pl-2 transition-all duration-300">
                       {faq.question}
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground leading-relaxed text-base pb-6">

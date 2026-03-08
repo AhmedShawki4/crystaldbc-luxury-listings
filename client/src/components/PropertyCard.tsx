@@ -60,28 +60,30 @@ const PropertyCard = ({
 
   return (
     <Link to={`/property/${id}`} className="block group">
-      <Card className="overflow-hidden border-border hover-lift bg-card">
+      <Card className="overflow-hidden border-border/60 bg-card magnetic-card glow-border">
         <div className="relative h-64 overflow-hidden">
           <LazyImage
             src={getMediaUrl(image)}
             alt={title}
-            className="w-full h-full"
+            className="w-full h-full transition-transform duration-700 ease-out group-hover:scale-110"
             blurUp={true}
             rootMargin="300px"
           />
+          {/* Image overlay gradient on hover */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           {shouldShowStatus ? (
-            <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold shadow ${statusClass}`}>
+            <div className={`absolute top-4 left-4 px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg backdrop-blur-sm ${statusClass}`}>
               {status}
             </div>
           ) : null}
-          <div className="absolute top-4 right-4 bg-accent text-accent-foreground px-4 py-2 rounded-full text-sm font-semibold">
+          <div className="absolute top-4 right-4 bg-accent text-accent-foreground px-4 py-2 rounded-full text-sm font-bold shadow-lg shadow-accent/20">
             {price}
           </div>
           <Button
             type="button"
             size="icon"
             variant="secondary"
-            className="absolute bottom-4 left-4 rounded-full bg-white/90 text-black hover:bg-white"
+            className="absolute bottom-4 left-4 rounded-full bg-white/90 text-black hover:bg-white hover:scale-110 transition-all duration-300 shadow-lg"
             onClick={handleWishlist}
             disabled={!propertyId || isSaving}
             aria-label="Save to wishlist"
@@ -95,11 +97,11 @@ const PropertyCard = ({
           )}
         </div>
         <CardContent className="p-6">
-          <h3 className="text-xl font-display font-semibold text-primary mb-2 group-hover:text-accent transition-colors">
+          <h3 className="text-xl font-display font-semibold text-primary mb-2 group-hover:text-accent transition-colors duration-300">
             {title}
           </h3>
           <div className="flex items-center gap-2 text-muted-foreground mb-4">
-            <MapPin className="h-4 w-4" />
+            <MapPin className="h-4 w-4 text-accent/70" />
             <span className="text-sm">{location}</span>
           </div>
           {companyName && (
@@ -107,16 +109,17 @@ const PropertyCard = ({
               Listed by <span className="font-semibold text-foreground">{companyName}</span>
             </div>
           )}
+          <div className="luxury-divider mb-4" />
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 group-hover:text-foreground transition-colors">
               <Bed className="h-4 w-4" />
               <span>{beds} Beds</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 group-hover:text-foreground transition-colors">
               <Bath className="h-4 w-4" />
               <span>{baths} Baths</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 group-hover:text-foreground transition-colors">
               <Square className="h-4 w-4" />
               <span>{sqft}</span>
             </div>

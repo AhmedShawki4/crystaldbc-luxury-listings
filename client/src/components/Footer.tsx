@@ -24,45 +24,58 @@ const Footer = () => {
   return (
     <footer className="relative overflow-hidden bg-luxury-dark text-white">
       <div className="absolute inset-0 bg-gradient-to-br from-luxury-dark via-[#0b1c2c] to-[#111] opacity-90" />
-      <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+      {/* Decorative elements */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-luxury-gold/30 to-transparent" />
+      <div className="absolute top-0 left-1/4 w-48 h-48 bg-luxury-gold/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-1/4 w-48 h-48 bg-accent/5 rounded-full blur-3xl" />
+      
+      <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-10">
           <div>
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <img src="/crystaldbclogo.png" alt="CrystalDBC Logo" className="h-40 w-auto" />
+            <Link to="/" className="flex items-center gap-2 mb-4 group">
+              <img src="/crystaldbclogo.png" alt="CrystalDBC Logo" className="h-40 w-auto transition-transform duration-500 group-hover:scale-105" />
             </Link>
-            <p className="text-white/70 text-sm leading-relaxed">{content.description}</p>
+            <p className="text-white/60 text-sm leading-relaxed">{content.description}</p>
           </div>
 
           <div>
-            <h3 className="text-lg font-display font-semibold mb-4">Contact Us</h3>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-center gap-2 text-white/80">
-                <Phone className="h-4 w-4 text-accent" />
-                <a href={`tel:${content.contact.phone}`} className="hover:text-accent transition-colors">
+            <h3 className="text-lg font-display font-semibold mb-5 text-white/90">Contact Us</h3>
+            <div className="w-8 h-0.5 bg-luxury-gold/50 mb-5" />
+            <ul className="space-y-4 text-sm">
+              <li className="flex items-center gap-3 text-white/70 group">
+                <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-accent/20 transition-colors duration-300">
+                  <Phone className="h-4 w-4 text-accent" />
+                </div>
+                <a href={`tel:${content.contact.phone}`} className="hover:text-accent transition-colors duration-300">
                   {content.contact.phone}
                 </a>
               </li>
-              <li className="flex items-center gap-2 text-white/80">
-                <Mail className="h-4 w-4 text-accent" />
-                <a href={`mailto:${content.contact.email}`} className="hover:text-accent transition-colors">
+              <li className="flex items-center gap-3 text-white/70 group">
+                <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-accent/20 transition-colors duration-300">
+                  <Mail className="h-4 w-4 text-accent" />
+                </div>
+                <a href={`mailto:${content.contact.email}`} className="hover:text-accent transition-colors duration-300">
                   {content.contact.email}
                 </a>
               </li>
-              <li className="flex items-center gap-2 text-white/80">
-                <MapPin className="h-4 w-4 text-accent" />
+              <li className="flex items-center gap-3 text-white/70 group">
+                <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-accent/20 transition-colors duration-300">
+                  <MapPin className="h-4 w-4 text-accent" />
+                </div>
                 {content.contact.location}
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-lg font-display font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2 text-sm">
+            <h3 className="text-lg font-display font-semibold mb-5 text-white/90">Quick Links</h3>
+            <div className="w-8 h-0.5 bg-luxury-gold/50 mb-5" />
+            <ul className="space-y-3 text-sm">
               {content.quickLinks.map((link) => (
                 <li key={link.href}>
-                  <Link to={link.href} className="group flex items-center gap-2 text-white/70 hover:text-accent transition-colors">
-                    <ArrowUpRight className="h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
-                    {link.label}
+                  <Link to={link.href} className="group flex items-center gap-2 text-white/60 hover:text-accent transition-all duration-300 hover:translate-x-1">
+                    <ArrowUpRight className="h-3.5 w-3.5 opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0" />
+                    <span className="animated-underline">{link.label}</span>
                   </Link>
                 </li>
               ))}
@@ -70,10 +83,11 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="text-lg font-display font-semibold mb-4">Property Types</h3>
-            <ul className="flex flex-wrap gap-2 text-sm text-white/80">
+            <h3 className="text-lg font-display font-semibold mb-5 text-white/90">Property Types</h3>
+            <div className="w-8 h-0.5 bg-luxury-gold/50 mb-5" />
+            <ul className="flex flex-wrap gap-2 text-sm text-white/70">
               {content.propertyTypes.map((type) => (
-                <li key={type} className="rounded-full border border-white/20 px-3 py-1">
+                <li key={type} className="rounded-full border border-white/15 bg-white/[0.03] px-3.5 py-1.5 hover:border-luxury-gold/30 hover:bg-luxury-gold/5 transition-all duration-300 cursor-default">
                   {type}
                 </li>
               ))}
@@ -91,8 +105,8 @@ const Footer = () => {
           </div>
         ) : null}
 
-        <div className="border-t border-white/10 pt-8 text-center text-white/70 text-sm">
-          <p>&copy; {new Date().getFullYear()} CrystalDBC (Crystal DBC). All rights reserved.</p>
+        <div className="border-t border-white/10 pt-8 text-center">
+          <p className="text-white/50 text-sm">&copy; {new Date().getFullYear()} CrystalDBC (Crystal DBC). All rights reserved.</p>
           {/* SEO-rich semantic footer content for search engine crawlers */}
           <div className="sr-only" aria-hidden="true">
             <h2>CrystalDBC - Luxury Real Estate Worldwide</h2>
