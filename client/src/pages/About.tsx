@@ -1,6 +1,6 @@
 import { Award, Users, Target, Heart, Globe2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, lazy, Suspense } from "react";
 import SEOHead from "@/components/SEOHead";
 import { useCmsSection } from "@/hooks/useCmsSection";
 import type { AboutContent } from "@/types";
@@ -12,6 +12,8 @@ import InvestmentBox from "@/components/InvestmentBox";
 import LazyImage from "@/components/LazyImage";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+const LuxuryDiamond3D = lazy(() => import("@/components/LuxuryDiamond3D"));
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -328,22 +330,14 @@ const About = () => {
 
             <div className="about-impact-visual order-1 lg:order-2 relative">
               <div className="absolute inset-0 bg-luxury-gold/10 blur-3xl transform rotate-12 -z-10"></div>
-              <div className="aspect-square bg-luxury-dark rounded-2xl overflow-hidden relative shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-luxury-dark via-[#0a0f1d] to-black opacity-90"></div>
-
-                {/* Decorative Globe Icon */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="relative w-64 h-64 border border-white/5 rounded-full animate-spin-slow">
-                    <div className="absolute top-0 left-1/2 w-2 h-2 bg-luxury-gold rounded-full shadow-[0_0_15px_rgba(212,175,55,0.8)]"></div>
+              <div className="aspect-square rounded-2xl overflow-hidden relative shadow-2xl">
+                <Suspense fallback={
+                  <div className="w-full h-full bg-luxury-dark rounded-2xl flex items-center justify-center">
+                    <div className="w-16 h-16 border-2 border-luxury-gold/20 border-t-luxury-gold rounded-full animate-spin" />
                   </div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Globe2 className="w-32 h-32 text-luxury-gold/20" strokeWidth={0.5} />
-                  </div>
-                </div>
-
-                <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent">
-                  <p className="text-white text-center font-display text-xl">"Creating spaces that inspire."</p>
-                </div>
+                }>
+                  <LuxuryDiamond3D />
+                </Suspense>
               </div>
             </div>
 

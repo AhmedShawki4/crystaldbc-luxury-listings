@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useState, useEffect, useRef, useLayoutEffect, lazy, Suspense } from "react";
 import apiClient from "@/lib/apiClient";
 import { useCmsSection } from "@/hooks/useCmsSection";
 import type { ContactContent } from "@/types";
@@ -12,6 +12,8 @@ import PageHero from "@/components/PageHero";
 import { useTranslation } from "react-i18next";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+const ContactGlobe3D = lazy(() => import("@/components/ContactGlobe3D"));
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -173,6 +175,15 @@ const Contact = () => {
           </>
         )}
       />
+
+      {/* 3D Globe Section */}
+      <Suspense fallback={
+        <div className="w-full h-[400px] bg-luxury-dark flex items-center justify-center">
+          <div className="w-16 h-16 border-2 border-luxury-gold/20 border-t-luxury-gold rounded-full animate-spin" />
+        </div>
+      }>
+        <ContactGlobe3D />
+      </Suspense>
 
       {/* Contact Content */}
       <section className="contact-content-section py-20">
