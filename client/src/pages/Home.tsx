@@ -42,6 +42,9 @@ import { useCmsSection } from "@/hooks/useCmsSection";
 import type { ContactContent, HomePartnersContent, HomeSuccessStoriesContent } from "@/types";
 import { getMediaUrl } from "@/lib/media";
 import LazyModelViewer from "@/components/LazyModelViewer";
+import { lazy, Suspense } from "react";
+
+const Building3D = lazy(() => import("@/components/Building3D"));
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -163,6 +166,48 @@ const Home = () => {
             scrollTrigger: {
               trigger: successCards[0]?.parentElement,
               start: "top 85%",
+            },
+          }
+        );
+      }
+
+      // Partners grid – cascading reveal from bottom with rotation
+      const partnerCards = gsap.utils.toArray<HTMLElement>(".partner-card");
+      if (partnerCards.length) {
+        gsap.fromTo(
+          partnerCards,
+          { opacity: 0, y: 40, scale: 0.8, rotateX: 15 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotateX: 0,
+            duration: 0.5,
+            stagger: { each: 0.06, from: "random" },
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: ".partners-grid",
+              start: "top 88%",
+            },
+          }
+        );
+      }
+
+      // Building 3D text section – slide in
+      const building3dText = document.querySelector(".building3d-text");
+      if (building3dText) {
+        gsap.fromTo(
+          building3dText.children,
+          { opacity: 0, x: -50 },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.8,
+            stagger: 0.15,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: building3dText,
+              start: "top 80%",
             },
           }
         );
@@ -462,75 +507,81 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Trusted Partners – Infinite Marquee */}
-      <section className="py-20 bg-gradient-to-b from-background via-background to-muted/20 reveal-section relative">
+      {/* 3D Luxury Skyline Experience */}
+      <Suspense fallback={<div className="w-full h-[600px] bg-luxury-dark" />}>
+        <Building3D />
+      </Suspense>
+
+      {/* Trusted Partners – Scroll-Driven Showcase */}
+      <section className="py-20 bg-gradient-to-b from-background via-background to-muted/20 relative overflow-hidden partners-showcase">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-luxury-gold/20 to-transparent" />
-        <div className="relative overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute -top-24 right-10 h-48 w-48 rounded-full bg-luxury-gold/10 blur-3xl" />
-            <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-luxury-gold/10 blur-3xl" />
-          </div>
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-            <div className="text-center mb-12">
-              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">
-                {t("home.partnersEyebrow")}
-              </span>
-              <h2 className="text-3xl md:text-5xl font-display font-medium text-primary mb-4">
-                {t("home.partnersTitle")}
-              </h2>
-              <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed">
-                {t("home.partnersSubtitle")}
-              </p>
-              <div className="flex items-center justify-center gap-4 mt-4">
-                <div className="w-16 h-[1px] bg-gradient-to-r from-transparent to-luxury-gold/60" />
-                <div className="w-2 h-2 bg-luxury-gold rotate-45" />
-                <div className="w-16 h-[1px] bg-gradient-to-l from-transparent to-luxury-gold/60" />
-              </div>
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-24 right-10 h-48 w-48 rounded-full bg-luxury-gold/10 blur-3xl" />
+          <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-luxury-gold/10 blur-3xl" />
+        </div>
+
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-14">
+            <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">
+              {t("home.partnersEyebrow")}
+            </span>
+            <h2 className="text-3xl md:text-5xl font-display font-medium text-primary mb-4">
+              {t("home.partnersTitle")}
+            </h2>
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed">
+              {t("home.partnersSubtitle")}
+            </p>
+            <div className="flex items-center justify-center gap-4 mt-4">
+              <div className="w-16 h-[1px] bg-gradient-to-r from-transparent to-luxury-gold/60" />
+              <div className="w-2 h-2 bg-luxury-gold rotate-45" />
+              <div className="w-16 h-[1px] bg-gradient-to-l from-transparent to-luxury-gold/60" />
             </div>
           </div>
 
-          {/* Marquee slider */}
-          <div className="partners-marquee-wrapper">
-            <div className="partners-marquee">
-              {[...allPartnerItems, ...allPartnerItems].map((partner, index) => {
-                const logo = getMediaUrl(partner.logoUrl);
-                const content = (
-                  <div className="group flex flex-col items-center justify-center gap-2 p-5 rounded-2xl border border-border/60 bg-background/60 hover:bg-background hover:border-luxury-gold/40 transition-all duration-300 min-w-[150px] sm:min-w-[170px] flex-shrink-0">
+          {/* Scroll-triggered grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-5 partners-grid">
+            {allPartnerItems.map((partner, index) => {
+              const logo = getMediaUrl(partner.logoUrl);
+              const card = (
+                <div className="partner-card group relative flex flex-col items-center justify-center gap-3 p-5 rounded-2xl border border-border/40 bg-background/40 backdrop-blur-sm hover:bg-background/80 hover:border-luxury-gold/40 hover:shadow-lg hover:shadow-luxury-gold/5 transition-all duration-500 h-[120px] overflow-hidden">
+                  {/* Hover glow */}
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-luxury-gold/0 via-luxury-gold/0 to-luxury-gold/0 group-hover:from-luxury-gold/5 group-hover:via-transparent group-hover:to-luxury-gold/5 transition-all duration-700" />
+                  <div className="relative z-10 flex flex-col items-center gap-2">
                     {logo ? (
                       <img
                         src={logo}
                         alt={partner.name}
-                        className="max-h-14 w-auto object-contain opacity-70 group-hover:opacity-100 transition partner-logo"
+                        className="max-h-10 w-auto object-contain opacity-50 group-hover:opacity-100 transition-all duration-500 group-hover:scale-110 partner-logo"
                         loading="lazy"
                       />
                     ) : (
-                      <span className="text-sm md:text-base font-display font-semibold text-primary/70 group-hover:text-primary transition whitespace-nowrap">
+                      <span className="text-sm font-display font-semibold text-primary/40 group-hover:text-primary transition-all duration-500 whitespace-nowrap">
                         {partner.name}
                       </span>
                     )}
                     {logo && partner.name ? (
-                      <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground text-center">
+                      <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground/60 group-hover:text-muted-foreground transition-all duration-500 text-center leading-tight">
                         {partner.name}
                       </span>
                     ) : null}
                   </div>
-                );
+                </div>
+              );
 
-                return partner.website ? (
-                  <a
-                    key={`${partner.name}-${index}`}
-                    href={partner.website}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block flex-shrink-0"
-                  >
-                    {content}
-                  </a>
-                ) : (
-                  <div key={`${partner.name}-${index}`} className="flex-shrink-0">{content}</div>
-                );
-              })}
-            </div>
+              return partner.website ? (
+                <a
+                  key={`${partner.name}-${index}`}
+                  href={partner.website}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block"
+                >
+                  {card}
+                </a>
+              ) : (
+                <div key={`${partner.name}-${index}`}>{card}</div>
+              );
+            })}
           </div>
         </div>
       </section>
