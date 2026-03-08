@@ -1,36 +1,71 @@
 import { useRef, useMemo, useState } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Environment } from "@react-three/drei";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Float, Environment, MeshTransmissionMaterial } from "@react-three/drei";
 import * as THREE from "three";
 
-/* ─── single glass tower ─── */
+/* ═══════════════════════════════════════════════════════
+   STARFIELD BACKGROUND — deep space feel
+   ═══════════════════════════════════════════════════════ */
+function Starfield({ count = 800 }: { count?: number }) {
+  const ref = useRef<THREE.Points>(null!);
+
+  const [positions, sizes] = useMemo(() => {
+    const pos = new Float32Array(count * 3);
+    const sz = new Float32Array(count);
+    for (let i = 0; i < count; i++) {
+      // Distribute in a large sphere
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const r = 18 + Math.random() * 30;
+      pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      pos[i * 3 + 2] = r * Math.cos(phi);
+      sz[i] = Math.random() * 0.06 + 0.01;
+    }
+    return [pos, sz];
+  }, [count]);
+
+  useFrame((state) => {
+    if (ref.current) {
+      ref.current.rotation.y = state.clock.elapsedTime * 0.005;
+      ref.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.003) * 0.05;
+    }
+  });
+
+  return (
+    <points ref={ref}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
+        <bufferAttribute attach="attributes-size" count={count} array={sizes} itemSize={1} />
+      </bufferGeometry>
+      <pointsMaterial color="#f0e6d0" size={0.06} transparent opacity={0.7} sizeAttenuation />
+    </points>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   SINGLE GLASS TOWER
+   ═══════════════════════════════════════════════════════ */
 interface TowerProps {
   position: [number, number, number];
   height: number;
   width: number;
   depth: number;
   goldTint?: boolean;
-  rotationSpeed?: number;
 }
 
-function Tower({ position, height, width, depth, goldTint, rotationSpeed = 0 }: TowerProps) {
-  const meshRef = useRef<THREE.Group>(null!);
-  const edgeRef = useRef<THREE.LineSegments>(null!);
+function Tower({ position, height, width, depth, goldTint }: TowerProps) {
   const glowRef = useRef<THREE.Mesh>(null!);
 
-  // Floors (horizontal lines inside the tower)
   const floorCount = Math.floor(height / 0.35);
+
   const floorGeom = useMemo(() => {
     const pts: number[] = [];
     for (let i = 1; i <= floorCount; i++) {
       const y = -height / 2 + i * (height / (floorCount + 1));
-      // Front face
       pts.push(-width / 2, y, depth / 2, width / 2, y, depth / 2);
-      // Right face
       pts.push(width / 2, y, depth / 2, width / 2, y, -depth / 2);
-      // Back face
       pts.push(width / 2, y, -depth / 2, -width / 2, y, -depth / 2);
-      // Left face
       pts.push(-width / 2, y, -depth / 2, -width / 2, y, depth / 2);
     }
     const geom = new THREE.BufferGeometry();
@@ -38,15 +73,12 @@ function Tower({ position, height, width, depth, goldTint, rotationSpeed = 0 }: 
     return geom;
   }, [height, width, depth, floorCount]);
 
-  // Window grid (vertical lines)
   const windowGeom = useMemo(() => {
     const pts: number[] = [];
     const cols = Math.max(2, Math.floor(width / 0.25));
     for (let c = 1; c < cols; c++) {
       const x = -width / 2 + c * (width / cols);
-      // Front
       pts.push(x, -height / 2, depth / 2, x, height / 2, depth / 2);
-      // Back
       pts.push(x, -height / 2, -depth / 2, x, height / 2, -depth / 2);
     }
     const depthCols = Math.max(2, Math.floor(depth / 0.25));
@@ -60,109 +92,245 @@ function Tower({ position, height, width, depth, goldTint, rotationSpeed = 0 }: 
     return geom;
   }, [height, width, depth]);
 
-  useFrame((state) => {
-    if (meshRef.current && rotationSpeed) {
-      meshRef.current.rotation.y += rotationSpeed * 0.002;
+  // Lit window dots (scattered emissive quads on facade)
+  const windowLights = useMemo(() => {
+    const lights: { x: number; y: number; z: number }[] = [];
+    const rows = Math.floor(height / 0.4);
+    const colsF = Math.max(2, Math.floor(width / 0.3));
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < colsF; c++) {
+        if (Math.random() > 0.45) continue; // only ~55% of windows lit
+        const y = -height / 2 + 0.3 + r * (height / rows);
+        const x = -width / 2 + 0.15 + c * (width / colsF);
+        lights.push({ x, y, z: depth / 2 + 0.005 });
+      }
     }
-    // Pulse glow
+    return lights;
+  }, [height, width, depth]);
+
+  useFrame((state) => {
     if (glowRef.current) {
       const mat = glowRef.current.material as THREE.MeshBasicMaterial;
-      mat.opacity = 0.03 + Math.sin(state.clock.elapsedTime * 1.2) * 0.015;
+      mat.opacity = 0.04 + Math.sin(state.clock.elapsedTime * 1.2) * 0.02;
     }
   });
 
   const edgeColor = goldTint ? "#d4af37" : "#4a90d9";
   const floorColor = goldTint ? "#c9a227" : "#3a7bc8";
   const glowColor = goldTint ? "#d4af37" : "#4a90d9";
+  const windowLightColor = goldTint ? "#ffe4a0" : "#a0d0ff";
 
   const boxGeom = useMemo(() => new THREE.BoxGeometry(width, height, depth), [width, height, depth]);
   const edgesGeom = useMemo(() => new THREE.EdgesGeometry(boxGeom), [boxGeom]);
 
   return (
-    <group ref={meshRef} position={position}>
+    <group position={position}>
       {/* Glass body */}
       <mesh geometry={boxGeom}>
         <meshPhysicalMaterial
-          color={goldTint ? "#1a1810" : "#0d1520"}
-          metalness={0.9}
-          roughness={0.1}
+          color={goldTint ? "#1a1810" : "#0a1020"}
+          metalness={0.95}
+          roughness={0.05}
           transparent
-          opacity={0.35}
-          envMapIntensity={1.5}
+          opacity={0.3}
+          envMapIntensity={2}
+          clearcoat={1}
+          clearcoatRoughness={0.1}
         />
       </mesh>
 
       {/* Wireframe edges */}
-      <lineSegments ref={edgeRef} geometry={edgesGeom}>
-        <lineBasicMaterial color={edgeColor} transparent opacity={0.7} />
+      <lineSegments geometry={edgesGeom}>
+        <lineBasicMaterial color={edgeColor} transparent opacity={0.8} />
       </lineSegments>
 
       {/* Floor lines */}
       <lineSegments geometry={floorGeom}>
-        <lineBasicMaterial color={floorColor} transparent opacity={0.2} />
+        <lineBasicMaterial color={floorColor} transparent opacity={0.18} />
       </lineSegments>
 
       {/* Window grid */}
       <lineSegments geometry={windowGeom}>
-        <lineBasicMaterial color={floorColor} transparent opacity={0.12} />
+        <lineBasicMaterial color={floorColor} transparent opacity={0.1} />
       </lineSegments>
 
-      {/* Top antenna / spire for tallest tower */}
-      {height > 3 && (
-        <mesh position={[0, height / 2 + 0.4, 0]}>
-          <cylinderGeometry args={[0.02, 0.06, 0.8, 8]} />
-          <meshStandardMaterial color={edgeColor} metalness={1} roughness={0.2} emissive={edgeColor} emissiveIntensity={0.3} />
+      {/* Lit windows – small emissive planes */}
+      {windowLights.map((w, i) => (
+        <mesh key={i} position={[w.x, w.y, w.z]}>
+          <planeGeometry args={[0.08, 0.06]} />
+          <meshBasicMaterial color={windowLightColor} transparent opacity={0.7} />
         </mesh>
+      ))}
+
+      {/* Top spire for tall towers */}
+      {height > 3 && (
+        <group position={[0, height / 2, 0]}>
+          <mesh position={[0, 0.45, 0]}>
+            <cylinderGeometry args={[0.015, 0.05, 0.9, 8]} />
+            <meshStandardMaterial color={edgeColor} metalness={1} roughness={0.2} emissive={edgeColor} emissiveIntensity={0.5} />
+          </mesh>
+          {/* Beacon light at top */}
+          <pointLight position={[0, 0.95, 0]} color={edgeColor} intensity={2} distance={4} />
+        </group>
       )}
 
       {/* Glow volume */}
-      <mesh ref={glowRef} geometry={boxGeom} scale={[1.08, 1.02, 1.08]}>
+      <mesh ref={glowRef} geometry={boxGeom} scale={[1.1, 1.03, 1.1]}>
         <meshBasicMaterial color={glowColor} transparent opacity={0.04} side={THREE.BackSide} />
       </mesh>
     </group>
   );
 }
 
-/* ─── ground grid ─── */
-function GroundGrid() {
-  const gridRef = useRef<THREE.GridHelper>(null!);
+/* ═══════════════════════════════════════════════════════
+   FLOATING CRYSTAL — glass octahedron with inner glow
+   ═══════════════════════════════════════════════════════ */
+interface CrystalProps {
+  position: [number, number, number];
+  scale?: number;
+  color?: string;
+  speed?: number;
+  orbitRadius?: number;
+  orbitOffset?: number;
+}
+
+function Crystal({ position, scale = 0.35, color = "#d4af37", speed = 0.4, orbitRadius = 0, orbitOffset = 0 }: CrystalProps) {
+  const ref = useRef<THREE.Group>(null!);
+  const innerRef = useRef<THREE.Mesh>(null!);
+
   useFrame((state) => {
-    if (gridRef.current) {
-      const mat = gridRef.current.material as THREE.Material;
-      (mat as THREE.MeshBasicMaterial).opacity = 0.15 + Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
+    const t = state.clock.elapsedTime;
+    if (ref.current) {
+      // Orbit if radius set
+      if (orbitRadius > 0) {
+        ref.current.position.x = position[0] + Math.cos(t * speed + orbitOffset) * orbitRadius;
+        ref.current.position.z = position[2] + Math.sin(t * speed + orbitOffset) * orbitRadius;
+      }
+      // Gentle vertical bob
+      ref.current.position.y = position[1] + Math.sin(t * speed * 1.5 + orbitOffset) * 0.3;
+      // Spin
+      ref.current.rotation.y = t * speed * 0.8;
+      ref.current.rotation.x = Math.sin(t * speed * 0.5) * 0.3;
+    }
+    // Inner glow pulse
+    if (innerRef.current) {
+      const mat = innerRef.current.material as THREE.MeshBasicMaterial;
+      mat.opacity = 0.4 + Math.sin(t * 2 + orbitOffset) * 0.2;
     }
   });
+
   return (
-    <gridHelper
-      ref={gridRef}
-      args={[20, 40, "#d4af37", "#1a2030"]}
-      position={[0, -2.5, 0]}
-      rotation={[0, 0, 0]}
-    />
+    <group ref={ref} position={position}>
+      {/* Outer crystal shell */}
+      <mesh scale={scale}>
+        <octahedronGeometry args={[1, 0]} />
+        <MeshTransmissionMaterial
+          backside
+          samples={6}
+          thickness={0.4}
+          chromaticAberration={0.15}
+          anisotropy={0.2}
+          distortion={0.1}
+          distortionScale={0.2}
+          temporalDistortion={0.1}
+          ior={1.5}
+          color={color}
+          transmissionSampler={false}
+        />
+      </mesh>
+
+      {/* Wireframe outline */}
+      <mesh scale={scale * 1.01}>
+        <octahedronGeometry args={[1, 0]} />
+        <meshBasicMaterial color={color} wireframe transparent opacity={0.4} />
+      </mesh>
+
+      {/* Inner glow core */}
+      <mesh ref={innerRef} scale={scale * 0.45}>
+        <octahedronGeometry args={[1, 0]} />
+        <meshBasicMaterial color={color} transparent opacity={0.5} />
+      </mesh>
+
+      {/* Point light for bleed */}
+      <pointLight color={color} intensity={1.5} distance={3} />
+    </group>
   );
 }
 
-/* ─── floating particles ─── */
-function Particles({ count = 60 }: { count?: number }) {
+/* ═══════════════════════════════════════════════════════
+   LIGHT BEAMS — volumetric spotlights from ground
+   ═══════════════════════════════════════════════════════ */
+function LightBeam({ position, color = "#d4af37", height = 8 }: { position: [number, number, number]; color?: string; height?: number }) {
+  const ref = useRef<THREE.Mesh>(null!);
+
+  useFrame((state) => {
+    if (ref.current) {
+      const mat = ref.current.material as THREE.MeshBasicMaterial;
+      mat.opacity = 0.04 + Math.sin(state.clock.elapsedTime * 0.8 + position[0]) * 0.02;
+    }
+  });
+
+  return (
+    <mesh ref={ref} position={[position[0], position[1] + height / 2, position[2]]}>
+      <cylinderGeometry args={[0.01, 0.3, height, 8, 1, true]} />
+      <meshBasicMaterial color={color} transparent opacity={0.05} side={THREE.DoubleSide} depthWrite={false} />
+    </mesh>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   GROUND GRID with gradient fade
+   ═══════════════════════════════════════════════════════ */
+function GroundGrid() {
+  const gridRef = useRef<THREE.GridHelper>(null!);
+
+  useFrame((state) => {
+    if (gridRef.current) {
+      const mat = gridRef.current.material as THREE.Material;
+      (mat as THREE.MeshBasicMaterial).opacity = 0.12 + Math.sin(state.clock.elapsedTime * 0.5) * 0.04;
+    }
+  });
+
+  return (
+    <>
+      <gridHelper ref={gridRef} args={[24, 48, "#d4af37", "#111828"]} position={[0, -2.5, 0]} />
+      {/* Ground reflective plane */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.49, 0]}>
+        <planeGeometry args={[24, 24]} />
+        <meshPhysicalMaterial
+          color="#080c18"
+          metalness={0.8}
+          roughness={0.3}
+          transparent
+          opacity={0.6}
+        />
+      </mesh>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   GOLD DUST PARTICLES
+   ═══════════════════════════════════════════════════════ */
+function Particles({ count = 100 }: { count?: number }) {
   const ref = useRef<THREE.Points>(null!);
 
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      arr[i * 3] = (Math.random() - 0.5) * 14;
-      arr[i * 3 + 1] = Math.random() * 8 - 2;
-      arr[i * 3 + 2] = (Math.random() - 0.5) * 14;
+      arr[i * 3] = (Math.random() - 0.5) * 16;
+      arr[i * 3 + 1] = Math.random() * 10 - 2;
+      arr[i * 3 + 2] = (Math.random() - 0.5) * 16;
     }
     return arr;
   }, [count]);
 
   useFrame((state) => {
     if (ref.current) {
-      ref.current.rotation.y = state.clock.elapsedTime * 0.02;
+      ref.current.rotation.y = state.clock.elapsedTime * 0.015;
       const pos = ref.current.geometry.attributes.position;
       for (let i = 0; i < count; i++) {
-        const y = pos.getY(i);
-        pos.setY(i, y + Math.sin(state.clock.elapsedTime + i) * 0.001);
+        pos.setY(i, pos.getY(i) + Math.sin(state.clock.elapsedTime * 0.5 + i * 0.7) * 0.0015);
       }
       pos.needsUpdate = true;
     }
@@ -171,77 +339,123 @@ function Particles({ count = 60 }: { count?: number }) {
   return (
     <points ref={ref}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={count}
-          array={positions}
-          itemSize={3}
-        />
+        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
       </bufferGeometry>
-      <pointsMaterial color="#d4af37" size={0.04} transparent opacity={0.6} sizeAttenuation />
+      <pointsMaterial color="#d4af37" size={0.05} transparent opacity={0.65} sizeAttenuation />
     </points>
   );
 }
 
-/* ─── scene composition ─── */
+/* ═══════════════════════════════════════════════════════
+   FOG BACKGROUND PLANE (gradient)
+   ═══════════════════════════════════════════════════════ */
+function BackgroundSphere() {
+  return (
+    <mesh>
+      <sphereGeometry args={[50, 32, 32]} />
+      <meshBasicMaterial
+        color="#060a14"
+        side={THREE.BackSide}
+      />
+    </mesh>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   SCENE COMPOSITION
+   ═══════════════════════════════════════════════════════ */
 function CityScene() {
   const groupRef = useRef<THREE.Group>(null!);
+  const { viewport } = useThree();
+  const isMobile = viewport.width < 6;
 
   useFrame((state) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.15) * 0.3 + state.clock.elapsedTime * 0.05;
+      groupRef.current.rotation.y =
+        Math.sin(state.clock.elapsedTime * 0.12) * 0.25 + state.clock.elapsedTime * 0.04;
     }
   });
 
   return (
     <>
-      <ambientLight intensity={0.3} />
-      <directionalLight position={[5, 8, 5]} intensity={1} color="#fff5e6" />
-      <directionalLight position={[-3, 6, -4]} intensity={0.4} color="#4a90d9" />
-      <pointLight position={[0, 6, 0]} intensity={0.8} color="#d4af37" distance={15} />
+      {/* Background */}
+      <BackgroundSphere />
+      <Starfield count={isMobile ? 400 : 800} />
 
-      <Float speed={0.8} rotationIntensity={0.05} floatIntensity={0.3}>
+      {/* Scene fog */}
+      <fog attach="fog" args={["#060a14", 12, 40]} />
+
+      {/* Lighting rig */}
+      <ambientLight intensity={0.25} />
+      <directionalLight position={[5, 10, 5]} intensity={1.2} color="#fff5e6" />
+      <directionalLight position={[-4, 6, -5]} intensity={0.5} color="#4a90d9" />
+      <pointLight position={[0, 7, 0]} intensity={1.2} color="#d4af37" distance={18} />
+      {/* Rim light from behind */}
+      <pointLight position={[-3, 3, -6]} intensity={0.6} color="#6a5acd" distance={15} />
+      <pointLight position={[4, 2, -5]} intensity={0.4} color="#1e90ff" distance={12} />
+
+      <Float speed={0.6} rotationIntensity={0.03} floatIntensity={0.2}>
         <group ref={groupRef}>
-          {/* Centre tower – tallest, gold */}
-          <Tower position={[0, 1.2, 0]} height={5.5} width={1} depth={1} goldTint rotationSpeed={0} />
-          {/* Left tower */}
-          <Tower position={[-1.8, 0.35, 0.3]} height={3.5} width={0.8} depth={0.8} rotationSpeed={0} />
-          {/* Right tower */}
-          <Tower position={[1.7, 0.55, -0.2]} height={4} width={0.9} depth={0.7} goldTint rotationSpeed={0} />
-          {/* Far back */}
-          <Tower position={[0.3, -0.1, -1.5]} height={2.8} width={0.7} depth={0.7} rotationSpeed={0} />
-          {/* Small left */}
-          <Tower position={[-2.8, -0.3, -0.8]} height={2.2} width={0.6} depth={0.6} rotationSpeed={0} />
-          {/* Small right */}
-          <Tower position={[2.9, -0.15, 0.6]} height={2.5} width={0.65} depth={0.65} goldTint rotationSpeed={0} />
+          {/* ── Towers ── */}
+          <Tower position={[0, 1.2, 0]} height={5.5} width={1} depth={1} goldTint />
+          <Tower position={[-1.8, 0.35, 0.3]} height={3.5} width={0.8} depth={0.8} />
+          <Tower position={[1.7, 0.55, -0.2]} height={4} width={0.9} depth={0.7} goldTint />
+          <Tower position={[0.3, -0.1, -1.5]} height={2.8} width={0.7} depth={0.7} />
+          <Tower position={[-2.8, -0.3, -0.8]} height={2.2} width={0.6} depth={0.6} />
+          <Tower position={[2.9, -0.15, 0.6]} height={2.5} width={0.65} depth={0.65} goldTint />
+          {/* Extra backdrop tower */}
+          <Tower position={[-0.8, 0.0, -2.2]} height={2.0} width={0.55} depth={0.55} />
+
+          {/* ── Floating Crystals ── */}
+          <Crystal position={[2.2, 3.5, 1.5]} scale={0.3} color="#d4af37" speed={0.35} orbitRadius={1.2} orbitOffset={0} />
+          <Crystal position={[-2.5, 4.2, -1]} scale={0.22} color="#4a90d9" speed={0.45} orbitRadius={1.5} orbitOffset={2} />
+          <Crystal position={[0, 5.5, 0]} scale={0.4} color="#d4af37" speed={0.25} orbitRadius={0.8} orbitOffset={4} />
+          <Crystal position={[-1.5, 2.5, 2]} scale={0.18} color="#8a6fff" speed={0.5} orbitRadius={1} orbitOffset={1} />
+          <Crystal position={[3, 2, -1.5]} scale={0.2} color="#d4af37" speed={0.38} orbitRadius={0.6} orbitOffset={3} />
+
+          {/* ── Light Beams ── */}
+          <LightBeam position={[0, -2.5, 0]} color="#d4af37" height={12} />
+          <LightBeam position={[1.7, -2.5, -0.2]} color="#4a90d9" height={9} />
+          <LightBeam position={[-1.8, -2.5, 0.3]} color="#d4af37" height={8} />
 
           <GroundGrid />
-          <Particles />
+          <Particles count={isMobile ? 50 : 100} />
         </group>
       </Float>
 
-      <Environment preset="city" />
+      <Environment preset="night" />
     </>
   );
 }
 
-/* ─── exported component ─── */
+/* ═══════════════════════════════════════════════════════
+   EXPORTED COMPONENT
+   ═══════════════════════════════════════════════════════ */
 export default function Building3D() {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <section className="relative w-full bg-luxury-dark overflow-hidden">
-      {/* Decorative top gradient */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-luxury-gold/30 to-transparent z-10" />
+    <section className="relative w-full overflow-hidden" style={{ background: "linear-gradient(180deg, #04060d 0%, #080e1e 40%, #0a1228 70%, #060a14 100%)" }}>
+      {/* Decorative top gradient line */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-luxury-gold/40 to-transparent z-10" />
 
-      {/* Background ambient glow */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-luxury-gold/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/5 rounded-full blur-[100px]" />
+      {/* Background ambient glows */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[10%] left-[15%] w-[500px] h-[500px] bg-luxury-gold/[0.04] rounded-full blur-[150px]" />
+        <div className="absolute bottom-[10%] right-[10%] w-[400px] h-[400px] bg-blue-600/[0.04] rounded-full blur-[120px]" />
+        <div className="absolute top-[40%] right-[30%] w-[300px] h-[300px] bg-purple-600/[0.03] rounded-full blur-[100px]" />
+        {/* Subtle grid overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: "linear-gradient(rgba(212,175,55,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(212,175,55,0.3) 1px, transparent 1px)",
+            backgroundSize: "60px 60px",
+          }}
+        />
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center min-h-[600px] py-16 md:py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center min-h-[650px] py-16 md:py-24">
           {/* Text content */}
           <div className="space-y-6 order-2 lg:order-1 building3d-text">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/20">
@@ -278,27 +492,33 @@ export default function Building3D() {
 
           {/* 3D Canvas */}
           <div
-            className="order-1 lg:order-2 relative h-[450px] md:h-[550px] lg:h-[600px] cursor-grab active:cursor-grabbing"
+            className="order-1 lg:order-2 relative h-[480px] md:h-[580px] lg:h-[650px] cursor-grab active:cursor-grabbing"
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
           >
             {/* Corner accents */}
-            <div className="absolute top-0 left-0 w-12 h-12 border-t border-l border-luxury-gold/20 rounded-tl-lg" />
-            <div className="absolute top-0 right-0 w-12 h-12 border-t border-r border-luxury-gold/20 rounded-tr-lg" />
-            <div className="absolute bottom-0 left-0 w-12 h-12 border-b border-l border-luxury-gold/20 rounded-bl-lg" />
-            <div className="absolute bottom-0 right-0 w-12 h-12 border-b border-r border-luxury-gold/20 rounded-br-lg" />
+            <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-luxury-gold/15 rounded-tl-xl z-10" />
+            <div className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-luxury-gold/15 rounded-tr-xl z-10" />
+            <div className="absolute bottom-0 left-0 w-16 h-16 border-b-2 border-l-2 border-luxury-gold/15 rounded-bl-xl z-10" />
+            <div className="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-luxury-gold/15 rounded-br-xl z-10" />
 
-            {/* Hover ring */}
-            <div className={`absolute inset-0 border border-luxury-gold/0 rounded-lg transition-all duration-700 ${hovered ? "border-luxury-gold/10" : ""}`} />
+            {/* Hover glow ring */}
+            <div className={`absolute inset-0 rounded-xl transition-all duration-1000 ${hovered ? "shadow-[inset_0_0_60px_rgba(212,175,55,0.06)]" : ""}`} />
 
             <Canvas
-              camera={{ position: [6, 4, 8], fov: 40 }}
+              camera={{ position: [7, 4.5, 9], fov: 38 }}
               dpr={[1, 1.5]}
-              gl={{ antialias: true, alpha: true }}
+              gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
               style={{ background: "transparent" }}
             >
               <CityScene />
             </Canvas>
+
+            {/* Floating label */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 backdrop-blur-md border border-white/10 z-10">
+              <div className="w-1 h-1 rounded-full bg-luxury-gold animate-pulse" />
+              <span className="text-[10px] text-white/40 uppercase tracking-[0.2em]">Interactive 3D</span>
+            </div>
           </div>
         </div>
       </div>
