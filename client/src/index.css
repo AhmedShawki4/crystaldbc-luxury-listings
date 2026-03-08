@@ -228,6 +228,39 @@ All colors MUST be HSL.
     scrollbar-color: hsl(var(--luxury-gold)) hsl(var(--luxury-dark));
   }
 
+  /* Partners infinite marquee */
+  @keyframes marquee-scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .partners-marquee-wrapper {
+    overflow: hidden;
+    width: 100%;
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+
+  .partners-marquee {
+    display: flex;
+    gap: 1.5rem;
+    width: max-content;
+    animation: marquee-scroll 35s linear infinite;
+  }
+
+  .partners-marquee:hover {
+    animation-play-state: paused;
+  }
+
+  /* Invert dark logos in dark mode so they're visible */
+  .dark .partner-logo {
+    filter: invert(1) brightness(1.8);
+  }
+
   .dialog-scroll::-webkit-scrollbar {
     width: 10px;
   }

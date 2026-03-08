@@ -190,6 +190,21 @@ const Home = () => {
     fallbackSuccessStories,
   );
 
+  const DEFAULT_TRUSTED_BRANDS = useMemo(() => [
+    { name: "Forbes", logoUrl: "/logos/forbes.svg", website: "https://www.forbes.com" },
+    { name: "Bloomberg", logoUrl: "/logos/bloomberg.svg", website: "https://www.bloomberg.com" },
+    { name: "Christie's Real Estate", logoUrl: "/logos/christies.svg", website: "https://www.christiesrealestate.com" },
+    { name: "Sotheby's Realty", logoUrl: "/logos/sothebys.svg", website: "https://www.sothebysrealty.com" },
+    { name: "Knight Frank", logoUrl: "/logos/knightfrank.svg", website: "https://www.knightfrank.com" },
+    { name: "Savills", logoUrl: "/logos/savills.svg", website: "https://www.savills.com" },
+    { name: "CBRE", logoUrl: "/logos/cbre.svg", website: "https://www.cbre.com" },
+    { name: "JLL", logoUrl: "/logos/jll.svg", website: "https://www.jll.com" },
+    { name: "Berkshire Hathaway", logoUrl: "/logos/berkshire.svg", website: "https://www.berkshirehathaway.com" },
+    { name: "Cushman & Wakefield", logoUrl: "/logos/cushman.svg", website: "https://www.cushmanwakefield.com" },
+    { name: "The Wall Street Journal", logoUrl: "/logos/wsj.svg", website: "https://www.wsj.com" },
+    { name: "Financial Times", logoUrl: "/logos/ft.svg", website: "https://www.ft.com" },
+  ], []);
+
   const fallbackPartners = useMemo<HomePartnersContent>(() => ({ partners: [] }), []);
   const { data: partnersContent } = useCmsSection<HomePartnersContent>(
     "homePartners",
@@ -200,9 +215,12 @@ const Home = () => {
   const successStats = Array.isArray(successStories.stats) ? successStories.stats : fallbackSuccessStories.stats;
 
   const partners = partnersContent ?? fallbackPartners;
-  const partnerItems = Array.isArray(partners.partners) ? partners.partners : [];
-  const showPartnersSection = partnerItems.length > 0;
-  const partnersLayoutClass = partnerItems.length < 6 ? "justify-center" : "justify-start";
+  const cmsPartnerItems = Array.isArray(partners.partners) ? partners.partners : [];
+  const allPartnerItems = useMemo(() => {
+    const cmsNames = new Set(cmsPartnerItems.map(p => p.name.toLowerCase()));
+    const uniqueDefaults = DEFAULT_TRUSTED_BRANDS.filter(b => !cmsNames.has(b.name.toLowerCase()));
+    return [...cmsPartnerItems, ...uniqueDefaults];
+  }, [cmsPartnerItems, DEFAULT_TRUSTED_BRANDS]);
 
   const testimonialItems = t("home.testimonialsItems", { returnObjects: true });
   const testimonials = Array.isArray(testimonialItems)
@@ -373,68 +391,72 @@ const Home = () => {
         </div>
       </section>
 
-      {showPartnersSection ? (
-        <section className="py-20 bg-gradient-to-b from-background via-background to-muted/20 reveal-section">
-          <div className="relative overflow-hidden">
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute -top-24 right-10 h-48 w-48 rounded-full bg-luxury-gold/10 blur-3xl" />
-              <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-luxury-gold/10 blur-3xl" />
-            </div>
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-              <div className="text-center mb-12">
-                <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">
-                  {t("home.partnersEyebrow")}
-                </span>
-                <h2 className="text-3xl md:text-5xl font-display font-medium text-primary mb-4">
-                  {t("home.partnersTitle")}
-                </h2>
-                <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed">
-                  {t("home.partnersSubtitle")}
-                </p>
-              </div>
-
-              {partnerItems.length > 0 ? (
-                <div className={`flex flex-wrap ${partnersLayoutClass} gap-6 items-center`}>
-                  {partnerItems.map((partner, index) => {
-                    const logo = getMediaUrl(partner.logoUrl);
-                    const content = (
-                      <div className="group flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-border/60 bg-background/60 hover:bg-background transition-all duration-300 w-[140px] sm:w-[160px]">
-                        {logo ? (
-                          <img
-                            src={logo}
-                            alt={partner.name}
-                            className="max-h-14 w-auto object-contain opacity-80 group-hover:opacity-100 transition"
-                            loading="lazy"
-                          />
-                        ) : null}
-                        {partner.name ? (
-                          <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground text-center">
-                            {partner.name}
-                          </span>
-                        ) : null}
-                      </div>
-                    );
-
-                    return partner.website ? (
-                      <a
-                        key={`${partner.name}-${index}`}
-                        href={partner.website}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="block"
-                      >
-                        {content}
-                      </a>
-                    ) : (
-                      <div key={`${partner.name}-${index}`}>{content}</div>
-                    );
-                  })}
-                </div>
-              ) : null}
+      {/* Trusted Partners – Infinite Marquee */}
+      <section className="py-20 bg-gradient-to-b from-background via-background to-muted/20 reveal-section">
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute -top-24 right-10 h-48 w-48 rounded-full bg-luxury-gold/10 blur-3xl" />
+            <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-luxury-gold/10 blur-3xl" />
+          </div>
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="text-center mb-12">
+              <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">
+                {t("home.partnersEyebrow")}
+              </span>
+              <h2 className="text-3xl md:text-5xl font-display font-medium text-primary mb-4">
+                {t("home.partnersTitle")}
+              </h2>
+              <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed">
+                {t("home.partnersSubtitle")}
+              </p>
             </div>
           </div>
-        </section>
-      ) : null}
+
+          {/* Marquee slider */}
+          <div className="partners-marquee-wrapper">
+            <div className="partners-marquee">
+              {[...allPartnerItems, ...allPartnerItems].map((partner, index) => {
+                const logo = getMediaUrl(partner.logoUrl);
+                const content = (
+                  <div className="group flex flex-col items-center justify-center gap-2 p-5 rounded-2xl border border-border/60 bg-background/60 hover:bg-background hover:border-luxury-gold/40 transition-all duration-300 min-w-[150px] sm:min-w-[170px] flex-shrink-0">
+                    {logo ? (
+                      <img
+                        src={logo}
+                        alt={partner.name}
+                        className="max-h-14 w-auto object-contain opacity-70 group-hover:opacity-100 transition partner-logo"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <span className="text-sm md:text-base font-display font-semibold text-primary/70 group-hover:text-primary transition whitespace-nowrap">
+                        {partner.name}
+                      </span>
+                    )}
+                    {logo && partner.name ? (
+                      <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground text-center">
+                        {partner.name}
+                      </span>
+                    ) : null}
+                  </div>
+                );
+
+                return partner.website ? (
+                  <a
+                    key={`${partner.name}-${index}`}
+                    href={partner.website}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block flex-shrink-0"
+                  >
+                    {content}
+                  </a>
+                ) : (
+                  <div key={`${partner.name}-${index}`} className="flex-shrink-0">{content}</div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* 5. Client Success Stories (Replaces How It Works) */}
       <section className="py-24 bg-background reveal-section">
