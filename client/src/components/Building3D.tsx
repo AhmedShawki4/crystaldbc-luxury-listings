@@ -415,10 +415,12 @@ function EnergyBridge({ start, end, color = "#d4af37" }: {
     }
   });
 
+  const Line = 'line' as any;
+
   return (
-    <line ref={ref as React.RefObject<THREE.Line>} geometry={geom}>
+    <Line ref={ref} geometry={geom}>
       <lineBasicMaterial color={color} transparent opacity={0.1} />
-    </line>
+    </Line>
   );
 }
 
