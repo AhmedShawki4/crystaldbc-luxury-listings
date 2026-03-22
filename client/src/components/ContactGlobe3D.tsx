@@ -180,7 +180,6 @@ function ConnectionArcs() {
           // @ts-expect-error - React Three Fiber line component type mismatch with standard SVG line
           <line key={i} geometry={geo}>
             <lineBasicMaterial color={i % 2 === 0 ? "#d4af37" : "#5ba3c9"} transparent opacity={0.3} />
-          {/* @ts-expect-error */}
           </line>
         );
       })}

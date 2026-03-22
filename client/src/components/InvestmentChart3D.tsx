@@ -145,6 +145,7 @@ function GrowthArrow() {
   });
 
   return (
+    // @ts-expect-error - React Three Fiber line component type mismatch with standard SVG line
     <line ref={lineRef as unknown as React.Ref<THREE.Line>} geometry={geometry}>
       <lineBasicMaterial color="#22c55e" transparent opacity={0.4} linewidth={2} />
     </line>
