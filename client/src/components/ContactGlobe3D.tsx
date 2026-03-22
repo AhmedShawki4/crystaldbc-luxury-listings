@@ -177,8 +177,10 @@ function ConnectionArcs() {
       {arcs.map((points, i) => {
         const geo = new THREE.BufferGeometry().setFromPoints(points);
         return (
+          // @ts-expect-error - React Three Fiber line component type mismatch with standard SVG line
           <line key={i} geometry={geo}>
             <lineBasicMaterial color={i % 2 === 0 ? "#d4af37" : "#5ba3c9"} transparent opacity={0.3} />
+          {/* @ts-expect-error */}
           </line>
         );
       })}
@@ -354,7 +356,7 @@ export default function ContactGlobe3D() {
             <div className={`absolute inset-0 rounded-xl transition-all duration-1000 ${hovered ? "shadow-[inset_0_0_60px_rgba(212,175,55,0.06)]" : ""}`} />
 
             <Canvas
-              camera={{ position: [3, 2, 5], fov: 40 }}
+              camera={{ position: window.innerWidth < 768 ? [4, 2.5, 7] : [3, 2, 5], fov: window.innerWidth < 768 ? 55 : 40 }}
               dpr={[1, 1.5]}
               gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
               style={{ background: "transparent" }}

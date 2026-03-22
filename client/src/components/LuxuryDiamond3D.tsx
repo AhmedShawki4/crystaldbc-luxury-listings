@@ -287,7 +287,7 @@ export default function LuxuryDiamond3D() {
       <div className={`absolute inset-0 rounded-2xl transition-all duration-1000 ${hovered ? "shadow-[inset_0_0_60px_rgba(212,175,55,0.06)]" : ""}`} />
 
       <Canvas
-        camera={{ position: [4, 2.5, 5], fov: 40 }}
+        camera={{ position: window.innerWidth < 768 ? [5, 3, 7] : [4, 2.5, 5], fov: window.innerWidth < 768 ? 55 : 40 }}
         dpr={[1, 1.5]}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         style={{ background: "transparent" }}

@@ -291,7 +291,7 @@ export default function InvestmentChart3D() {
       <div className={`absolute inset-0 rounded-2xl transition-all duration-1000 ${hovered ? "shadow-[inset_0_0_60px_rgba(212,175,55,0.06)]" : ""}`} />
 
       <Canvas
-        camera={{ position: [5, 4, 7], fov: 38 }}
+        camera={{ position: window.innerWidth < 768 ? [6, 5, 9] : [5, 4, 7], fov: window.innerWidth < 768 ? 55 : 38 }}
         dpr={[1, 1.5]}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         style={{ background: "transparent" }}
