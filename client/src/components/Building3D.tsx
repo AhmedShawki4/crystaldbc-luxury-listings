@@ -34,7 +34,7 @@ function Starfield({ count = 800 }: { count?: number }) {
 
   return (
     <points ref={ref}>
-      <bufferGeometry>
+      <bufferGeometry key={count}>
         <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
         <bufferAttribute attach="attributes-size" count={count} array={sizes} itemSize={1} />
       </bufferGeometry>
@@ -338,7 +338,7 @@ function Particles({ count = 100 }: { count?: number }) {
 
   return (
     <points ref={ref}>
-      <bufferGeometry>
+      <bufferGeometry key={count}>
         <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
       </bufferGeometry>
       <pointsMaterial color="#d4af37" size={0.05} transparent opacity={0.65} sizeAttenuation />

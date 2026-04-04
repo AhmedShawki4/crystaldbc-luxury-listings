@@ -22,7 +22,7 @@ function Starfield({ count = 200 }: { count?: number }) {
   });
   return (
     <points ref={ref}>
-      <bufferGeometry>
+      <bufferGeometry key={count}>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
       <pointsMaterial size={0.04} color="#d4af37" transparent opacity={0.5} sizeAttenuation />

@@ -34,8 +34,7 @@ const DialogContent = React.forwardRef<
     <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
-      ref={ref}
-      className={cn(
+      ref={ref}      aria-describedby={props["aria-describedby"] || undefined}      className={cn(
         // Mobile-first: bottom sheet (full width, rounded top, limited height)
         "fixed left-0 right-0 bottom-0 top-auto z-50 grid w-full max-w-none gap-3 border bg-background p-3 shadow-lg duration-200 max-h-[75vh] overflow-y-auto rounded-t-2xl",
         // Larger screens: centered modal with max width
