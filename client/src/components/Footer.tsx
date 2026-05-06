@@ -20,6 +20,10 @@ const fallbackFooter: FooterContent = {
 const Footer = () => {
   const { data } = useCmsSection<FooterContent>("footer", fallbackFooter);
   const content = data ?? fallbackFooter;
+  const phoneEntries = content.contact.phone
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
 
   return (
     <footer className="relative overflow-hidden bg-luxury-dark text-white">
@@ -36,11 +40,24 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-display font-semibold mb-4">Contact Us</h3>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-center gap-2 text-white/80">
-                <Phone className="h-4 w-4 text-accent" />
-                <a href={`tel:${content.contact.phone}`} className="hover:text-accent transition-colors">
-                  {content.contact.phone}
-                </a>
+              <li className="flex items-start gap-2 text-white/80">
+                <Phone className="h-4 w-4 text-accent mt-0.5" />
+                <div className="flex flex-col gap-1">
+                  {(phoneEntries.length ? phoneEntries : [content.contact.phone]).map((entry, index) => {
+                    const telValue = entry.replace(/[^\d+]/g, "");
+                    return telValue ? (
+                      <a
+                        key={`${telValue}-${index}`}
+                        href={`tel:${telValue}`}
+                        className="hover:text-accent transition-colors"
+                      >
+                        {entry}
+                      </a>
+                    ) : (
+                      <span key={`phone-${index}`}>{entry}</span>
+                    );
+                  })}
+                </div>
               </li>
               <li className="flex items-center gap-2 text-white/80">
                 <Mail className="h-4 w-4 text-accent" />

@@ -801,7 +801,11 @@ const FooterSectionEditor = ({ section, onSave, saving, language }: CmsEditorPro
           </div>
           <div>
             <label className="text-sm font-medium">{t("admin.cms.footer.labels.phone")}</label>
-            <Input value={draft.contact.phone} onChange={(e) => updateContact("phone", e.target.value)} />
+            <Textarea
+              value={draft.contact.phone}
+              onChange={(e) => updateContact("phone", e.target.value)}
+              rows={3}
+            />
           </div>
           <div>
             <label className="text-sm font-medium">{t("admin.cms.footer.labels.email")}</label>
@@ -852,7 +856,15 @@ const FooterSectionEditor = ({ section, onSave, saving, language }: CmsEditorPro
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs uppercase text-muted-foreground">{t("admin.cms.footer.preview.contact")}</p>
-              <p className="text-sm">{draft.contact.phone}</p>
+              {draft.contact.phone
+                .split(/\r?\n/)
+                .map((line) => line.trim())
+                .filter(Boolean)
+                .map((line, index) => (
+                  <p key={`${line}-${index}`} className="text-sm">
+                    {line}
+                  </p>
+                ))}
               <p className="text-sm">{draft.contact.email}</p>
               <p className="text-sm">{draft.contact.location}</p>
             </div>
