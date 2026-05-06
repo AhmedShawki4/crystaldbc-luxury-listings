@@ -171,8 +171,121 @@ All colors MUST be HSL.
   }
 
   .hover-lift {
-    @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_50px_-15px_hsl(220_25%_20%_/_0.25)];
+    @apply transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_-15px_hsl(220_25%_20%_/_0.25)];
   }
+
+  /* Premium glass morphism card */
+  .glass-card {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: hsl(var(--card) / 0.6);
+    border: 1px solid hsl(var(--border) / 0.3);
+    box-shadow: 
+      0 8px 32px hsl(0 0% 0% / 0.06),
+      inset 0 1px 0 hsl(0 0% 100% / 0.06);
+  }
+
+  /* Shimmer loading effect */
+  .shimmer-bg {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--luxury-gold) / 0) 0%,
+      hsl(var(--luxury-gold) / 0.08) 50%,
+      hsl(var(--luxury-gold) / 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2.5s ease-in-out infinite;
+  }
+
+  /* Premium divider with gold accent */
+  .luxury-divider {
+    position: relative;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--luxury-gold) / 0.4) 30%,
+      hsl(var(--luxury-gold) / 0.6) 50%,
+      hsl(var(--luxury-gold) / 0.4) 70%,
+      transparent
+    );
+  }
+
+  .luxury-divider::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    width: 8px;
+    height: 8px;
+    background: hsl(var(--luxury-gold));
+    box-shadow: 0 0 12px hsl(var(--luxury-gold) / 0.5);
+  }
+
+  /* Gold border glow on hover */
+  .glow-border {
+    @apply transition-all duration-500;
+    box-shadow: 0 0 0 0 hsl(var(--luxury-gold) / 0);
+  }
+
+  .glow-border:hover {
+    box-shadow: 0 0 20px hsl(var(--luxury-gold) / 0.15), 0 0 40px hsl(var(--luxury-gold) / 0.05);
+    border-color: hsl(var(--luxury-gold) / 0.4);
+  }
+
+  /* Magnetic hover effect for cards */
+  .magnetic-card {
+    @apply transition-all duration-500 ease-out;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
+
+  .magnetic-card:hover {
+    transform: translateY(-8px) rotateX(2deg);
+    box-shadow: 
+      0 25px 50px -12px hsl(0 0% 0% / 0.15),
+      0 0 0 1px hsl(var(--luxury-gold) / 0.2);
+  }
+
+  /* Section reveal animation helpers */
+  .reveal-up {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .reveal-up.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Animated underline */
+  .animated-underline {
+    position: relative;
+  }
+
+  .animated-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, hsl(var(--luxury-gold)), hsl(var(--luxury-gold-light)));
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .animated-underline:hover::after {
+    width: 100%;
+  }
+
+  /* Stagger animation delay helpers */
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-5 { animation-delay: 0.5s; }
 
   .fade-in {
     animation: fadeIn 0.6s ease-out;
@@ -214,10 +327,18 @@ All colors MUST be HSL.
     }
   }
 
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
   .reveal-section {
     animation: fadeIn 1s ease-out forwards;
     opacity: 0;
-    /* Star invisible */
     animation-delay: 0.2s;
     animation-fill-mode: forwards;
   }
@@ -226,6 +347,39 @@ All colors MUST be HSL.
   .dialog-scroll {
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--luxury-gold)) hsl(var(--luxury-dark));
+  }
+
+  /* Partners infinite marquee */
+  @keyframes marquee-scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .partners-marquee-wrapper {
+    overflow: hidden;
+    width: 100%;
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+
+  .partners-marquee {
+    display: flex;
+    gap: 1.5rem;
+    width: max-content;
+    animation: marquee-scroll 35s linear infinite;
+  }
+
+  .partners-marquee:hover {
+    animation-play-state: paused;
+  }
+
+  /* Invert dark logos in dark mode so they're visible */
+  .dark .partner-logo {
+    filter: invert(1) brightness(1.8);
   }
 
   .dialog-scroll::-webkit-scrollbar {

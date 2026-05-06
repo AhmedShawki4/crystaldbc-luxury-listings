@@ -35,6 +35,11 @@ const TrendingProjects = () => {
     });
   }, [api]);
 
+  // Hide entire section if no projects and not loading
+  if (!isLoading && projects.length === 0) {
+    return null;
+  }
+
   return (
     <section className="py-20 bg-luxury-dark text-white relative overflow-hidden">
       {/* Background Pattern */}

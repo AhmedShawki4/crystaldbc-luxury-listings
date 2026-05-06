@@ -1,6 +1,7 @@
 import { Award, Users, Target, Heart, Globe2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, lazy, Suspense } from "react";
+import SEOHead from "@/components/SEOHead";
 import { useCmsSection } from "@/hooks/useCmsSection";
 import type { AboutContent } from "@/types";
 import { getMediaUrl } from "@/lib/media";
@@ -9,6 +10,12 @@ import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import InvestmentBox from "@/components/InvestmentBox";
 import LazyImage from "@/components/LazyImage";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+const LuxuryDiamond3D = lazy(() => import("@/components/LuxuryDiamond3D"));
+
+gsap.registerPlugin(ScrollTrigger);
 
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&q=80&w=2000";
 
@@ -43,6 +50,79 @@ const About = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  // GSAP scroll-triggered animations
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      // Legacy section - image & content slide in
+      gsap.fromTo(
+        ".about-legacy-image",
+        { opacity: 0, x: -60, scale: 0.95 },
+        {
+          opacity: 1, x: 0, scale: 1, duration: 1, ease: "power3.out",
+          scrollTrigger: { trigger: ".about-legacy-section", start: "top 80%" },
+        }
+      );
+      gsap.fromTo(
+        ".about-legacy-content > *",
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1, y: 0, duration: 0.7, stagger: 0.1, ease: "power3.out",
+          scrollTrigger: { trigger: ".about-legacy-section", start: "top 75%" },
+        }
+      );
+
+      // Stats bar - counter animation
+      gsap.fromTo(
+        ".about-stat-item",
+        { opacity: 0, y: 40, scale: 0.9 },
+        {
+          opacity: 1, y: 0, scale: 1, duration: 0.8, stagger: 0.15, ease: "back.out(1.4)",
+          scrollTrigger: { trigger: ".about-stats-section", start: "top 85%" },
+        }
+      );
+
+      // Values cards - staggered reveal
+      gsap.fromTo(
+        ".about-value-card",
+        { opacity: 0, y: 50, rotateX: 15 },
+        {
+          opacity: 1, y: 0, rotateX: 0, duration: 0.8, stagger: 0.12, ease: "power3.out",
+          scrollTrigger: { trigger: ".about-values-section", start: "top 80%" },
+        }
+      );
+
+      // Impact section
+      gsap.fromTo(
+        ".about-impact-content > *",
+        { opacity: 0, x: -30 },
+        {
+          opacity: 1, x: 0, duration: 0.7, stagger: 0.1, ease: "power3.out",
+          scrollTrigger: { trigger: ".about-impact-section", start: "top 80%" },
+        }
+      );
+      gsap.fromTo(
+        ".about-impact-visual",
+        { opacity: 0, scale: 0.85, rotate: 5 },
+        {
+          opacity: 1, scale: 1, rotate: 0, duration: 1.2, ease: "power3.out",
+          scrollTrigger: { trigger: ".about-impact-section", start: "top 80%" },
+        }
+      );
+
+      // Impact items stagger
+      gsap.fromTo(
+        ".about-impact-item",
+        { opacity: 0, x: -20 },
+        {
+          opacity: 1, x: 0, duration: 0.5, stagger: 0.08, ease: "power2.out",
+          scrollTrigger: { trigger: ".about-impact-list", start: "top 85%" },
+        }
+      );
+    }, mainRef);
+
+    return () => ctx.revert();
+  }, []);
+
   const fallbackAbout = useMemo<AboutContent>(() => ({
     heroImage: FALLBACK_IMAGE,
     heroTitle: t("about.heroTitle"),
@@ -74,6 +154,12 @@ const About = () => {
 
   return (
     <div ref={mainRef} className="min-h-screen">
+      <SEOHead
+        title="About CrystalDBC - Our Legacy in Luxury Real Estate"
+        description="Learn about CrystalDBC (Crystal DBC), a premier luxury real estate firm established in 2002. Operating across Dubai, Egypt, Saudi Arabia, Germany, and Russia. كريستال دي بي سي - تاريخنا في العقارات الفاخرة. Über CrystalDBC - Luxusimmobilien seit 2002."
+        canonical="/about"
+        keywords="about CrystalDBC, Crystal DBC history, luxury real estate company, عن كريستال دي بي سي, über CrystalDBC"
+      />
       <PageHero
         eyebrow={t("about.heroEyebrow")}
         title={content.heroTitle || t("about.heroTitle")}
@@ -94,7 +180,7 @@ const About = () => {
       />
 
       {/* Our Legacy */}
-      <section className="relative py-24 overflow-hidden bg-background min-h-[540px]">
+      <section className="about-legacy-section relative py-24 overflow-hidden bg-background min-h-[540px]">
         <div className="absolute inset-0 -z-10 pointer-events-none">
           <div
             className="absolute inset-0 bg-gradient-to-b from-transparent via-background/15 to-background/85"
@@ -105,7 +191,7 @@ const About = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
-            <div className="relative order-2 lg:order-1 z-10">
+            <div className="about-legacy-image relative order-2 lg:order-1 z-10">
               <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-white/10">
                 <LazyImage 
                   src={heroImage || "/backgroundphoto.jpg"} 
@@ -121,7 +207,7 @@ const About = () => {
               </div>
             </div>
 
-            <div className="order-1 lg:order-2 space-y-8">
+            <div className="about-legacy-content order-1 lg:order-2 space-y-8">
               <div>
                 <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("about.storyEyebrow")}</span>
                 <h2 className="text-4xl md:text-5xl font-display font-bold text-primary mb-6">{t("about.storyTitle")}</h2>
@@ -148,12 +234,12 @@ const About = () => {
       </section>
 
       {/* Global Stats Bar */}
-      <section className="py-20 bg-luxury-dark text-white relative">
+      <section className="about-stats-section py-20 bg-luxury-dark text-white relative">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-white/10">
             {stats.map((stat, i) => (
-              <div className="p-4" key={i}>
+              <div className="about-stat-item p-4" key={i}>
                 <h3 className="text-4xl md:text-5xl font-display font-bold text-luxury-gold mb-2">{stat.value}</h3>
                 <p className="text-sm text-white/60 uppercase tracking-wider">{stat.label}</p>
               </div>
@@ -163,7 +249,7 @@ const About = () => {
       </section>
 
       {/* Philosophy / Values */}
-      <section className="py-24 bg-luxury-dark text-white relative overflow-hidden">
+      <section className="about-values-section py-24 bg-luxury-dark text-white relative overflow-hidden">
         <div
           className="absolute inset-0 z-0 opacity-[0.22]"
           style={{ backgroundImage: "url(/crystalpattern.png)", backgroundRepeat: "repeat" }}
@@ -204,7 +290,7 @@ const About = () => {
               const theme = palette[index % palette.length];
               return (
                 <div
-                  className={`group rounded-2xl border ${theme.border} ${theme.card} p-8 text-left shadow-lg shadow-black/25 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl`}
+                  className={`about-value-card group rounded-2xl border ${theme.border} ${theme.card} p-8 text-left shadow-lg shadow-black/25 transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl`}
                   key={value.title}
                 >
                   <div className={`mb-6 inline-flex h-14 w-14 items-center justify-center rounded-full transition-all duration-500 ${theme.iconWrap}`}>
@@ -220,19 +306,19 @@ const About = () => {
       </section>
 
       {/* Our Impact */}
-      <section className="py-24 bg-background relative overflow-hidden">
+      <section className="about-impact-section py-24 bg-background relative overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
-            <div className="order-2 lg:order-1">
+            <div className="about-impact-content order-2 lg:order-1">
               <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{impactEyebrow}</span>
               <h2 className="text-4xl font-display font-bold text-primary mb-6">{impactTitle}</h2>
               <p className="text-lg text-muted-foreground font-light leading-relaxed mb-6">
                 {impactDescription}
               </p>
-              <ul className="space-y-4 mt-8">
+              <ul className="about-impact-list space-y-4 mt-8">
                 {impactItems.map((item, i) => (
-                  <li key={i} className="flex items-center gap-4 text-primary p-4 rounded-lg bg-muted/20 border border-transparent hover:border-luxury-gold/20 transition-all">
+                  <li key={i} className="about-impact-item flex items-center gap-4 text-primary p-4 rounded-lg bg-muted/20 border border-transparent hover:border-luxury-gold/20 transition-all">
                     <div className="w-10 h-10 rounded-full bg-luxury-gold/10 flex items-center justify-center text-luxury-gold">
                       <Globe2 className="w-5 h-5" />
                     </div>
@@ -242,24 +328,16 @@ const About = () => {
               </ul>
             </div>
 
-            <div className="order-1 lg:order-2 relative">
+            <div className="about-impact-visual order-1 lg:order-2 relative">
               <div className="absolute inset-0 bg-luxury-gold/10 blur-3xl transform rotate-12 -z-10"></div>
-              <div className="aspect-square bg-luxury-dark rounded-2xl overflow-hidden relative shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-luxury-dark via-[#0a0f1d] to-black opacity-90"></div>
-
-                {/* Decorative Globe Icon */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="relative w-64 h-64 border border-white/5 rounded-full animate-spin-slow">
-                    <div className="absolute top-0 left-1/2 w-2 h-2 bg-luxury-gold rounded-full shadow-[0_0_15px_rgba(212,175,55,0.8)]"></div>
+              <div className="aspect-square rounded-2xl overflow-hidden relative shadow-2xl">
+                <Suspense fallback={
+                  <div className="w-full h-full bg-luxury-dark rounded-2xl flex items-center justify-center">
+                    <div className="w-16 h-16 border-2 border-luxury-gold/20 border-t-luxury-gold rounded-full animate-spin" />
                   </div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Globe2 className="w-32 h-32 text-luxury-gold/20" strokeWidth={0.5} />
-                  </div>
-                </div>
-
-                <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent">
-                  <p className="text-white text-center font-display text-xl">"Creating spaces that inspire."</p>
-                </div>
+                }>
+                  <LuxuryDiamond3D />
+                </Suspense>
               </div>
             </div>
 

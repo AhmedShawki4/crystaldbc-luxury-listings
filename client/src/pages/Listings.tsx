@@ -1,4 +1,5 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
+import SEOHead from "@/components/SEOHead";
 import PropertyCard from "@/components/PropertyCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -10,12 +11,16 @@ import { useTranslation } from "react-i18next";
 import LazyImage from "@/components/LazyImage";
 import { useCmsSection } from "@/hooks/useCmsSection";
 import type { SiteSettingsContent } from "@/types";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 const Listings = () => {
   const { t, i18n } = useTranslation();
   const [sortBy, setSortBy] = useState("featured");
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
+  const heroRef = useRef<HTMLElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -111,8 +116,66 @@ const Listings = () => {
   const cityCount = Math.max(locations.length - 1, 0);
   const typeCount = Math.max(types.length - 1, 0);
 
+  // Animations
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    const ctx = gsap.context(() => {
+      // Hero content animation
+      gsap.fromTo(
+        ".listing-hero-content > *",
+        { opacity: 0, y: 40, filter: "blur(8px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.9, stagger: 0.12, ease: "power3.out", delay: 0.2 }
+      );
+      // Hero stats animation
+      gsap.fromTo(
+        ".listing-hero-stats",
+        { opacity: 0, x: 60, scale: 0.95 },
+        { opacity: 1, x: 0, scale: 1, duration: 0.8, ease: "power3.out", delay: 0.4 }
+      );
+      // Ambient blob float
+      gsap.to(".hero-blob-1", { y: -20, x: 10, duration: 4, repeat: -1, yoyo: true, ease: "sine.inOut" });
+      gsap.to(".hero-blob-2", { y: 15, x: -15, duration: 5, repeat: -1, yoyo: true, ease: "sine.inOut" });
+    }, heroRef);
+    return () => ctx.revert();
+  }, []);
+
+  // Property grid stagger animation
+  useEffect(() => {
+    if (!gridRef.current || isLoading || properties.length === 0) return;
+    gsap.registerPlugin(ScrollTrigger);
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        gridRef.current!.children,
+        { opacity: 0, y: 50, scale: 0.95 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.7,
+          stagger: 0.08,
+          ease: "power3.out",
+          scrollTrigger: { trigger: gridRef.current, start: "top 90%" },
+        }
+      );
+    }, gridRef);
+    return () => ctx.revert();
+  }, [isLoading, properties.length]);
+
   return (
     <div className="min-h-screen">
+      <SEOHead
+        title="Luxury Property Listings - Villas, Penthouses & Apartments"
+        description="Browse CrystalDBC's exclusive luxury property listings. Premium villas, penthouses, and apartments for sale and rent in Dubai, Cairo, Egypt, Red Sea, Saudi Arabia, and Germany. عقارات للبيع والإيجار - كريستال دي بي سي. Luxusimmobilien kaufen und mieten."
+        canonical="/listings"
+        keywords="CrystalDBC listings, luxury properties for sale, Dubai apartments, Cairo villas, عقارات للبيع, Immobilien kaufen, недвижимость купить"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "CrystalDBC Property Listings",
+          "description": "Browse luxury properties for sale and rent",
+          "url": "https://crystaldbc.com/listings"
+        }}
+      />
       {/* Unified Background */}
       <div className="fixed inset-0 z-[-1]">
         <LazyImage
@@ -124,7 +187,7 @@ const Listings = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/50 to-background" />
       </div>
       {/* Custom Hero Section */}
-      <section className="relative isolate overflow-hidden border-b border-white/10 bg-gradient-to-br from-luxury-dark via-luxury-dark/95 to-[#111] pt-28 pb-16 text-white">
+      <section ref={heroRef} className="relative isolate overflow-hidden border-b border-white/10 bg-gradient-to-br from-luxury-dark via-luxury-dark/95 to-[#111] pt-36 md:pt-44 pb-16 text-white">
         {/* Background Image */}
         <div className="absolute inset-0 -z-10 h-full w-full">
           <div
@@ -137,17 +200,26 @@ const Listings = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-luxury-dark via-luxury-dark/80 to-transparent" />
         </div>
 
-        <div className="absolute -top-20 left-1/4 h-72 w-72 rounded-full bg-luxury-gold/20 blur-[120px]" aria-hidden="true"></div>
-        <div className="absolute -bottom-24 right-1/3 h-72 w-72 rounded-full bg-accent/20 blur-[120px]" aria-hidden="true"></div>
+        <div className="hero-blob-1 absolute -top-20 left-1/4 h-72 w-72 rounded-full bg-luxury-gold/20 blur-[120px]" aria-hidden="true"></div>
+        <div className="hero-blob-2 absolute -bottom-24 right-1/3 h-72 w-72 rounded-full bg-accent/20 blur-[120px]" aria-hidden="true"></div>
+        
+        {/* Decorative grid lines */}
+        <div className="absolute inset-0 z-[1] opacity-[0.03]" aria-hidden>
+          <div className="h-full w-full" style={{
+            backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+            backgroundSize: "80px 80px"
+          }} />
+        </div>
 
         <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr),auto] lg:items-center">
-            <div className="space-y-6">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-white/70">
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr),auto] lg:items-start">
+            <div className="listing-hero-content space-y-6">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.35em] text-white/70 backdrop-blur-sm">
+                <span className="h-1.5 w-1.5 rounded-full bg-luxury-gold animate-pulse" />
                 Luxury Listings
               </span>
               <div className="flex flex-wrap items-center gap-4">
-                <span className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10">
+                <span className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 border border-white/10 backdrop-blur-sm shadow-lg shadow-black/10">
                   <Building2 className="h-7 w-7" />
                 </span>
                 <h1 className="text-4xl font-display font-bold leading-tight md:text-5xl">
@@ -159,24 +231,27 @@ const Listings = () => {
               </p>
             </div>
 
-            <div className="grid min-w-[240px] gap-4 rounded-3xl border border-white/15 bg-white/5 p-6 backdrop-blur-xl">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10">
+            <div className="listing-hero-stats grid min-w-[260px] gap-4 rounded-3xl border border-white/15 bg-white/[0.04] p-6 backdrop-blur-2xl shadow-2xl shadow-black/20 mt-2">
+              <div className="group rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition-all duration-300 hover:bg-white/10 hover:border-white/20 hover:shadow-lg">
                 <p className="text-3xl font-display font-bold text-white">{isLoading ? "..." : properties.length}</p>
                 <p className="text-sm uppercase tracking-[0.2em] text-white/60">Active Listings</p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10">
+              <div className="group rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition-all duration-300 hover:bg-white/10 hover:border-white/20 hover:shadow-lg">
                 <p className="text-3xl font-display font-bold text-white">{cityCount}</p>
                 <p className="text-sm uppercase tracking-[0.2em] text-white/60">Cities</p>
-                <p className="text-xs text-white/60 mt-1">{marketSummary}</p>
+                <p className="text-xs text-white/50 mt-1">{marketSummary}</p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10">
+              <div className="group rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition-all duration-300 hover:bg-white/10 hover:border-white/20 hover:shadow-lg">
                 <p className="text-3xl font-display font-bold text-white">{typeCount}</p>
                 <p className="text-sm uppercase tracking-[0.2em] text-white/60">Property Types</p>
-                <p className="text-xs text-white/60 mt-1">Villas, penthouses, more</p>
+                <p className="text-xs text-white/50 mt-1">Villas, penthouses, more</p>
               </div>
             </div>
           </div>
         </div>
+        
+        {/* Bottom gradient fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-luxury-dark/50 to-transparent z-[2]" />
       </section>
 
       {/* Search and Filters */}
@@ -409,7 +484,7 @@ const Listings = () => {
           {isLoading ? (
             <p className="text-muted-foreground">{t("common.loadingListings")}</p>
           ) : properties.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {properties.map((property) => (
                 <PropertyCard
                   key={property._id}

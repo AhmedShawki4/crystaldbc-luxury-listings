@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import SEOHead from "@/components/SEOHead";
 import { ArrowRight, CheckCircle2, TrendingUp, Building2, BarChart3, PieChart, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +18,8 @@ import AuthModal from "@/components/AuthModal";
 import { jsPDF } from "jspdf";
 import LazyModelViewer from "@/components/LazyModelViewer";
 import LazyImage from "@/components/LazyImage";
+
+const InvestmentChart3D = lazy(() => import("@/components/InvestmentChart3D"));
 
 type PendingAction = { type: "my-investments" } | { type: "invest"; box: InvestmentBox };
 
@@ -323,8 +326,22 @@ const Investment = () => {
 
     return (
         <div className="min-h-screen bg-background">
+            <SEOHead
+              title="Real Estate Investment Opportunities - High Yield ROI"
+              description="Invest in luxury real estate with CrystalDBC. High-yield investment boxes, transparent ROI tracking, and premium property portfolios across Dubai, Egypt, Saudi Arabia. استثمار عقاري مع كريستال دي بي سي. Immobilien Investition mit CrystalDBC."
+              canonical="/investment"
+              keywords="CrystalDBC investment, real estate ROI, property investment Dubai, investment boxes, استثمار عقاري, Immobilien Investition, инвестиции в недвижимость"
+              structuredData={{
+                "@context": "https://schema.org",
+                "@type": "InvestmentOrDeposit",
+                "name": "CrystalDBC Real Estate Investment",
+                "description": "High-yield luxury real estate investment opportunities",
+                "url": "https://crystaldbc.com/investment",
+                "provider": { "@type": "Organization", "name": "CrystalDBC" }
+              }}
+            />
             {/* Hero Section */}
-            <section className="relative py-20 md:py-32 bg-luxury-dark text-white overflow-hidden">
+            <section className="relative py-20 md:py-32 pt-36 md:pt-44 bg-luxury-dark text-white overflow-hidden">
                 <div className="absolute inset-0 z-0">
                     <img
                         src="/crystalpattern.png"
@@ -520,29 +537,13 @@ const Investment = () => {
                             </div>
                         </div>
                         <div className="order-1 lg:order-2 relative h-[500px] reveal-card">
-                            <div className="absolute inset-0 bg-gradient-to-tr from-luxury-gold/20 to-transparent rounded-2xl transform rotate-3 z-0"></div>
-                            <LazyImage
-                                src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1200"
-                                alt="Market Analysis"
-                                className="relative z-10 w-full h-full rounded-2xl shadow-2xl hover:scale-[1.02] transition-transform duration-700"
-                                blurUp={true}
-                                rootMargin="300px"
-                            />
-                            {/* Floating Stats Card */}
-                            <div className="absolute -bottom-8 -left-8 z-20 bg-white p-6 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 max-w-xs animate-bounce-slow hidden md:block">
-                                <div className="flex items-center gap-4 mb-3">
-                                    <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center text-green-600">
-                                        <TrendingUp className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-gray-500 font-medium">{t("investment.marketStats.outperformance")}</p>
-                                        <p className="text-2xl font-bold text-gray-900">+12.4%</p>
-                                    </div>
+                            <Suspense fallback={
+                                <div className="w-full h-full bg-luxury-dark/50 rounded-2xl flex items-center justify-center">
+                                    <div className="w-16 h-16 border-2 border-luxury-gold/20 border-t-luxury-gold rounded-full animate-spin" />
                                 </div>
-                                <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                                    <div className="bg-green-500 h-full rounded-full" style={{ width: '75%' }}></div>
-                                </div>
-                            </div>
+                            }>
+                                <InvestmentChart3D />
+                            </Suspense>
                         </div>
                     </div>
                     {/* End 2-col grid */}

@@ -84,14 +84,14 @@ const Navigation = () => {
   return (
     <nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-white/10 pt-[env(safe-area-inset-top)]",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b pt-[env(safe-area-inset-top)]",
         useDarkNav
-          ? "backdrop-blur-xl shadow-2xl"
-          : "bg-transparent"
+          ? "backdrop-blur-xl shadow-2xl border-luxury-gold/10"
+          : "bg-transparent border-white/10"
       )}
       style={useDarkNav ? {
         background: "linear-gradient(90deg, #0a0d1a 0%, #10182b 60%, #181f3a 100%)",
-        boxShadow: "0 8px 32px 0 rgba(10, 13, 26, 0.55)",
+        boxShadow: "0 8px 32px 0 rgba(10, 13, 26, 0.55), 0 1px 0 0 rgba(200, 170, 100, 0.08)",
       } : {}}
     >
       <div className="pointer-events-none absolute inset-x-1/2 top-3 hidden h-10 w-[60%] -translate-x-1/2 rounded-full bg-white/10 blur-3xl lg:block" aria-hidden />
@@ -118,16 +118,22 @@ const Navigation = () => {
                   key={link.path}
                   to={link.path}
                   className={cn(
-                    "group relative inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[13px] md:text-sm font-medium transition-all shrink-0 whitespace-nowrap",
+                    "group relative inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[13px] md:text-sm font-medium transition-all duration-300 shrink-0 whitespace-nowrap",
                     isActive(link.path)
-                      ? "border-white/40 bg-white/15 text-white shadow-lg shadow-black/20"
-                      : "border-white/10 bg-white/5 text-white/80 hover:border-white/30 hover:bg-white/10 hover:text-white"
+                      ? "border-luxury-gold/40 bg-luxury-gold/10 text-white shadow-lg shadow-luxury-gold/10"
+                      : "border-white/10 bg-white/5 text-white/80 hover:border-white/30 hover:bg-white/10 hover:text-white hover:shadow-md hover:shadow-black/10"
                   )}
                 >
-                  <span className="flex h-6 w-6 items-center justify-center rounded-md bg-white/10 text-white">
+                  <span className={cn(
+                    "flex h-6 w-6 items-center justify-center rounded-md transition-colors duration-300",
+                    isActive(link.path) ? "bg-luxury-gold/20 text-luxury-gold" : "bg-white/10 text-white group-hover:bg-white/15"
+                  )}>
                     <Icon className="h-4 w-4" />
                   </span>
                   <span className="tracking-wide">{link.name}</span>
+                  {isActive(link.path) && (
+                    <span className="absolute -bottom-px left-1/2 -translate-x-1/2 w-3/4 h-[2px] bg-gradient-to-r from-transparent via-luxury-gold to-transparent" />
+                  )}
                 </Link>
               );
             })}

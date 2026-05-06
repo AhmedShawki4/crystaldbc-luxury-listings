@@ -1,6 +1,7 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLayoutEffect, useRef, useEffect, useState, useMemo } from "react";
+import SEOHead from "@/components/SEOHead";
 import FloatingShapes from "@/components/FloatingShapes";
 import Antigravity from "@/components/Antigravity";
 import { Link } from "react-router-dom";
@@ -41,6 +42,9 @@ import { useCmsSection } from "@/hooks/useCmsSection";
 import type { ContactContent, HomePartnersContent, HomeSuccessStoriesContent } from "@/types";
 import { getMediaUrl } from "@/lib/media";
 import LazyModelViewer from "@/components/LazyModelViewer";
+import { lazy, Suspense } from "react";
+
+const Building3D = lazy(() => import("@/components/Building3D"));
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -110,6 +114,104 @@ const Home = () => {
           },
         }
       );
+
+      // Featured properties section – header elements
+      gsap.fromTo(
+        ".stagger-grid",
+        { opacity: 0 },
+        {
+          opacity: 1,
+          duration: 0.01,
+          scrollTrigger: {
+            trigger: ".stagger-grid",
+            start: "top 95%",
+          },
+        }
+      );
+
+      // Testimonial cards – 3D flip in
+      const testimonialCards = gsap.utils.toArray<HTMLElement>(".testimonial-card");
+      if (testimonialCards.length) {
+        gsap.fromTo(
+          testimonialCards,
+          { opacity: 0, rotateY: -15, scale: 0.9 },
+          {
+            opacity: 1,
+            rotateY: 0,
+            scale: 1,
+            duration: 0.8,
+            stagger: 0.15,
+            ease: "back.out(1.2)",
+            scrollTrigger: {
+              trigger: testimonialCards[0]?.parentElement,
+              start: "top 85%",
+            },
+          }
+        );
+      }
+
+      // Success stat counters – scale bounce
+      const successCards = gsap.utils.toArray<HTMLElement>(".success-stat-card");
+      if (successCards.length) {
+        gsap.fromTo(
+          successCards,
+          { opacity: 0, y: 60, scale: 0.85 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.7,
+            stagger: 0.2,
+            ease: "back.out(1.4)",
+            scrollTrigger: {
+              trigger: successCards[0]?.parentElement,
+              start: "top 85%",
+            },
+          }
+        );
+      }
+
+      // Partners grid – cascading reveal from bottom with rotation
+      const partnerCards = gsap.utils.toArray<HTMLElement>(".partner-card");
+      if (partnerCards.length) {
+        gsap.fromTo(
+          partnerCards,
+          { opacity: 0, y: 40, scale: 0.8, rotateX: 15 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotateX: 0,
+            duration: 0.5,
+            stagger: { each: 0.06, from: "random" },
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: ".partners-grid",
+              start: "top 88%",
+            },
+          }
+        );
+      }
+
+      // Building 3D text section – slide in
+      const building3dText = document.querySelector(".building3d-text");
+      if (building3dText) {
+        gsap.fromTo(
+          building3dText.children,
+          { opacity: 0, x: -50 },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.8,
+            stagger: 0.15,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: building3dText,
+              start: "top 80%",
+            },
+          }
+        );
+      }
 
     }, mainRef);
     return () => ctx.revert();
@@ -190,6 +292,21 @@ const Home = () => {
     fallbackSuccessStories,
   );
 
+  const DEFAULT_TRUSTED_BRANDS = useMemo(() => [
+    { name: "Forbes", logoUrl: "/logos/forbes.svg", website: "https://www.forbes.com" },
+    { name: "Bloomberg", logoUrl: "/logos/bloomberg.svg", website: "https://www.bloomberg.com" },
+    { name: "Christie's Real Estate", logoUrl: "/logos/christies.svg", website: "https://www.christiesrealestate.com" },
+    { name: "Sotheby's Realty", logoUrl: "/logos/sothebys.svg", website: "https://www.sothebysrealty.com" },
+    { name: "Knight Frank", logoUrl: "/logos/knightfrank.svg", website: "https://www.knightfrank.com" },
+    { name: "Savills", logoUrl: "/logos/savills.svg", website: "https://www.savills.com" },
+    { name: "CBRE", logoUrl: "/logos/cbre.svg", website: "https://www.cbre.com" },
+    { name: "JLL", logoUrl: "/logos/jll.svg", website: "https://www.jll.com" },
+    { name: "Berkshire Hathaway", logoUrl: "/logos/berkshire.svg", website: "https://www.berkshirehathaway.com" },
+    { name: "Cushman & Wakefield", logoUrl: "/logos/cushman.svg", website: "https://www.cushmanwakefield.com" },
+    { name: "The Wall Street Journal", logoUrl: "/logos/wsj.svg", website: "https://www.wsj.com" },
+    { name: "Financial Times", logoUrl: "/logos/ft.svg", website: "https://www.ft.com" },
+  ], []);
+
   const fallbackPartners = useMemo<HomePartnersContent>(() => ({ partners: [] }), []);
   const { data: partnersContent } = useCmsSection<HomePartnersContent>(
     "homePartners",
@@ -200,9 +317,12 @@ const Home = () => {
   const successStats = Array.isArray(successStories.stats) ? successStories.stats : fallbackSuccessStories.stats;
 
   const partners = partnersContent ?? fallbackPartners;
-  const partnerItems = Array.isArray(partners.partners) ? partners.partners : [];
-  const showPartnersSection = partnerItems.length > 0;
-  const partnersLayoutClass = partnerItems.length < 6 ? "justify-center" : "justify-start";
+  const cmsPartnerItems = Array.isArray(partners.partners) ? partners.partners : [];
+  const allPartnerItems = useMemo(() => {
+    const cmsNames = new Set(cmsPartnerItems.map(p => p.name.toLowerCase()));
+    const uniqueDefaults = DEFAULT_TRUSTED_BRANDS.filter(b => !cmsNames.has(b.name.toLowerCase()));
+    return [...cmsPartnerItems, ...uniqueDefaults];
+  }, [cmsPartnerItems, DEFAULT_TRUSTED_BRANDS]);
 
   const testimonialItems = t("home.testimonialsItems", { returnObjects: true });
   const testimonials = Array.isArray(testimonialItems)
@@ -218,6 +338,20 @@ const Home = () => {
 
   return (
     <div ref={mainRef} className="min-h-screen">
+      <SEOHead
+        canonical="/"
+        title="Luxury Real Estate & Investment in Dubai, Egypt, Saudi Arabia"
+        description="CrystalDBC (Crystal DBC) is the premier luxury real estate platform. Explore exclusive villas, penthouses, apartments, and high-yield investment opportunities in Dubai, Cairo, Egypt, Red Sea, Riyadh, Saudi Arabia, Germany, and Russia. كريستال دي بي سي عقارات فاخرة"
+        keywords="CrystalDBC home, luxury homes Dubai, luxury villas Egypt, real estate investment, عقارات فاخرة دبي, Luxusimmobilien Dubai, элитная недвижимость"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "CrystalDBC - Luxury Real Estate & Investment",
+          "description": "Premier luxury real estate platform offering exclusive properties in Dubai, Egypt, Saudi Arabia, Germany, and Russia",
+          "url": "https://crystaldbc.com/",
+          "isPartOf": { "@type": "WebSite", "name": "CrystalDBC", "url": "https://crystaldbc.com" }
+        }}
+      />
       {/* 1. Hero Section */}
       <Hero />
 
@@ -373,84 +507,110 @@ const Home = () => {
         </div>
       </section>
 
-      {showPartnersSection ? (
-        <section className="py-20 bg-gradient-to-b from-background via-background to-muted/20 reveal-section">
-          <div className="relative overflow-hidden">
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute -top-24 right-10 h-48 w-48 rounded-full bg-luxury-gold/10 blur-3xl" />
-              <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-luxury-gold/10 blur-3xl" />
-            </div>
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-              <div className="text-center mb-12">
-                <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">
-                  {t("home.partnersEyebrow")}
-                </span>
-                <h2 className="text-3xl md:text-5xl font-display font-medium text-primary mb-4">
-                  {t("home.partnersTitle")}
-                </h2>
-                <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed">
-                  {t("home.partnersSubtitle")}
-                </p>
-              </div>
+      {/* 3D Luxury Skyline Experience */}
+      <Suspense fallback={<div className="w-full h-[600px] bg-luxury-dark" />}>
+        <Building3D />
+      </Suspense>
 
-              {partnerItems.length > 0 ? (
-                <div className={`flex flex-wrap ${partnersLayoutClass} gap-6 items-center`}>
-                  {partnerItems.map((partner, index) => {
-                    const logo = getMediaUrl(partner.logoUrl);
-                    const content = (
-                      <div className="group flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-border/60 bg-background/60 hover:bg-background transition-all duration-300 w-[140px] sm:w-[160px]">
-                        {logo ? (
-                          <img
-                            src={logo}
-                            alt={partner.name}
-                            className="max-h-14 w-auto object-contain opacity-80 group-hover:opacity-100 transition"
-                            loading="lazy"
-                          />
-                        ) : null}
-                        {partner.name ? (
-                          <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground text-center">
-                            {partner.name}
-                          </span>
-                        ) : null}
-                      </div>
-                    );
+      {/* Trusted Partners – Scroll-Driven Showcase */}
+      <section className="py-20 bg-gradient-to-b from-background via-background to-muted/20 relative overflow-hidden partners-showcase">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-luxury-gold/20 to-transparent" />
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-24 right-10 h-48 w-48 rounded-full bg-luxury-gold/10 blur-3xl" />
+          <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-luxury-gold/10 blur-3xl" />
+        </div>
 
-                    return partner.website ? (
-                      <a
-                        key={`${partner.name}-${index}`}
-                        href={partner.website}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="block"
-                      >
-                        {content}
-                      </a>
-                    ) : (
-                      <div key={`${partner.name}-${index}`}>{content}</div>
-                    );
-                  })}
-                </div>
-              ) : null}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-14">
+            <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">
+              {t("home.partnersEyebrow")}
+            </span>
+            <h2 className="text-3xl md:text-5xl font-display font-medium text-primary mb-4">
+              {t("home.partnersTitle")}
+            </h2>
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed">
+              {t("home.partnersSubtitle")}
+            </p>
+            <div className="flex items-center justify-center gap-4 mt-4">
+              <div className="w-16 h-[1px] bg-gradient-to-r from-transparent to-luxury-gold/60" />
+              <div className="w-2 h-2 bg-luxury-gold rotate-45" />
+              <div className="w-16 h-[1px] bg-gradient-to-l from-transparent to-luxury-gold/60" />
             </div>
           </div>
-        </section>
-      ) : null}
+
+          {/* Scroll-triggered grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-5 partners-grid">
+            {allPartnerItems.map((partner, index) => {
+              const logo = getMediaUrl(partner.logoUrl);
+              const card = (
+                <div className="partner-card group relative flex flex-col items-center justify-center gap-3 p-5 rounded-2xl border border-border/40 bg-background/40 backdrop-blur-sm hover:bg-background/80 hover:border-luxury-gold/40 hover:shadow-lg hover:shadow-luxury-gold/5 transition-all duration-500 h-[120px] overflow-hidden">
+                  {/* Hover glow */}
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-luxury-gold/0 via-luxury-gold/0 to-luxury-gold/0 group-hover:from-luxury-gold/5 group-hover:via-transparent group-hover:to-luxury-gold/5 transition-all duration-700" />
+                  <div className="relative z-10 flex flex-col items-center gap-2">
+                    {logo ? (
+                      <img
+                        src={logo}
+                        alt={partner.name}
+                        className="max-h-10 w-auto object-contain opacity-50 group-hover:opacity-100 transition-all duration-500 group-hover:scale-110 partner-logo"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <span className="text-sm font-display font-semibold text-primary/40 group-hover:text-primary transition-all duration-500 whitespace-nowrap">
+                        {partner.name}
+                      </span>
+                    )}
+                    {logo && partner.name ? (
+                      <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground/60 group-hover:text-muted-foreground transition-all duration-500 text-center leading-tight">
+                        {partner.name}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+              );
+
+              return partner.website ? (
+                <a
+                  key={`${partner.name}-${index}`}
+                  href={partner.website}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block"
+                >
+                  {card}
+                </a>
+              ) : (
+                <div key={`${partner.name}-${index}`}>{card}</div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
       {/* 5. Client Success Stories (Replaces How It Works) */}
-      <section className="py-24 bg-background reveal-section">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-24 bg-background reveal-section relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-luxury-gold/20 to-transparent" />
+        <div className="absolute -top-32 left-1/4 w-64 h-64 bg-luxury-gold/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-32 right-1/4 w-64 h-64 bg-luxury-gold/5 rounded-full blur-3xl" />
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-16">
             <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{successStories.eyebrow}</span>
             <h2 className="text-4xl md:text-5xl font-display font-medium text-primary">{successStories.title}</h2>
+            <div className="flex items-center justify-center gap-4 mt-4">
+              <div className="w-16 h-[1px] bg-gradient-to-r from-transparent to-luxury-gold/60" />
+              <div className="w-2 h-2 bg-luxury-gold rotate-45" />
+              <div className="w-16 h-[1px] bg-gradient-to-l from-transparent to-luxury-gold/60" />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 stagger-grid">
             {successStats.map((stat, i) => (
-              <div key={i} className="relative p-8 rounded-2xl bg-luxury-gold/5 border border-luxury-gold/10 hover:border-luxury-gold/30 transition-all duration-300 group">
+              <div key={i} className="relative p-8 rounded-2xl bg-luxury-gold/5 border border-luxury-gold/10 hover:border-luxury-gold/30 transition-all duration-500 group glow-border success-stat-card">
+                <div className="absolute top-4 right-4 w-8 h-8 border border-luxury-gold/10 rotate-45 group-hover:rotate-[135deg] transition-transform duration-700" />
                 <div className="text-5xl md:text-6xl font-display font-bold text-luxury-gold mb-4 group-hover:scale-105 transition-transform duration-300">
                   {stat.value}
                 </div>
                 <h3 className="text-xl font-semibold text-primary mb-3">{stat.label}</h3>
+                <div className="luxury-divider mb-3" />
                 <p className="text-muted-foreground font-light leading-relaxed">
                   {stat.desc}
                 </p>
@@ -469,19 +629,28 @@ const Home = () => {
       <FloatingShapes />
 
       {/* 6. Testimonials Section */}
-      <section className="py-24 bg-muted/20 reveal-section">
+      <section className="py-24 bg-muted/20 reveal-section relative overflow-hidden">
+        {/* Decorative background */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-luxury-gold/20 to-transparent" />
+        <div className="absolute -top-24 right-10 h-48 w-48 rounded-full bg-luxury-gold/5 blur-3xl" />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <span className="text-luxury-gold uppercase tracking-[0.2em] text-sm font-semibold mb-3 block">{t("home.testimonialsEyebrow")}</span>
             <h2 className="text-4xl md:text-5xl font-display font-medium text-primary">{t("home.testimonialsTitle")}</h2>
+            <div className="flex items-center justify-center gap-4 mt-4">
+              <div className="w-16 h-[1px] bg-gradient-to-r from-transparent to-luxury-gold/60" />
+              <div className="w-2 h-2 bg-luxury-gold rotate-45" />
+              <div className="w-16 h-[1px] bg-gradient-to-l from-transparent to-luxury-gold/60" />
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 stagger-grid">
             {testimonials.map((testimonial, i) => (
-              <div key={i} className="bg-background p-8 rounded-2xl shadow-sm hover:shadow-md transition-all border border-border/50">
-                <Quote className="h-8 w-8 text-luxury-gold/30 mb-6" />
+              <div key={i} className="bg-background p-8 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-500 border border-border/50 glow-border group testimonial-card" style={{ perspective: '1000px' }}>
+                <Quote className="h-8 w-8 text-luxury-gold/30 mb-6 group-hover:text-luxury-gold/50 transition-colors duration-300" />
                 <p className="text-muted-foreground italic mb-6 leading-relaxed">"{testimonial.text}"</p>
+                <div className="luxury-divider mb-6" />
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-luxury-gold/10 flex items-center justify-center text-luxury-gold font-bold">
+                  <div className="w-11 h-11 rounded-full bg-luxury-gold/10 flex items-center justify-center text-luxury-gold font-bold ring-2 ring-luxury-gold/20">
                     {testimonial.name[0]}
                   </div>
                   <div>
@@ -496,7 +665,8 @@ const Home = () => {
       </section>
 
       {/* 7. FAQ Section (NEW) */}
-      <section className="py-24 bg-background reveal-section">
+      <section className="py-24 bg-background reveal-section relative">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 faq-container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             <div className="space-y-6">
@@ -505,20 +675,20 @@ const Home = () => {
               <p className="text-lg text-muted-foreground font-light leading-relaxed">
                 {t("home.faqDescription")}
               </p>
-              <div className="p-8 bg-luxury-gold/5 border border-luxury-gold/20 rounded-lg">
+              <div className="p-8 bg-luxury-gold/5 border border-luxury-gold/20 rounded-2xl glow-border">
                 <h4 className="text-xl font-display font-semibold mb-2 text-primary">{t("home.faqCtaTitle")}</h4>
                 <p className="text-muted-foreground mb-4">{t("home.faqCtaSubtitle")}</p>
-                <Button asChild variant="outline" className="border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-white">
+                <Button asChild variant="outline" className="border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-white transition-all duration-300">
                   <Link to="/contact">{t("home.faqCtaButton")}</Link>
                 </Button>
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               <Accordion type="single" collapsible className="w-full">
                 {faqs.map((faq, index) => (
-                  <AccordionItem key={index} value={`item-${index}`} className="faq-item border-b border-border/60">
-                    <AccordionTrigger className="text-left text-lg font-medium hover:text-luxury-gold transition-colors py-6">
+                  <AccordionItem key={index} value={`item-${index}`} className="faq-item border-b border-border/40 group">
+                    <AccordionTrigger className="text-left text-lg font-medium hover:text-luxury-gold transition-colors py-6 group-hover:pl-2 transition-all duration-300">
                       {faq.question}
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground leading-relaxed text-base pb-6">

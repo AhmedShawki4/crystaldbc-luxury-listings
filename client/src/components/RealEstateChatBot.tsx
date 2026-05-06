@@ -526,7 +526,7 @@ const RealEstateChatBot = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed inset-x-0 bottom-0 sm:bottom-6 sm:right-6 sm:left-auto w-full sm:w-[420px] h-[85vh] sm:h-[600px] max-h-[85vh] sm:max-h-[600px] bg-background border-t sm:border border-border rounded-t-2xl sm:rounded-lg shadow-2xl z-50 flex flex-col overflow-hidden fade-in">
+        <div className="fixed inset-x-0 bottom-0 sm:bottom-6 sm:right-6 sm:left-auto w-full sm:w-[420px] h-[85dvh] sm:h-[600px] max-h-[85dvh] sm:max-h-[600px] bg-background border-t sm:border border-border rounded-t-2xl sm:rounded-lg shadow-2xl z-50 flex flex-col overflow-hidden fade-in">
           {/* Header */}
           <div className="bg-accent text-accent-foreground p-3 sm:p-4 flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-3">
