@@ -99,13 +99,13 @@ const Navigation = () => {
         <div className="hidden lg:flex items-center justify-end pb-1 text-[9px] font-semibold uppercase tracking-[0.32em] text-white/60">
           <span className="text-white/40">{t("layout.locations")}</span>
         </div>
-        <div className="flex items-center justify-between h-28 md:h-32">
+        <div className="flex items-center justify-between h-32 md:h-44">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group ml-4 lg:ml-10">
             <img
               src={getMediaUrl(logoUrl)}
               alt="CrystalDBC Logo"
-              className="h-28 md:h-32 w-auto drop-shadow-lg transition-transform group-hover:scale-105"
+              className="h-32 md:h-44 w-auto drop-shadow-lg transition-transform group-hover:scale-105"
             />
           </Link>
 

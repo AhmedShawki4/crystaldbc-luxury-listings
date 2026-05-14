@@ -10,7 +10,6 @@ import type {
   AboutContent,
   SiteSettingsContent,
   HomeSuccessStoriesContent,
-  HomePartnersContent,
   CmsLanguage,
   LocalizedContent,
   CmsContent,
@@ -130,13 +129,6 @@ const normalizeHomeSuccessStories = (content?: Partial<HomeSuccessStoriesContent
   eyebrow: content?.eyebrow ?? "",
   title: content?.title ?? "",
   stats: content?.stats ?? [],
-});
-
-const normalizeHomePartners = (content?: Partial<HomePartnersContent>): HomePartnersContent => ({
-  eyebrow: content?.eyebrow ?? "",
-  title: content?.title ?? "",
-  subtitle: content?.subtitle ?? "",
-  partners: Array.isArray(content?.partners) ? content?.partners ?? [] : [],
 });
 
 const toMultiline = (items?: string[]) => (Array.isArray(items) ? items : []).join("\n");
@@ -579,158 +571,6 @@ const HomeSuccessStoriesEditor = ({ section, onSave, saving, language }: CmsEdit
                 <p className="text-lg font-semibold text-primary">{stat.value}</p>
                 <p className="font-medium">{stat.label}</p>
                 <p className="text-xs text-muted-foreground">{stat.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </AdminGlassCard>
-  );
-};
-
-const HomePartnersEditor = ({ section, onSave, saving }: CmsEditorProps<HomePartnersContent>) => {
-  const { t, i18n } = useTranslation();
-
-  const getDefaults = (lang: CmsLanguage): HomePartnersContent => {
-    const fixedT = i18n.getFixedT(lang);
-    return normalizeHomePartners({
-      eyebrow: fixedT("home.partnersEyebrow"),
-      title: fixedT("home.partnersTitle"),
-      subtitle: fixedT("home.partnersSubtitle"),
-      partners: [],
-    });
-  };
-
-  const [draft, setDraft] = useState<HomePartnersContent>(() => {
-    const normalized = normalizeLocalizedContent(section.content as CmsContent<HomePartnersContent>, getDefaults("en"));
-    return normalizeHomePartners(normalized.translations.en ?? getDefaults("en"));
-  });
-
-  useEffect(() => {
-    const normalized = normalizeLocalizedContent(section.content as CmsContent<HomePartnersContent>, getDefaults("en"));
-    setDraft(normalizeHomePartners(normalized.translations.en ?? getDefaults("en")));
-  }, [i18n, section.content]);
-
-  const updateDraft = (next: HomePartnersContent) => {
-    setDraft(next);
-  };
-
-  const updatePartner = (index: number, next: HomePartnersContent["partners"][number]) => {
-    const partners = [...draft.partners];
-    partners[index] = next;
-    updateDraft({ ...draft, partners });
-  };
-
-  const addPartner = () => {
-    updateDraft({
-      ...draft,
-      partners: [...draft.partners, { name: "", logoUrl: "", website: "" }],
-    });
-  };
-
-  const removePartner = (index: number) => {
-    updateDraft({
-      ...draft,
-      partners: draft.partners.filter((_, itemIndex) => itemIndex !== index),
-    });
-  };
-
-  return (
-    <AdminGlassCard
-      title={t("admin.cms.homePartners.title")}
-      description={t("admin.cms.homePartners.description")}
-      rightSlot={
-        <Button onClick={() => onSave(section.key, draft)} disabled={saving}>
-          {saving ? t("admin.cms.actions.saving") : t("admin.cms.actions.save") + " Partners"}
-        </Button>
-      }
-    >
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">{t("admin.cms.homePartners.labels.partners")}</p>
-            <Button type="button" variant="outline" size="sm" onClick={addPartner}>
-              <Plus className="h-4 w-4 mr-2" />
-              {t("admin.cms.homePartners.actions.add")}
-            </Button>
-          </div>
-
-          {draft.partners.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("admin.cms.homePartners.empty")}</p>
-          ) : (
-            <div className="space-y-4">
-              {draft.partners.map((partner, index) => (
-                <div key={`partner-${index}`} className="rounded-xl border border-border bg-muted/30 p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium">{t("admin.cms.homePartners.labels.partnerName")} #{index + 1}</p>
-                    <Button type="button" variant="ghost" size="sm" onClick={() => removePartner(index)}>
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      {t("admin.cms.homePartners.actions.remove")}
-                    </Button>
-                  </div>
-                  <ImageUploadField
-                    label={t("admin.cms.homePartners.labels.partnerLogo")}
-                    value={partner.logoUrl}
-                    onChange={(value) => updatePartner(index, { ...partner, logoUrl: value })}
-                  />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-sm font-medium">{t("admin.cms.homePartners.labels.partnerName")}</label>
-                      <Input
-                        value={partner.name}
-                        onChange={(e) => updatePartner(index, { ...partner, name: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">{t("admin.cms.homePartners.labels.partnerWebsite")}</label>
-                      <Input
-                        value={partner.website ?? ""}
-                        onChange={(e) => updatePartner(index, { ...partner, website: e.target.value })}
-                        placeholder="https://"
-                      />
-                    </div>
-                  </div>
-                  {partner.logoUrl ? (
-                    <div className="flex items-center gap-3 rounded-lg border border-border bg-background/70 p-3">
-                      <img
-                        src={getMediaUrl(partner.logoUrl)}
-                        alt={partner.name || "Partner logo"}
-                        className="h-10 w-auto object-contain"
-                      />
-                      <span className="text-xs text-muted-foreground">{partner.name || t("admin.cms.homePartners.labels.partnerName")}</span>
-                    </div>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="border border-border rounded-xl p-6 bg-muted/40 space-y-4">
-          <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
-            {t("admin.cms.homePartners.preview.eyebrow")}
-          </p>
-          <h4 className="text-2xl font-display font-semibold">
-            {t("admin.cms.homePartners.preview.title")}
-          </h4>
-          <p className="text-sm text-muted-foreground">{t("home.partnersSubtitle")}</p>
-          <div className="grid grid-cols-2 gap-3">
-            {draft.partners.slice(0, 4).map((partner, index) => (
-              <div key={`partner-preview-${index}`} className="rounded-lg border border-border bg-background/70 p-3 flex flex-col items-center justify-center gap-2">
-                {partner.logoUrl ? (
-                  <img
-                    src={getMediaUrl(partner.logoUrl)}
-                    alt={partner.name || "Partner logo"}
-                    className="h-8 w-auto object-contain"
-                  />
-                ) : null}
-                {partner.name ? (
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground text-center">
-                    {partner.name}
-                  </span>
-                ) : (
-                  <span className="text-xs text-muted-foreground">Partner</span>
-                )}
               </div>
             ))}
           </div>
@@ -1339,25 +1179,6 @@ const AdminCMS = () => {
     },
   };
 
-  const buildHomePartnersDefaults = (lang: CmsLanguage): HomePartnersContent => {
-    const fixedT = i18n.getFixedT(lang);
-    return normalizeHomePartners({
-      eyebrow: fixedT("home.partnersEyebrow"),
-      title: fixedT("home.partnersTitle"),
-      subtitle: fixedT("home.partnersSubtitle"),
-      partners: [],
-    });
-  };
-
-  const homePartnersDefaults: LocalizedContent<HomePartnersContent> = {
-    translations: {
-      en: buildHomePartnersDefaults("en"),
-      ar: buildHomePartnersDefaults("ar"),
-      de: buildHomePartnersDefaults("de"),
-      ru: buildHomePartnersDefaults("ru"),
-    },
-  };
-
   // Ensure siteSettings section exists (if not in DB, show with defaults)
   const sectionsWithSettings = data.some((s) => s.key === "siteSettings")
     ? data
@@ -1367,9 +1188,7 @@ const AdminCMS = () => {
     ? sectionsWithSettings
     : [...sectionsWithSettings, { _id: "homeSuccessStories-default", key: "homeSuccessStories", content: homeSuccessDefaults }];
 
-  const sections = sectionsWithHomeSuccess.some((s) => s.key === "homePartners")
-    ? sectionsWithHomeSuccess
-    : [...sectionsWithHomeSuccess, { _id: "homePartners-default", key: "homePartners", content: homePartnersDefaults }];
+  const sections = sectionsWithHomeSuccess;
 
   return (
     <div className="space-y-6">
@@ -1443,18 +1262,6 @@ const AdminCMS = () => {
               <HomeSuccessStoriesEditor
                 key={section._id}
                 section={section as CMSSection<HomeSuccessStoriesContent>}
-                onSave={handleSave}
-                saving={savingKey === section.key}
-                language={activeLanguage}
-              />
-            );
-          }
-
-          if (section.key === "homePartners") {
-            return (
-              <HomePartnersEditor
-                key={section._id}
-                section={section as CMSSection<HomePartnersContent>}
                 onSave={handleSave}
                 saving={savingKey === section.key}
                 language={activeLanguage}

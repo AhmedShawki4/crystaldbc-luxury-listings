@@ -97,9 +97,9 @@ const Hero = () => {
         className="relative z-20 container mx-auto px-4 sm:px-6 lg:px-8 text-center pt-24 sm:pt-28 lg:pt-32"
       >
         <div className="max-w-5xl mx-auto">
-          <h1 className="hero-text text-5xl sm:text-6xl md:text-8xl font-display font-medium text-white mb-8 leading-tight tracking-tight pb-10">
+          <h1 className="hero-text text-5xl sm:text-6xl md:text-8xl font-display font-light text-white mb-8 leading-tight tracking-tight pb-10">
             {content.heading}
-            <span className="block text-gradient mt-2 font-serif italic leading-[1.15] pt-1 pb-3">{content.highlight}</span>
+            <span className="block text-gradient mt-2 font-serif italic leading-[1.15] pt-1 pb-3 text-3xl sm:text-4xl md:text-5xl">{content.highlight}</span>
           </h1>
           <p className="hero-text text-lg sm:text-xl md:text-2xl text-white/90 mb-10 max-w-2xl mx-auto font-light leading-relaxed">
             {content.subheading}
